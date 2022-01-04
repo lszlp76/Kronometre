@@ -469,7 +469,9 @@ public class TimerFragment extends Fragment {
     }
 
     public void save (){
-        excelSave.save(getContext().getApplicationContext(),unit,laps,lapsval,ave,modul);
+        // activity nin context i için getActivity kullan
+      excelSave.save(getActivity(),unit,laps,lapsval,ave,modul);
+        //excelSave.deneme(getActivity());
     }
 
 

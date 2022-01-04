@@ -14,6 +14,12 @@ Storing Datas: \n
    If you want to record your datas, you have to give the permission to write. Once you give a permission, you can click SAVE button after stopwatch is been stopped by user. They are stored in Download folder of your
 device with abbrevation of the day of study in format as 'ddMMyy@HHsslapsdata' with extension xls.  \n
 Example :  050520@1230lapsdata.xls means you've stored your datas  at 12:30 PM 05th of May in 2020"</string>
+    <style name="AlertDialogCustom" parent="@android:style/Theme.Dialog">
+        <item name="android:textColor">#d81b60</item>
+
+        <item name="android:typeface">sans</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 
 
 </resources>
