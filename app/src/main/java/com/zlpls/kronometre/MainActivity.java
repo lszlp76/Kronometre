@@ -1,12 +1,15 @@
 package com.zlpls.kronometre;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.preference.DialogPreference;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -70,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
                         fragment.start();
                         lapButton.setEnabled(true);
                         startButton.setText("STOP");
+                        resetButton.setEnabled(false);
+                        saveButton.setEnabled(false);
                     }
 
                 } else {
@@ -96,13 +101,34 @@ public class MainActivity extends AppCompatActivity {
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                 ChartFragment chartFragment = (ChartFragment)viewPager.getAdapter().instantiateItem(viewPager,1);
 
-                resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-                startButton.setText("START");
-                startButton.setEnabled(true);// start tuşu açılıyor
-                lapButton.setEnabled(false);// lap tuşu kapanıyor
-                saveButton.setEnabled(false); //save butonu kapat
-                fragment.reset();
-                chartFragment.ClearChart();
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Delete All Datas");
+                builder.setMessage("Are you sure to delete all datas ?");
+
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        System.out.println("No ya basıldı");
+                    }
+                });
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
+                        startButton.setText("START");
+                        startButton.setEnabled(true);// start tuşu açılıyor
+                        lapButton.setEnabled(false);// lap tuşu kapanıyor
+                        saveButton.setEnabled(false); //save butonu kapat
+
+                        fragment.reset();
+                        chartFragment.ClearChart();
+                    }
+                });
+
+
+
+                builder.show();
+
             }
         });
 

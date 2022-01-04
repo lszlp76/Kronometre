@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.zlpls.kronometre.ui.main.PageViewModel;
+import com.zlpls.kronometre.ui.main.SectionsPagerAdapter;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -65,6 +66,8 @@ public class TimerFragment extends Fragment {
     int lapnomax = 0, lapnomin = 0;
     double min, max, ave;
     PageViewModel pageViewModel;
+    SectionsPagerAdapter viewPager;
+    boolean isNoPressed ; // resetleme kutusu çıktığında No'ya basıldı bilgisi MainActivity'e gitmeli.O nedenle bu var.
     /*** operasyonel fonksiyonlar***/
 
     private RadioGroup.OnCheckedChangeListener onCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
@@ -196,7 +199,7 @@ public class TimerFragment extends Fragment {
         minuteButton = (RadioButton) view.findViewById(R.id.minuteButton);
         cminuteButton = (RadioButton) view.findViewById(R.id.cminuteButton);
 
-
+        isNoPressed = false;// ilk olarak resetlemede kullanılacak.
 // reset butonuna basılınca olanlar
         button4.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -526,10 +529,52 @@ public class TimerFragment extends Fragment {
         ; // double serisi verirken içine kaç tane yazacağını belirt
 
     }
+public void reset() {
+    handler.removeCallbacks(runnable);
+    if (go == true) {
 
-    public void reset() {
+        Auth = true;
+        button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
+        button2.setText("START");
+
+
+        textView2.setText("");
+
+        m = 0;
+        h = 0;
+        number = 0;
+
+        //handler.removeCallbacks(runnable);
+        textView.setText(timer);
+        cminuteButton.setEnabled(true);
+        minuteButton.setEnabled(true);
+        button2.setEnabled(true);// start tuşu açılıyor
+        button3.setEnabled(false);// lap tuşu kapanıyor
+        button.setEnabled(false);
+        lapsayisi = 0;
+        laps.clear(); // lapları siliyor
+        lapsval.clear();// aralık değerlerini siliyor
+        maxvalue.setText(departure);
+        maxvalcmin.setText(departure);
+        minvalcmin.setText(departure);
+        minvalue.setText(departure);
+        avevalue.setText(departure);
+        avevalcmin.setText(departure);
+        lapnoMin.setText(departure);
+        lapnoMax.setText(departure);
+        lapTotal.setText(departure);
+        ;
+
+
+    } else {
+
+    }
+
+}
+    public void reset2() {
 
         handler.removeCallbacks(runnable);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Delete All Datas");
         builder.setMessage("Are you sure to delete all datas ?");
@@ -543,12 +588,15 @@ public class TimerFragment extends Fragment {
                 if (Auth == true) {
                     button2.setText("STOP");
 
+                    // No ya basıldı.
+
                     //start();
                     //button.setEnabled(false);// save butonu kapalı
                     //button4.setEnabled(false);// reset butonu kapalı
                 } else {
                     button2.setText("START");
 
+                   // No ya basıldı.
                     stop();
                     button.setEnabled(true);// save butonu açık
                     button4.setEnabled(true);// reset butonu açık
@@ -560,6 +608,7 @@ public class TimerFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (go == true) {
+
                     Auth = true;
                     button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
                     button2.setText("START");
@@ -590,6 +639,9 @@ public class TimerFragment extends Fragment {
                     lapnoMin.setText(departure);
                     lapnoMax.setText(departure);
                     lapTotal.setText(departure);;
+
+
+
                 } else {
 
                 }
