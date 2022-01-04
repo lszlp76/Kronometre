@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Kronometre</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment"></string>
+    <string name="max">Max :</string>
+    <string name="sn_second">Sec. - Second</string>
+    <string name="cmin">Hundereths Minutes - Cmin</string>
+    <string name="aciklama">"User Guide : \n
+   This app is designed for kaizen and lean activities to measure cycle time and lap time. You can use 2 type of time units for stopwatch such as second or hundredths of minute.
+HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Mathematically,1 minute is equal to 60 seconds and it's equivalent to 100 HM or 100 Cmin. \n
+Storing Datas: \n
+   If you want to record your datas, you have to give the permission to write. Once you give a permission, you can click SAVE button after stopwatch is been stopped by user. They are stored in Download folder of your
+device with abbrevation of the day of study in format as 'ddMMyy@HHsslapsdata' with extension xls.  \n
+Example :  050520@1230lapsdata.xls means you've stored your datas  at 12:30 PM 05th of May in 2020"</string>
+
+
+</resources>

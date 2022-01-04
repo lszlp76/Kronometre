@@ -1,0 +1,5 @@
+grafik için com.github.mikephil.charting.charts eklemen lazım.
+setting gradle için maven url kısmını ekle
+gradle içine dependecies ekle
+https://github.com/PhilJay/MPAndroidChart/releases/tag/v3.1.0
+https://weeklycoding.com/mpandroidchart-documentation/
