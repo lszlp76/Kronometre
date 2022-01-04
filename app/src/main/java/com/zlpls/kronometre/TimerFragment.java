@@ -67,6 +67,7 @@ public class TimerFragment extends Fragment {
     double min, max, ave;
     PageViewModel pageViewModel;
     SectionsPagerAdapter viewPager;
+    ExcelSave excelSave = new ExcelSave();
     boolean isNoPressed ; // resetleme kutusu çıktığında No'ya basıldı bilgisi MainActivity'e gitmeli.O nedenle bu var.
     /*** operasyonel fonksiyonlar***/
 
@@ -192,7 +193,7 @@ public class TimerFragment extends Fragment {
                         button4.setEnabled(true);// reset butonu açık
                     }
                 } else {
-                    Toast.makeText(getContext(), "Choose your chrono type!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Choose time unit !", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -467,12 +468,10 @@ public class TimerFragment extends Fragment {
         // System.out.println("deneme lapsayısı "+lapsval.get(lapsayisi-1));
     }
 
-
-    public void deneme() {
-
-        System.out.println("deneme ok");
-        takeLap();
+    public void save (){
+        excelSave.save(getContext().getApplicationContext(),unit,laps,lapsval,ave,modul);
     }
+
 
     public void start() {
       Auth = false;
@@ -514,7 +513,7 @@ public class TimerFragment extends Fragment {
                 handler.post(runnable);
                 //button2.setEnabled(false);
             } else {
-                Toast.makeText(getContext(), "Choose your chrono type!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
             }
         }
         ;
@@ -652,9 +651,7 @@ public void reset() {
 
     }
 
-    public void save() {
-        System.out.println("HEnüz yok save");
-    }
+
 }
 /*
  public void start() {

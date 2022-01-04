@@ -55,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("HEnüz yok save");
+                TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                fragment.save();
             }
         });
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (startButton.getText() != "STOP") {
                     if (fragment.modul == 0) {
-                        Toast.makeText(getApplicationContext(), "Choose your chrono type!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
                     } else {
                         fragment.start();
                         lapButton.setEnabled(true);
