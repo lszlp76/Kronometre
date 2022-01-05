@@ -22,4 +22,11 @@
     <style name="Theme.Kronometre.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.Kronometre.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="TableText">
+        <item name="android:textSize">20dp</item>
+        <item name="android:textColor">@color/purple_700</item>
+        <item name="android:textStyle">bold</item>
+
+    </style>
 </resources>

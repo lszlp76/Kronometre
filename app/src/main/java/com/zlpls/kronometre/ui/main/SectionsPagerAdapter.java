@@ -10,6 +10,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.zlpls.kronometre.ChartFragment;
 import com.zlpls.kronometre.R;
+import com.zlpls.kronometre.ReportFragment;
 import com.zlpls.kronometre.TimerFragment;
 
 /**
@@ -33,8 +34,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         // Return a PlaceholderFragment (defined as a static inner class below).
         if (position ==0){
             return new TimerFragment();
-        }else {
+        }else if (position == 1){
             return new ChartFragment();
+        }else {
+            return new ReportFragment();
+
         }
     }
 
