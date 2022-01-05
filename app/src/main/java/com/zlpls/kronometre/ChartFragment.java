@@ -1,7 +1,9 @@
 package com.zlpls.kronometre;
 
+
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.view.Display;
@@ -19,11 +21,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.DefaultAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.zlpls.kronometre.ui.main.PageViewModel;
 
@@ -210,7 +210,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
-       // System.out.println("X ölçüsü-->" + width);
+        // System.out.println("X ölçüsü-->" + width);
 
 
         LineData linedata = new LineData(iLinedata);
@@ -221,8 +221,10 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         //lineChart.animateXY(500, 500);
         Description des = lineChart.getDescription();
         des.setText("Cycle Time Chart ");
+        ;
+        des.setTextAlign(Paint.Align.CENTER);
         des.setPosition(width / 2, 100);//yukarıdan width alıyor
-        des.setTextSize(15);
+        des.setTextSize(25);
         ;
 
 

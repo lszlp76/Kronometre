@@ -372,6 +372,12 @@ public class TimerFragment extends Fragment {
 
     public void takeLap() {
         //System.out.println("Modul değeri-->"+modul);
+        if( go){
+            System.out.println("go var");
+        }else{
+            System.out.println("go yok");
+        }
+
         int deltah = 0;
         int deltam = 0;
         int i = 0;

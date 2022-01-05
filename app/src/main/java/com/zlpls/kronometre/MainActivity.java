@@ -5,11 +5,10 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.preference.DialogPreference;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
@@ -22,7 +21,9 @@ import com.zlpls.kronometre.databinding.ActivityMainBinding;
 import com.zlpls.kronometre.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
-
+    ViewPager viewPager;
+    Button startButton, lapButton,resetButton,saveButton ;
+    boolean auth ;// lap için onay verilmesi lazım
     private ActivityMainBinding binding;
 
     @Override
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
-        ViewPager viewPager = binding.viewPager;
+        viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
@@ -55,13 +56,14 @@ public class MainActivity extends AppCompatActivity {
         // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //fragmentTransaction.add(R.id.view_pager,TimerFragment.class,null);
 
-        Button startButton = findViewById(R.id.button2);
-        Button lapButton = findViewById(R.id.button3);
+        startButton = findViewById(R.id.button2);
+        lapButton = findViewById(R.id.button3);
         lapButton.setEnabled(false);
-        Button resetButton = findViewById(R.id.button4);
+        resetButton = findViewById(R.id.button4);
         resetButton.setEnabled(false);
-        Button saveButton = findViewById(R.id.button);
+        saveButton = findViewById(R.id.button);
         saveButton.setEnabled(false);
+
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -72,15 +74,16 @@ public class MainActivity extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                ;
+               ;
                 // fragmenti initial et.
                 // sadece 0nci siradaki fragmeni çalıştır
+                TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
 
                 if (startButton.getText() != "STOP") {
                     if (fragment.modul == 0) {
                         Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
                     } else {
+                        auth = true;
                         fragment.start();
                         lapButton.setEnabled(true);
                         startButton.setText("STOP");
@@ -90,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
                 } else {
                     //stop yapılması
+                    auth = false;
                     fragment.stop();
                     startButton.setText("START");
                     lapButton.setEnabled(false);
@@ -110,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                ChartFragment chartFragment = (ChartFragment)viewPager.getAdapter().instantiateItem(viewPager,1);
+                ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AlertDialogCustom));
                 builder.setTitle("Delete All Datas");
@@ -137,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
-
                 builder.show();
 
             }
@@ -153,8 +156,54 @@ public class MainActivity extends AppCompatActivity {
             }
         });*/
     }
+/*
+VOLUME tuşlarını start /stop / lap özelliği koyma.
+ */
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int action = event.getAction();
+        int keyCode = event.getKeyCode();
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+                if (action == KeyEvent.ACTION_UP) {
 
-    public void deneme() {
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+
+                    if (startButton.getText() != "STOP") {
+
+                        if (fragment.modul == 0) {
+                            Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            auth= true;
+                            fragment.start();
+                            lapButton.setEnabled(true);
+                            startButton.setText("STOP");
+                            resetButton.setEnabled(false);
+                            saveButton.setEnabled(false);
+                        }
+
+                    } else {
+                        //stop yapılması
+                        auth=false;
+                        fragment.stop();
+                        startButton.setText("START");
+                        lapButton.setEnabled(false);
+                        saveButton.setEnabled(true);// save butonu açık
+                        resetButton.setEnabled(true);// reset butonu açık
+                    }
+                }
+
+                return true;
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (action == KeyEvent.ACTION_DOWN && auth) {
+
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+
+                    fragment.takeLap();
+                }
+                return true;
+            default:
+                return super.dispatchKeyEvent(event);
+        }
 
     }
 }

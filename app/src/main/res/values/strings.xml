@@ -2,6 +2,7 @@
     <string name="app_name">Kronometre</string>
     <string name="tab_text_1">Counter</string>
     <string name="tab_text_2">Chart</string>
+    <string name="tab_text_3">Report</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment"></string>
     <string name="max">Max :</string>
