@@ -5,8 +5,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment"></string>
     <string name="max">Max :</string>
-    <string name="sn_second">Sec. - Second</string>
-    <string name="cmin">Hundereths Minutes - Cmin</string>
+    <string name="sn_second">Second - Sec.</string>
+    <string name="cmin">Hundereths of Minutes - Cmin.</string>
     <string name="aciklama">"User Guide : \n
    This app is designed for kaizen and lean activities to measure cycle time and lap time. You can use 2 type of time units for stopwatch such as second or hundredths of minute.
 HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Mathematically,1 minute is equal to 60 seconds and it's equivalent to 100 HM or 100 Cmin. \n
@@ -15,11 +15,20 @@ Storing Datas: \n
 device with abbrevation of the day of study in format as 'ddMMyy@HHsslapsdata' with extension xls.  \n
 Example :  050520@1230lapsdata.xls means you've stored your datas  at 12:30 PM 05th of May in 2020"</string>
     <style name="AlertDialogCustom" parent="@android:style/Theme.Dialog">
-        <item name="android:textColor">#d81b60</item>
+        <item name="android:textColor">#FF3700B3</item>
+
+        <item name="android:backgroundTint">#f48fb1</item>
 
         <item name="android:typeface">sans</item>
         <item name="android:textSize">15sp</item>
     </style>
 
+    <style name="AlertDialogCustom2" parent="@style/AlertDialogCustom">
+        <item name="android:textColor">#FF3700B3</item>
 
+        <item name="android:backgroundTint">#f48fb1</item>
+
+        <item name="android:typeface">sans</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 </resources>

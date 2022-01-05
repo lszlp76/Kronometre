@@ -25,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:button="@android:drawable/btn_radio"
-
+            android:textColor="@color/purple_700"
             android:text="@string/sn_second"
             android:textSize="16sp" />
 
@@ -33,7 +33,7 @@
             android:id="@+id/cminuteButton"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-
+            android:textColor="@color/purple_700"
             android:button="@android:drawable/btn_radio"
 
             android:text="@string/cmin"
@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
-        android:stretchColumns="1"
+        android:stretchColumns="*"
         app:layout_constraintBottom_toTopOf="@+id/guideline7"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline5"
@@ -79,19 +79,19 @@
 
                 android:id="@+id/textView8"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
+                android:layout_height="match_parent"
+                android:textColor="@color/purple_700"
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="Second"
                 android:textAlignment="center"
-                android:textSize="16sp"
+                android:textSize="14sp"
 
 
                 />
 
             <TextView
-
+                android:textColor="@color/purple_700"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
@@ -100,13 +100,14 @@
                 android:textSize="14sp" />
 
             <TextView
-
+                android:textColor="@color/purple_700"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:padding="7dp"
+
                 android:text="Lap"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 tools:layout_conversion_absoluteHeight="35dp"
                 tools:layout_conversion_absoluteWidth="40dp" />
         </TableRow>
@@ -118,6 +119,7 @@
             android:orientation="vertical">
 
             <TextView
+                android:textColor="@color/purple_700"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -182,6 +184,7 @@
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="Max.Cyc:"
+                android:textColor="@color/purple_700"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -237,6 +240,7 @@
                 android:padding="7dp"
                 android:text="Ave.Cyc.:"
                 android:textSize="16sp"
+                android:textColor="@color/purple_700"
                 android:textStyle="bold" />
 
             <TextView
@@ -285,9 +289,10 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/digital7mono"
         android:text="00:00:00"
+        android:textColor="@color/purple_700"
         android:textAlignment="center"
         android:textAllCaps="true"
-        android:textSize="48sp"
+        android:textSize="56sp"
         android:textStyle="bold"
         android:typeface="monospace"
         app:layout_constraintBottom_toTopOf="@+id/guideline4"
@@ -299,13 +304,14 @@
     <TextView
         android:id="@+id/textView2"
         android:layout_width="match_parent"
-        android:layout_height="123dp"
-
+        android:layout_height="200dp"
+android:fontFamily="@font/digital7"
+        android:layout_marginTop="20dp"
         android:hint="Your laps are here"
         android:scrollbars="vertical"
         android:textAlignment="center"
         android:textColor="#2E7D32"
-        android:textSize="15sp"
+        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/guideline8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

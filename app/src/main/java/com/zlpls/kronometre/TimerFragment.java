@@ -144,10 +144,16 @@ public class TimerFragment extends Fragment {
         textView = view.findViewById(R.id.textView);
         textView2 = view.findViewById(R.id.textView2);
         button2 = view.findViewById(R.id.button2);
+        button2.setVisibility(View.GONE);
         button1 = view.findViewById(R.id.button);
+        button1.setVisibility(View.GONE);// bunlar gözükmesin .silersen kodu bozabilirsin
         button3 = view.findViewById(R.id.button3);
+        button3.setVisibility(View.GONE);
         button4 = view.findViewById(R.id.button4);
+        button4.setVisibility(View.GONE);
+
         button = view.findViewById(R.id.button);// save butonu
+        button.setVisibility(View.GONE);
         maxvalue = view.findViewById(R.id.maxval);
         minvalue = view.findViewById(R.id.minval);
         avevalue = view.findViewById(R.id.aveval);
@@ -450,7 +456,7 @@ public class TimerFragment extends Fragment {
             lapTotal.setText(String.valueOf(lapsval.size()));
         }
         // EN SON YAZILAN EN ÜSTE  version
-        textView2.setText("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta * modul) + " " + unit + "\n" + textView2.getText().toString());
+        textView2.setText("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta * modul) + " " + unit + "\n\n" + textView2.getText().toString());
         /* BU KISIM EN SON YAZILANI EN ALTA ATIYOR
         textView2.append("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta) + " min/cyc ");
         textView2.append(System.getProperty("line.separator"));*/
@@ -572,86 +578,7 @@ public void reset() {
     }
 
 }
-    public void reset2() {
 
-        handler.removeCallbacks(runnable);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Delete All Datas");
-        builder.setMessage("Are you sure to delete all datas ?");
-
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            /* RESET düğmesi çıktığı zaman No ya basınca
-            Start'a basılmış gibi olmalı
-             */
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (Auth == true) {
-                    button2.setText("STOP");
-
-                    // No ya basıldı.
-
-                    //start();
-                    //button.setEnabled(false);// save butonu kapalı
-                    //button4.setEnabled(false);// reset butonu kapalı
-                } else {
-                    button2.setText("START");
-
-                   // No ya basıldı.
-                    stop();
-                    button.setEnabled(true);// save butonu açık
-                    button4.setEnabled(true);// reset butonu açık
-                }
-            }
-        });
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (go == true) {
-
-                    Auth = true;
-                    button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-                    button2.setText("START");
-
-
-                    textView2.setText("");
-
-                    m = 0;
-                    h = 0;
-                    number = 0;
-
-                    //handler.removeCallbacks(runnable);
-                    textView.setText(timer);
-                    cminuteButton.setEnabled(true);
-                    minuteButton.setEnabled(true);
-                    button2.setEnabled(true);// start tuşu açılıyor
-                    button3.setEnabled(false);// lap tuşu kapanıyor
-                    button.setEnabled(false);
-                    lapsayisi = 0;
-                    laps.clear(); // lapları siliyor
-                    lapsval.clear();// aralık değerlerini siliyor
-                    maxvalue.setText(departure);
-                    maxvalcmin.setText(departure);
-                    minvalcmin.setText(departure);
-                    minvalue.setText(departure);
-                    avevalue.setText(departure);
-                    avevalcmin.setText(departure);
-                    lapnoMin.setText(departure);
-                    lapnoMax.setText(departure);
-                    lapTotal.setText(departure);;
-
-
-
-                } else {
-
-                }
-            }
-        });
-        builder.show();
-
-
-    }
 
 
 }
