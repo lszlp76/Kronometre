@@ -44,14 +44,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
-        ;
-        //Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
-        } else {
-
-        }
 
         // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //fragmentTransaction.add(R.id.view_pager,TimerFragment.class,null);

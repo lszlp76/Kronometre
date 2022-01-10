@@ -80,33 +80,33 @@
                 android:id="@+id/textView8"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:textColor="@color/purple_700"
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="Second"
                 android:textAlignment="center"
+                android:textColor="@color/purple_700"
                 android:textSize="14sp"
 
 
                 />
 
             <TextView
-                android:textColor="@color/purple_700"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="Cminute"
+                android:textColor="@color/purple_700"
                 android:textSize="14sp" />
 
             <TextView
-                android:textColor="@color/purple_700"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:padding="7dp"
-
                 android:text="Lap"
+
+                android:textColor="@color/purple_700"
                 android:textSize="14sp"
                 tools:layout_conversion_absoluteHeight="35dp"
                 tools:layout_conversion_absoluteWidth="40dp" />
@@ -119,12 +119,12 @@
             android:orientation="vertical">
 
             <TextView
-                android:textColor="@color/purple_700"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="Min.Cyc.:"
+                android:textColor="@color/purple_700"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:layout_editor_absoluteX="195dp"
@@ -239,8 +239,8 @@
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="Ave.Cyc.:"
-                android:textSize="16sp"
                 android:textColor="@color/purple_700"
+                android:textSize="16sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -419,6 +419,67 @@ android:fontFamily="@font/digital7"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.75" />
+
+    <TextView
+        android:id="@+id/textView3"
+android:textColor="@color/purple_700"
+        android:layout_width="108dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginEnd="70dp"
+        android:text="Cycle per Minute"
+        android:textSize="14dp"
+        app:flow_horizontalAlign="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textView5"
+        app:layout_constraintTop_toBottomOf="@id/guideline4"
+        app:layout_constraintTop_toTopOf="@+id/guideline4" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="99dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginEnd="70dp"
+        android:textColor="@color/purple_700"
+        android:text="Cycle per Hour"
+        android:textSize="14dp"
+        app:flow_horizontalAlign="center"
+        app:layout_constraintEnd_toStartOf="@+id/textView3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline4" />
+
+    <TextView
+        android:id="@+id/cycPerHour"
+        android:layout_width="92dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="8dp"
+        android:text="..."
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="25dp"
+        android:background="@drawable/textviewborder"
+        app:layout_constraintBottom_toTopOf="@+id/tableLayout"
+        app:layout_constraintEnd_toEndOf="@+id/textView5"
+        app:layout_constraintStart_toStartOf="@+id/textView5"
+        app:layout_constraintTop_toBottomOf="@+id/textView5"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/cycPerMinute"
+        android:layout_width="92dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="5dp"
+        android:text="..."
+
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="25dp"
+        android:background="@drawable/textviewborder"
+        app:layout_constraintEnd_toEndOf="@+id/textView3"
+        app:layout_constraintStart_toStartOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

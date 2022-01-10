@@ -31,7 +31,7 @@ import jxl.write.WriteException;
 import jxl.write.biff.RowsExceededException;
 
 public class ExcelSave {
-    int lapsize;
+    String timeUnit;
     private DecimalFormat dec = new DecimalFormat("#0.00");
     private EditText txt;
     private DecimalFormat decthree = new DecimalFormat("#0.000");
@@ -43,12 +43,11 @@ public class ExcelSave {
 
     private String fileName = "";
 
-    public int getLapsize() {
-        return lapsize;
-    }
+    public String getTimeUnit() {
+        return timeUnit ;}
 
-    public void setLapsize(int lapsize) {
-        this.lapsize = lapsize;
+    public void setTimeUnit(String timeUnit) {
+        this.timeUnit = timeUnit;
     }
 
 
