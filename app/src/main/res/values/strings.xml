@@ -7,7 +7,7 @@
     <string name="hello_blank_fragment"></string>
     <string name="max">Max :</string>
     <string name="sn_second">Second - Sec.</string>
-    <string name="cmin">Hundereths of Minutes - Cmin.</string>
+    <string name="cmin">Hundreths of Minutes - Cmin.</string>
     <string name="aciklama">"User Guide : \n
    This app is designed for kaizen and lean activities to measure cycle time and lap time. You can use 2 type of time units for stopwatch such as second or hundredths of minute.
 HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Mathematically,1 minute is equal to 60 seconds and it's equivalent to 100 HM or 100 Cmin. \n

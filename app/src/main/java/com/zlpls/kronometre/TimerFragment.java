@@ -95,6 +95,7 @@ public class TimerFragment extends Fragment {
                     break;
                 case R.id.minuteButton:
                     // if (checked)
+
                     minuteButton.setTypeface(null, Typeface.BOLD_ITALIC);
                     cminuteButton.setTypeface(null, Typeface.NORMAL);
                     milis = 1000;
@@ -477,7 +478,6 @@ public class TimerFragment extends Fragment {
         //excelSave.deneme(getActivity());
     }
 
-
     public void start() {
         Auth = false;
         // buraya number=XX yazrsan o saniyeden başlatabilirsin
@@ -541,6 +541,8 @@ public class TimerFragment extends Fragment {
             Auth = true;
             button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
             button2.setText("START");
+            cminuteButton.setEnabled(true);
+            minuteButton.setEnabled(true);
 
 
             textView2.setText("");
