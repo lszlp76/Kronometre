@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TableLayout;
@@ -27,14 +28,22 @@ import androidx.lifecycle.ViewModelProvider;
 import com.zlpls.kronometre.ui.main.PageViewModel;
 import com.zlpls.kronometre.ui.main.SectionsPagerAdapter;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 
 public class TimerFragment extends Fragment {
-    TextView textView, textView2, maxvalue, minvalue,
+    TextView textView, textView2, maxvalue, minvalue,totalObservationTime,
             lapTotal, avevalue, minvalcmin, maxvalcmin, avevalcmin, lapnoMin, lapnoMax,cycPerHour,cycPerMinute;
     Button button2, button1, button3, button4, button;
     RadioButton radioButton, minuteButton, cminuteButton;
@@ -68,7 +77,13 @@ public class TimerFragment extends Fragment {
     SectionsPagerAdapter viewPager;
     ExcelSave excelSave = new ExcelSave();
     List<String> saveValue;
+    String currentDateandTimeStop;
+    String currentDateandTimeStart;
 
+   Typeface tf;
+    private DateFormat df = new SimpleDateFormat("ddMMyy@HHmm");
+    private DateFormat df2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss ", Locale.ENGLISH);
+    Date timeStop,timeStart;
     boolean isNoPressed; // resetleme kutusu çıktığında No'ya basıldı bilgisi MainActivity'e gitmeli.O nedenle bu var.
     /*** operasyonel fonksiyonlar***/
 
@@ -82,10 +97,9 @@ public class TimerFragment extends Fragment {
                     // if (checked)
                     //if windows phone programming book is selected
                     //set the checked radio button's text style bold italic
-
-                    cminuteButton.setTypeface(null, Typeface.BOLD_ITALIC);
+                   cminuteButton.setTypeface(tf, Typeface.BOLD_ITALIC);
                     //set the other two radio buttons text style to default
-                    minuteButton.setTypeface(null, Typeface.NORMAL);
+                    minuteButton.setTypeface(tf, Typeface.NORMAL);
                     modul = 100;
                     milis = 600;
                     unit = "Cmin./cyc";
@@ -96,8 +110,8 @@ public class TimerFragment extends Fragment {
                 case R.id.minuteButton:
                     // if (checked)
 
-                    minuteButton.setTypeface(null, Typeface.BOLD_ITALIC);
-                    cminuteButton.setTypeface(null, Typeface.NORMAL);
+                    minuteButton.setTypeface( tf, Typeface.BOLD_ITALIC);
+                    cminuteButton.setTypeface(tf, Typeface.NORMAL);
                     milis = 1000;
                     modul = 60;
                     unit = "sec./cyc";
@@ -116,9 +130,11 @@ public class TimerFragment extends Fragment {
         return new TimerFragment();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
+       tf = getResources().getFont(R.font.digital7);
 
         pageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
 
@@ -149,6 +165,7 @@ public class TimerFragment extends Fragment {
         textView2 = view.findViewById(R.id.textView2);
         cycPerHour = view.findViewById(R.id.cycPerHour);
         cycPerMinute = view.findViewById(R.id.cycPerMinute);
+        totalObservationTime = view.findViewById(R.id.totalObservationTime);
         button2 = view.findViewById(R.id.button2);
         button2.setVisibility(View.GONE);
         button1 = view.findViewById(R.id.button);
@@ -157,7 +174,6 @@ public class TimerFragment extends Fragment {
         button3.setVisibility(View.GONE);
         button4 = view.findViewById(R.id.button4);
         button4.setVisibility(View.GONE);
-
         button = view.findViewById(R.id.button);// save butonu
         button.setVisibility(View.GONE);
         maxvalue = view.findViewById(R.id.maxval);
@@ -169,7 +185,6 @@ public class TimerFragment extends Fragment {
         lapnoMax = view.findViewById(R.id.lapnomax);
         lapnoMin = view.findViewById(R.id.lapnomin);
         lapTotal = view.findViewById(R.id.laptotal);
-
         //minuteButton =view.findViewById(R.id.minuteButton);
         //cminuteButton=view.findViewById(R.id.cminuteButton);
         radioGroup = view.findViewById(R.id.radioGroup);
@@ -374,8 +389,9 @@ public class TimerFragment extends Fragment {
         double delta1, delta0;
         double deltas = 0;
         double delta;
-
         double sum = 0;
+
+
 
 
         // laps dizisinde string olarak tutulan ifadelerin sayıya çevrilmiş olarak tutuldukları dizi
@@ -486,6 +502,7 @@ public class TimerFragment extends Fragment {
 
         {
             if (modul > 0) {
+                getStartTime();
                 cminuteButton.setEnabled(false);
                 minuteButton.setEnabled(false);
                 button3.setEnabled(true); // lap tuşu açılıyor
@@ -511,11 +528,15 @@ public class TimerFragment extends Fragment {
 
                         textView.setText(hh + ":" + mm + ":" + ss);
 
+
                         handler.postDelayed(runnable, milis);
 
+
                     }
+
                 };
                 handler.post(runnable);
+
                 //button2.setEnabled(false);
             } else {
                 Toast.makeText(getContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
@@ -526,11 +547,52 @@ public class TimerFragment extends Fragment {
 
     }
 
+    private void getStartTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        currentDateandTimeStart = sdf.format(new Date());
+        timeStart = new Date();
+        System.out.println(currentDateandTimeStart);
+
+    }
+
     public void stop() {
         Auth = true;
         //button2.setEnabled(true);
+//        totalObservationTime.setText(String.valueOf(calculateTotalObservationTime()));
+        getStopTime();
         handler.removeCallbacks(runnable);
         ; // double serisi verirken içine kaç tane yazacağını belirt
+
+    }
+
+    private void getStopTime() {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        currentDateandTimeStop = sdf.format(new Date());
+        Date date1 = null;
+        try {
+            date1 = sdf.parse(currentDateandTimeStart);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Date date2 = null;
+        try {
+            date2 = sdf.parse(currentDateandTimeStop);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        long diff = date2.getTime() - date1.getTime();
+
+        int timeInSeconds = (int) (diff / 1000);
+        int hours, minutes, seconds;
+        hours = timeInSeconds / 3600;
+        timeInSeconds = timeInSeconds - (hours * 3600);
+        minutes = timeInSeconds / 60;
+        timeInSeconds = timeInSeconds - (minutes * 60);
+        seconds = timeInSeconds;
+        String diffTime = (hours<10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds) ;
+        System.out.println(diffTime);
+        totalObservationTime.setText(diffTime);
 
     }
 
@@ -555,6 +617,7 @@ public class TimerFragment extends Fragment {
             textView.setText(timer);
             cycPerHour.setText("");
             cycPerMinute.setText("");
+            totalObservationTime.setText("");
             cminuteButton.setEnabled(true);
             minuteButton.setEnabled(true);
             button2.setEnabled(true);// start tuşu açılıyor
@@ -591,6 +654,8 @@ public class TimerFragment extends Fragment {
             }
         return cycPerMinute;
         }
+
+
 
 
     private double calculateCycPerHour(double ave){

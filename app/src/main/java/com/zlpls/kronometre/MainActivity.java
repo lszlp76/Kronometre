@@ -19,6 +19,16 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
 import com.zlpls.kronometre.databinding.ActivityMainBinding;
 import com.zlpls.kronometre.ui.main.SectionsPagerAdapter;
+/** TODO
+ * ekran koruyucu kapatma
+ * menu ekranı
+ * paylaşım
+ * about sayfası
+ *portrait iptali
+ * chart sayfasında kronoyu gösterme
+ * salise ekleme
+ * excele total time yazdırma
+ * **/
 
 public class MainActivity extends AppCompatActivity {
     ViewPager viewPager;

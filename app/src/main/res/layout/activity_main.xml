@@ -31,63 +31,56 @@
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     </androidx.viewpager.widget.ViewPager>
 
-
-
-    <Button
-        android:id ="@id/button2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="40dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
         android:layout_gravity="bottom"
-        android:layout_marginLeft="10dp"
-        android:backgroundTint="@color/btn_color"
-        android:baselineAligned="true"
-        android:text="Start"
-         />
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="82dp"
-        android:layout_height="48dp"
-       app:layout_anchor="@id/button2"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="40dp"
-        android:layout_gravity="bottom"
-        android:layout_marginLeft="117dp"
-        android:backgroundTint="@color/btn_color"
-        android:text="LAP"
-        />
-    <Button
-        android:id="@+id/button4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="40dp"
-        android:backgroundTint="@color/btn_color"
-        android:text="Reset"
-        android:layout_gravity="bottom|end"
-        android:layout_marginRight="10dp"
-        tools:ignore="MissingConstraints" />
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
 
-        android:layout_marginRight="110dp"
-        android:layout_gravity="bottom|end"
-        android:backgroundTint="@color/btn_color"
 
-        android:text="Save"
+        >
 
-         />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="5"
+            android:gravity="center_vertical"
+            >
+
+            <Button
+                android:id="@id/button2"
+                style="@style/ButtonAdjustmentStyle"
+
+                android:text="Start" />
+
+            <Button
+                android:id="@+id/button3"
+                style="@style/ButtonAdjustmentStyle"
+                android:text="LAP" />
+
+            <Button
+                android:id="@+id/button4"
+                style="@style/ButtonAdjustmentStyle"
+
+                android:text="Reset" />
+
+            <Button
+                android:id="@+id/button"
+                style="@style/ButtonAdjustmentStyle"
+                android:text="Save"
+
+                />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+
+
 
     <!--
         <com.google.android.material.floatingactionbutton.FloatingActionButton
