@@ -12,6 +12,7 @@ public class PageViewModel extends ViewModel {
     private MutableLiveData<Float> mMinTimeValue = new MutableLiveData<>();//mincycletime
     private MutableLiveData<Float> mAvgTimeValue = new MutableLiveData<>();//avgcycletime
     private String mTimeUnit = new String();
+    private MutableLiveData<String> mTimerValue = new MutableLiveData<>();
     public void setAvgTimeValue (float timeValue){
         mAvgTimeValue.setValue(timeValue);
     }
@@ -31,8 +32,12 @@ public class PageViewModel extends ViewModel {
     public LiveData<Float> getMaxTimeValue() {
         return mMaxTimeValue;
     }
-
-
+     public void setTimerValue(String timerValue){
+         mTimerValue.setValue(timerValue);
+     }
+     public LiveData<String> getTimerValue(){
+          return mTimerValue;
+     }
     public void setMinTimeValue (float timeValue){
         mMinTimeValue.setValue(timeValue);
     }

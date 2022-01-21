@@ -62,11 +62,10 @@
     <TableLayout
         android:id="@+id/tableLayout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-
+        android:layout_height="0dp"
+        android:gravity="center_vertical"
         android:stretchColumns="*"
-
-        app:layout_constraintBottom_toTopOf="@+id/guideline7"
+        app:layout_constraintBottom_toTopOf="@+id/textView2"
         app:layout_constraintEnd_toEndOf="@id/guideline6"
         app:layout_constraintStart_toStartOf="@+id/guideline5"
         app:layout_constraintTop_toBottomOf="@id/dashboard">
@@ -143,23 +142,22 @@
 
             <TextView
                 android:id="@+id/minvalcmin"
+                style="@style/TableText"
                 android:layout_width="130dp"
                 android:layout_height="41dp"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
-                android:text="---"
-                style="@style/TableText"
-               />
+                android:text="---" />
 
             <TextView
                 android:id="@+id/lapnomin"
+                style="@style/TableText"
                 android:layout_width="wrap_content"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
-                android:text="---"
-                style="@style/TableText"/>
+                android:text="---" />
 
 
         </TableRow>
@@ -177,40 +175,40 @@
 
             <TextView
                 android:id="@+id/maxval"
+                style="@style/TableText"
                 android:layout_width="wrap_content"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="---"
                 android:textColor="#0A24B5"
-                android:textColorHighlight="@android:color/holo_green_light"
 
-                style="@style/TableText" />
+                android:textColorHighlight="@android:color/holo_green_light" />
 
             <TextView
                 android:id="@+id/maxvalcmin"
+                style="@style/TableText"
                 android:layout_width="126dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
-                android:text="---"
-                style="@style/TableText"
-               />
+                android:text="---" />
+
             <TextView
                 android:id="@+id/lapnomax"
+                style="@style/TableText"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
-                android:text="---"
-                style="@style/TableText" />
+                android:text="---" />
 
 
         </TableRow>
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <TextView
                 style="@style/TableText"
@@ -220,33 +218,33 @@
 
             <TextView
                 android:id="@+id/aveval"
-                android:layout_width="wrap_content"
+                style="@style/TableText"
 
+                android:layout_width="wrap_content"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
-                android:text="---"
 
 
-                style="@style/TableText" />
+                android:text="---" />
 
             <TextView
                 android:id="@+id/avevalcmin"
+                style="@style/TableText"
                 android:layout_width="wrap_content"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
-                android:text="---"
-                style="@style/TableText" />
+                android:text="---" />
 
             <TextView
                 android:id="@+id/laptotal"
+                style="@style/TableText"
                 android:layout_width="wrap_content"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
                 android:padding="7dp"
-                android:text="---"
-                style="@style/TableText" />
+                android:text="---" />
         </TableRow>
 
 
@@ -278,13 +276,13 @@
         android:id="@+id/textView2"
         android:layout_width="0dp"
         android:layout_height="0dp"
+
         android:fontFamily="@font/digital7"
         android:gravity="center_horizontal"
         android:hint="@string/your_laps_will_be_here"
         android:scrollbars="vertical"
         android:textColor="#2E7D32"
         android:textSize="25dp"
-
         app:layout_constraintBottom_toBottomOf="@+id/guideline8"
         app:layout_constraintEnd_toEndOf="@id/guideline6"
         app:layout_constraintStart_toStartOf="@id/guideline5"
@@ -391,13 +389,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.94" />
+        app:layout_constraintGuide_percent="0.92" />
 
     <RelativeLayout
         android:id="@+id/dashboard"
 
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="70dp"
+
         app:layout_constraintBottom_toTopOf="@id/tableLayout"
         app:layout_constraintEnd_toEndOf="@id/guideline6"
         app:layout_constraintStart_toStartOf="@id/guideline5"
@@ -423,7 +422,7 @@
                 android:textAlignment="center"
 
                 android:textColor="@color/purple_700"
-                android:textSize="16dp"
+                android:textSize="18dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -435,10 +434,10 @@
                 android:layout_marginRight="3dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/digital7"
-                android:text="Total Observation Time"
+                android:text="Observation Time"
                 android:textAlignment="center"
                 android:textColor="@color/purple_700"
-                android:textSize="16dp"
+                android:textSize="18dp"
                 android:textStyle="bold" />
 
             <TextView
@@ -452,7 +451,7 @@
                 android:text="Cycle per Hour"
                 android:textAlignment="center"
                 android:textColor="@color/purple_700"
-                android:textSize="16dp"
+                android:textSize="18dp"
                 android:textStyle="bold">
 
             </TextView>
@@ -463,8 +462,9 @@
         <LinearLayout
             android:id="@+id/boxes"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_below="@id/texts"
+            android:layout_marginTop="5dp"
             android:weightSum="3">
 
 
@@ -478,7 +478,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/textviewborder"
                 android:fontFamily="@font/digital7"
-                android:textAlignment="center"
+                android:gravity="center"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="20dp"
 
@@ -494,7 +494,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/textviewborder"
                 android:fontFamily="@font/digital7"
-                android:textAlignment="center"
+                android:gravity="center"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="20dp"
 
@@ -512,7 +512,7 @@
 
                 android:background="@drawable/textviewborder"
                 android:fontFamily="@font/digital7"
-                android:textAlignment="center"
+                android:gravity="center"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="20dp"
 

@@ -5,13 +5,15 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
-
+import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,8 +41,9 @@ public class ChartFragment extends Fragment {
 
     LineChart lineChart;
     ArrayList<Entry> lineEntry, lapValue;
-
+    TextView chartTimer;
     PageViewModel pageViewModel;
+    Typeface tf;
 
     public static ChartFragment newInstance() {
         return new ChartFragment();
@@ -52,6 +55,7 @@ public class ChartFragment extends Fragment {
         super.onCreate(savedInstanceState);
         pageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
 
+
     }
 
 
@@ -61,17 +65,34 @@ public class ChartFragment extends Fragment {
         // Inflate the layout for this fragment
 
         return inflater.inflate(R.layout.fragment_chart, container, false);
+
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         //grafik için değişkenlerin oluşturulması
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            tf = getResources().getFont(R.font.digital7);
+        }
         lineChart = view.findViewById(R.id.chart);
+        lineChart.setNoDataTextTypeface(tf);
+        lineChart.setNoDataTextColor(Color.BLUE);
         lineEntry = new ArrayList<>();
         lapValue = new ArrayList<>();
+        chartTimer = view.findViewById(R.id.chartTimer);
         /*tAvgValue = new ArrayList<>();
         tMinValue = new ArrayList<>();
         tMaxValue = new ArrayList<>();*/
+
+           pageViewModel.getTimerValue().observe(requireActivity(), new Observer<String>() {
+                @Override
+                public void onChanged(String s) {
+
+                    chartTimer.setText(s);
+                }
+            });;
+
+
 
 
         pageViewModel.getIndex().observe(requireActivity(), new Observer<Integer>() {
@@ -80,6 +101,8 @@ public class ChartFragment extends Fragment {
                 /*
                 ama her seferinde lap tuşuna basınca lineENTRY dizisine eklemesi lazım
                 */
+                ;
+
                 DrawChart();
             }
         });
@@ -108,7 +131,7 @@ public class ChartFragment extends Fragment {
         lapValue.clear();
         lineChart.invalidate();
         lineChart.clear();
-
+        chartTimer.setText("00:00:00");
 
     }
 
@@ -118,7 +141,9 @@ public class ChartFragment extends Fragment {
 https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axis-show-on-the-bottom-of-the-graph-not-the-top
 
  */
-        DecimalFormat dec = new DecimalFormat("#0.00" );
+
+        System.out.println("kronos:  **" + pageViewModel.getTimerValue().getValue());
+        DecimalFormat dec = new DecimalFormat("#0.00");
         Integer i = pageViewModel.getIndex().getValue();
         Float j = pageViewModel.getTimeValue().getValue();
         Float tmax = pageViewModel.getMaxTimeValue().getValue();
@@ -187,7 +212,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         lapValueDataSet.setValueTextSize(12);
         lapValueDataSet.setCircleColor(Color.GREEN);
         lapValueDataSet.setCircleRadius(5);
-
+        lapValueDataSet.setValueTypeface(tf);
         lapValueDataSet.enableDashedLine(3, 3, 3);
         lapValueDataSet.isDashedLineEnabled();
         /* *//*T max **//*
@@ -206,17 +231,19 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         tMinValueDataSet.setValueTextSize(12);
         tMinValueDataSet.setLineWidth(2f);*/
 
-        LimitLine tmaxLimit = new LimitLine(tmax, "Maximum Cycle Time: " +dec.format(tmax) + " cyc/unit ");
+        LimitLine tmaxLimit = new LimitLine(tmax, "Maximum Cycle Time: " + dec.format(tmax) + " cyc/unit ");
         tmaxLimit.setLineWidth(4f);
         tmaxLimit.enableDashedLine(10f, 10f, 0f);
         tmaxLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         tmaxLimit.setTextSize(12f);
+        tmaxLimit.setTypeface(tf);
 
         LimitLine tminLimit = new LimitLine(tmin, "Minimum Cycle Time: " + dec.format(tmin) + " cyc/unit ");
         tminLimit.setLineWidth(4f);
         tminLimit.enableDashedLine(10f, 10f, 0f);
         tminLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         tminLimit.setTextSize(12f);
+        tminLimit.setTypeface(tf);
 
         LimitLine taveLimit = new LimitLine(tave, "Mean Cycle Time: " + dec.format(tave) + " cyc/unit ");
         taveLimit.setLineWidth(4f);
@@ -224,9 +251,16 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         taveLimit.enableDashedLine(10f, 10f, 0f);
         taveLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         taveLimit.setTextSize(12f);
+        taveLimit.setTypeface(tf);
+
+        //sağ y ekseni kapama
+        YAxis yRAxis = lineChart.getAxisRight();
+        yRAxis.setEnabled(false);
+        //sol y ekseni
 
         YAxis yAxis = lineChart.getAxisLeft();
         // yAxis.setLabelCount(4,true);
+        yAxis.setTypeface(tf);
         yAxis.removeAllLimitLines();
         yAxis.addLimitLine(tmaxLimit);
         yAxis.addLimitLine(tminLimit);
@@ -245,6 +279,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         /***X eksenini alta alma**/
         XAxis xAxis = lineChart.getXAxis();
+        xAxis.setTypeface(tf);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);// ölçeği 1 adım olarak ayarlama
 
@@ -269,12 +304,16 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         lineChart.setBackgroundColor(getResources().getColor(R.color.colorAccent));
         //lineChart.animateXY(500, 500);
-        Description des = lineChart.getDescription();
+
+
+         Description des = lineChart.getDescription();
+        des.setTypeface(tf);
         des.setText("Cycle Time Chart ");
-        ;
         des.setTextAlign(Paint.Align.CENTER);
         des.setPosition(width / 2, 100);//yukarıdan width alıyor
         des.setTextSize(25);
+        des.setTextColor(Color.BLUE);
+        des.setEnabled(false);
         ;
 
 

@@ -3,7 +3,9 @@ package com.zlpls.kronometre;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Environment;
 import android.text.InputFilter;
 import android.widget.EditText;
@@ -44,12 +46,12 @@ public class ExcelSave {
     private String fileName = "";
 
     public String getTimeUnit() {
-        return timeUnit ;}
+        return timeUnit;
+    }
 
     public void setTimeUnit(String timeUnit) {
         this.timeUnit = timeUnit;
     }
-
 
     private void collectInput(Context context) {
         // convert edit text to string
@@ -57,7 +59,7 @@ public class ExcelSave {
 
         // ensure that user input bar is not empty
         if (getInput == null || getInput.trim().equals("")) {
-            Toast.makeText(context, "Please enter your file name :", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Please enter your file name!", Toast.LENGTH_LONG).show();
         }
 
         // add input into an data collection arraylist
@@ -67,8 +69,29 @@ public class ExcelSave {
             //  adapter.notifyDataSetChanged();
         }
     }
+    public void share(Context context){
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
+        File folder = new File(path, "IndustrialChoronometer");
+        if (!folder.exists()) {
+           Toast.makeText(context,"No files to share !",Toast.LENGTH_LONG).show();
 
-    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul) {
+        }else{
+            //Toast.makeText(context,"Files to share !",Toast.LENGTH_LONG).show();
+            Uri fileToShareURI = null;
+            File file = new File(folder, "deneme.xls");
+            file.setReadable(true, true);
+            fileToShareURI = Uri.parse(file.toString());
+            Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+            intent.putExtra(Intent.EXTRA_STREAM, fileToShareURI); //Uri.fromFile(file));
+
+            intent.setType("*/*");
+            context.startActivity((Intent.createChooser(intent, "MyFile")));
+
+
+        }
+        ;
+    }
+    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute) {
 
 
         if (laps.size() > 0) {
@@ -97,9 +120,16 @@ alert dialog için
                     txt = editTextName1; // variable to collect user input
 
                     collectInput(context); // analyze input (txt) in this method
+                    File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
+                    File folder = new File(path, "IndustrialChoronometer");
+                    if (!folder.exists()) {
+                        folder.mkdirs();
+
+                    }
+                    ;
                     if (!fileName.isEmpty()) {
                         String FILE_NAME = fileName + ".xls";
-                        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
+                        path = new File(folder.getPath());
                         File file = new File(path, FILE_NAME);
 
 
@@ -122,27 +152,29 @@ alert dialog için
                             Label lbl6 = new Label(0, 6, "Minimum Cycle Time : ");
                             Label lbl7 = new Label(0, 7, "Lap number of Min.Cyc.Time : ");
                             Label lbl8 = new Label(0, 8, "Average Cycle Time : ");
-
-                            Label no = new Label(0, 9, "Lap No :");
-                            Label lbl9 = new Label(1, 9, "Laps Value:");
-                            Label lbl10 = new Label(2, 9, "Cycle Time [" + timeUnit + "] :");
+                            Label lblCycPerHour = new Label(0, 9, "Cyc.per Hour :");
+                            Label lblCycPerMinute = new Label(0, 10, "Cyc.per Minute :");
+                            Label no = new Label(0, 11, "Lap No :");
+                            Label lbl9 = new Label(1, 11, "Laps Value:");
+                            Label lbl10 = new Label(2, 11, "Cycle Time [" + timeUnit + "] :");
 
 // başlık değerleri
                             Label lbl11 = new Label(1, 1, xlString);
 
                             Label lbl12 = new Label(1, 2, timeUnit);
-                            Label lbl13 = new Label(1, 3, laps.get(laps.size() - 1));
+                            Label lbl13 = new Label(1, 3, totalStudyTime); //laps.get(laps.size() - 1));
                             Label lbl14 = new Label(1, 4, decthree.format(Collections.max(lapsval) * modul) + " " + timeUnit);
                             Label lbl15 = new Label(1, 5, String.valueOf(lapsval.indexOf(Collections.max(lapsval))));
                             Label lbl16 = new Label(1, 6, decthree.format(Collections.min(lapsval) * modul) + " " + timeUnit);
                             Label lbl17 = new Label(1, 7, String.valueOf(lapsval.indexOf(Collections.min(lapsval))));
                             Label lbl18 = new Label(1, 8, decthree.format(ave * modul) + " " + timeUnit);
-
+                            Label lbl19 = new Label(1, 9, String.valueOf(dec.format(cycPerHour)) + " cyc/hour");
+                            Label lbl20 = new Label(1, 10, String.valueOf(dec.format(cycPerMinute)) + " cyc/minute");
 
                             while (i < laps.size()) {// laplar
-                                Label lbls0 = new Label(0, 10 + i, String.valueOf(i + 1));
-                                Label lbls = new Label(1, 10 + i, laps.get(i));// lap yazma
-                                Label lbls2 = new Label(2, 10 + i, String.valueOf(dec.format(lapsval.get(i) * modul))); // cycle time yazma
+                                Label lbls0 = new Label(0, 12 + i, String.valueOf(i + 1));
+                                Label lbls = new Label(1, 12 + i, laps.get(i));// lap yazma
+                                Label lbls2 = new Label(2, 12 + i, String.valueOf(dec.format(lapsval.get(i) * modul))); // cycle time yazma
                                 sheet.addCell(lbls);
                                 sheet.addCell(lbls0);
                                 sheet.addCell(lbls2);
@@ -158,6 +190,8 @@ alert dialog için
                                 sheet.addCell(lbl6);
                                 sheet.addCell(lbl7);
                                 sheet.addCell(lbl8);
+                                sheet.addCell(lblCycPerHour);
+                                sheet.addCell(lblCycPerMinute);
                                 sheet.addCell(lbl9);
                                 sheet.addCell(lbl10);
                                 sheet.addCell(lbl11);
@@ -168,6 +202,8 @@ alert dialog için
                                 sheet.addCell(lbl16);
                                 sheet.addCell(lbl17);
                                 sheet.addCell(lbl18);
+                                sheet.addCell(lbl19);
+                                sheet.addCell(lbl20);
 
 
                             } catch (RowsExceededException e) {
@@ -180,7 +216,8 @@ alert dialog için
 
                             try {
                                 workbook.close();
-                                Toast.makeText(context, "Your datas stored in DownLoad folder with name " + FILE_NAME, Toast.LENGTH_LONG).show();
+                                fileName = "";
+                                Toast.makeText(context, "Your datas stored in DownLoad/IndustrialChronometer folder with name " + FILE_NAME, Toast.LENGTH_LONG).show();
                             } catch (WriteException e) {
 
                                 e.printStackTrace();

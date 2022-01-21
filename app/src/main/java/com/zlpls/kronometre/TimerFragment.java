@@ -54,7 +54,7 @@ public class TimerFragment extends Fragment {
     boolean go; // uygulama çalışma izini. radiobutonlar seçili değilse başlamaz
     int number;
     Toolbar toolbar;
-    String unit; //birim
+    String unit,diffTime; //birim
     String
             second = null, minute = null, hour = null;
     String timer = "00:00:00";
@@ -160,6 +160,7 @@ public class TimerFragment extends Fragment {
         /**** ESAS HESAPLAYICI KOD *****/
 
 
+
         tableLayout = view.findViewById(R.id.tableLayout);
         textView = view.findViewById(R.id.textView);
         textView2 = view.findViewById(R.id.textView2);
@@ -233,44 +234,6 @@ public class TimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 reset();
-               /* handler.removeCallbacks(runnable);
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Delete All Datas");
-                builder.setMessage("Are you sure to delete all datas ?");
-
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    *//* RESET düğmesi çıktığı zaman No ya basınca
-                    Start'a basılmış gibi olmalı
-                     *//*
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (Auth == true) {
-                            button2.setText("STOP");
-
-                            //start();
-                            //button.setEnabled(false);// save butonu kapalı
-                            //button4.setEnabled(false);// reset butonu kapalı
-                        } else {
-                            button2.setText("START");
-
-                            stop();
-                            button.setEnabled(true);// save butonu açık
-                            button4.setEnabled(true);// reset butonu açık
-                        }
-                    }
-                });
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (go == true) {
-                            reset();
-                        } else {
-
-                        }
-                    }
-                });
-                builder.show();*/
 
             }
         });
@@ -279,97 +242,7 @@ public class TimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 takeLap();
-                //yeni fonksiyon olarak yazdım lap almayı
-              /*  //System.out.println("Modul değeri-->"+modul);
-                int deltah = 0;
-                int deltam = 0;
-                int i = 0;
-                double delta1, delta0;
-                double deltas = 0;
-                double delta;
 
-                double sum = 0;
-
-
-
-                // laps dizisinde string olarak tutulan ifadelerin sayıya çevrilmiş olarak tutuldukları dizi
-                String lap = hh + ":" + mm + ":" + ss;
-                laps.add(lap);
-
-
-                textView2.setMovementMethod(new ScrollingMovementMethod());
-                if (lapsayisi > 0) {
-
-
-                    second = laps.get(lapsayisi - 1).substring(6, 8);
-                    minute = laps.get(lapsayisi - 1).substring(3, 5);
-                    hour = laps.get(lapsayisi - 1).substring(0, 2);
-
-                    delta1 = (Integer.parseInt(hh) / 60 + Integer.parseInt(mm) + Double.valueOf(Integer.parseInt(ss)) / Double.valueOf(modul));
-                    delta0 = (Integer.parseInt(hour) / 60 + Integer.parseInt(minute) + Double.valueOf(Integer.parseInt(second)) / Double.valueOf(modul));
-
-                    // deltah = Math.abs(Integer.parseInt(hh)/60 - Integer.parseInt(hour)/60);
-                    // deltam = Math.abs(Integer.parseInt(mm) - Integer.parseInt(minute));
-                    // deltas = Math.abs(Integer.parseInt(ss)/modul - Integer.parseInt(second)/modul);
-                    delta = Math.abs(delta1 - delta0);
-                    lapsval.add(delta);
-
-                } else {
-                    // ilk lap değeri
-                    second = laps.get(lapsayisi).substring(6, 8);
-                    minute = laps.get(lapsayisi).substring(3, 5);
-                    hour = laps.get(lapsayisi).substring(0, 2);
-                    delta0 = (Integer.parseInt(hour) / 60 + Integer.parseInt(minute) + Double.valueOf(Integer.parseInt(second)) / Double.valueOf(modul));
-                    delta = delta0 ;
-                    lapsval.add(delta0);
-
-                }
-                // laps değerlerini sayıya çevirme
-
-                if (laps.size() > 0) {
-                    while (i < lapsval.size()) {
-                        sum = (lapsval.get(i) + sum);
-
-
-                        //second = laps.get(i).substring(6, 8);
-                        //minute = laps.get(i).substring(3, 5);
-                        //hour = laps.get(i).substring(0, 2);
-                        //lapsval[i] = (Integer.parseInt(hour) / 60 + Integer.parseInt(minute) + Double.valueOf(Integer.parseInt(second)) / Double.valueOf(modul));
-                        i++;
-                    }
-                    // lapsval dizisindeki max ve min değerleri bulmak
-
-                    // DoubleSummaryStatistics stat = Arrays.stream(lapsval).summaryStatistics();
-             *//*
-                double max =stat.getMax();
-             double min =stat.getMin();
-             double ave = stat.getAverage();
-             double sum= stat.getSum();
-*//*
-
-                    min = Collections.min(lapsval);
-                    lapnomin = lapsval.indexOf(min) + 1;// 0 yazmaması için
-                    max = Collections.max(lapsval);
-                    lapnomax = lapsval.indexOf(max) + 1;
-
-                    ave = sum / lapsval.size();
-
-                    // tablodaki yerine yazdırmak
-                    maxvalue.setText(dec.format(max*60)); // saniye olarak yazıyor
-                    maxvalcmin.setText(dec.format(max * 100));
-                    minvalcmin.setText(dec.format(min * 100));
-                    minvalue.setText(dec.format(min * 60));
-                    avevalue.setText(dec.format(ave*60));
-                    avevalcmin.setText(dec.format(ave * 100));
-                    lapnoMin.setText(String.valueOf(lapnomin));
-                    lapnoMax.setText(String.valueOf(lapnomax));
-                    lapTotal.setText(String.valueOf(lapsval.size()));
-                }
-                // EN SON YAZILAN EN ÜSTE  version
-                textView2.setText( "Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta* modul) +" " + unit + "\n" + textView2.getText().toString());
-        *//* BU KISIM EN SON YAZILANI EN ALTA ATIYOR
-        textView2.append("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta) + " min/cyc ");
-        textView2.append(System.getProperty("line.separator"));*//**/
             }
         });
         super.onViewCreated(view, savedInstanceState);
@@ -487,10 +360,20 @@ public class TimerFragment extends Fragment {
         //System.out.println("deneme değeri "+pageViewModel.getTimeValue().getValue());
         // System.out.println("deneme lapsayısı "+lapsval.get(lapsayisi-1));
     }
+    public void share(){
 
+        excelSave.share(getActivity());
+
+    }
     public void save() {
         // activity nin context i için getActivity kullan
-        excelSave.save(getActivity(), unit, laps, lapsval, ave, modul);
+        if (Auth)
+        excelSave.save(getActivity(), unit, laps, lapsval, ave, modul,diffTime,calculateCycPerHour(ave),calculateCycPerMinute(ave));
+        else
+        {
+            Toast.makeText(getContext(), "Chrono is running !", Toast.LENGTH_SHORT).show();
+        }
+
         //excelSave.deneme(getActivity());
     }
 
@@ -528,7 +411,8 @@ public class TimerFragment extends Fragment {
 
                         textView.setText(hh + ":" + mm + ":" + ss);
 
-
+                        pageViewModel.setTimerValue(textView.getText().toString()); //diğer fragmanda
+                        //görünmesi için
                         handler.postDelayed(runnable, milis);
 
 
@@ -590,7 +474,7 @@ public class TimerFragment extends Fragment {
         minutes = timeInSeconds / 60;
         timeInSeconds = timeInSeconds - (minutes * 60);
         seconds = timeInSeconds;
-        String diffTime = (hours<10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds) ;
+        diffTime = (hours<10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds) ;
         System.out.println(diffTime);
         totalObservationTime.setText(diffTime);
 

@@ -1,6 +1,8 @@
 package com.zlpls.kronometre.ui.main;
 
 import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -11,6 +13,9 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import com.zlpls.kronometre.ChartFragment;
 import com.zlpls.kronometre.R;
 import com.zlpls.kronometre.TimerFragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
@@ -25,6 +30,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
         mContext = context;
+
     }
 
     @Override
@@ -39,12 +45,12 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         return null;
     }
 
-
-    @Nullable
-    @Override
+   @Override
     public CharSequence getPageTitle(int position) {
         return mContext.getResources().getString(TAB_TITLES[position]);
     }
+
+
 
     @Override
     public int getCount() {
