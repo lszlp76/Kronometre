@@ -1,4 +1,4 @@
-package com.zlpls.kronometre;
+package com.lszlp.choronometre;
 
 
 import android.content.Context;
@@ -30,7 +30,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
-import com.zlpls.kronometre.ui.main.PageViewModel;
+import com.lszlp.choronometre.main.PageViewModel;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

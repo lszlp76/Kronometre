@@ -34,4 +34,12 @@
         <!--item name="android:autoSizeTextType">uniform</item-->
 
     </style>
+    <style name ="textColorStyle">
+        <item name="android:textColor">@color/purple_700</item>
+    </style>
+    <style name="menuStyle">
+        <item name="android:actionMenuTextColor">#FF3700B3</item>
+        <item name="android:textColorPrimary">#f48fb1</item>
+
+    </style>
 </resources>

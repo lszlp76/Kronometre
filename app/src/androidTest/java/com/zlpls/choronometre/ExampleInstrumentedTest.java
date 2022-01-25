@@ -1,4 +1,4 @@
-package com.zlpls.kronometre;
+package com.zlpls.choronometre;
 
 import android.content.Context;
 

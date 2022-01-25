@@ -1,4 +1,4 @@
-package com.zlpls.kronometre;
+package com.lszlp.choronometre;
 
 import static com.google.android.material.math.MathUtils.floorMod;
 
@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TableLayout;
@@ -25,17 +24,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.zlpls.kronometre.ui.main.PageViewModel;
-import com.zlpls.kronometre.ui.main.SectionsPagerAdapter;
+import com.lszlp.choronometre.main.PageViewModel;
+import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;

@@ -105,7 +105,8 @@
     android:layout_gravity="start"
     android:id="@+id/nav_view"
     app:itemIconTint="@color/colorPrimary"
-    app:itemTextColor="@color/purple_700"
+    android:theme="@style/menuStyle"
+
     app:headerLayout="@layout/nav_drawer"
     app:menu="@menu/drawermenu">
 

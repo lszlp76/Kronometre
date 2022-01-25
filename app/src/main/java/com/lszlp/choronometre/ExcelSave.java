@@ -1,4 +1,4 @@
-package com.zlpls.kronometre;
+package com.lszlp.choronometre;
 
 import android.app.AlertDialog;
 import android.content.Context;

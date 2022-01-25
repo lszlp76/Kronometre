@@ -1,4 +1,4 @@
-package com.zlpls.kronometre;
+package com.lszlp.choronometre;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -29,8 +29,8 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
-import com.zlpls.kronometre.databinding.ActivityMainBinding;
-import com.zlpls.kronometre.ui.main.SectionsPagerAdapter;
+import com.lszlp.choronometre.databinding.ActivityMainBinding;
+import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
 /**
  * TODO
@@ -276,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()) {
             case (R.id.nav_about):
                 Intent intent = new Intent(MainActivity.this,WebpagesActivities.class);
-                String link = "https://www.google.com";
+                String link = "about";
                 intent.putExtra("link",link);
                 startActivity(intent);
 

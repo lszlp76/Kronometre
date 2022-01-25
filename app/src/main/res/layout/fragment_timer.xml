@@ -24,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            style="@style/textColorStyle"
             android:weightSum="2">
 
 
@@ -33,11 +34,11 @@
                 android:layout_height="match_parent"
                 android:layout_marginLeft="5dp"
                 android:layout_weight="1"
+                style="@style/textColorStyle"
                 android:button="@android:drawable/btn_radio"
                 android:fontFamily="@font/digital7"
                 android:text="@string/sn_second"
-                android:textColor="@color/purple_700"
-                android:textSize="16sp" />
+                 android:textSize="16sp" />
 
             <RadioButton
                 android:id="@+id/cminuteButton"
@@ -45,11 +46,10 @@
                 android:layout_height="match_parent"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
+                style="@style/textColorStyle"
                 android:button="@android:drawable/btn_radio"
                 android:fontFamily="@font/digital7"
                 android:text="@string/cmin"
-                android:textColor="@color/purple_700"
-
                 android:textSize="16sp" />
 
 
@@ -181,8 +181,6 @@
                 android:gravity="center"
                 android:padding="7dp"
                 android:text="---"
-                android:textColor="#0A24B5"
-
                 android:textColorHighlight="@android:color/holo_green_light" />
 
             <TextView
@@ -252,9 +250,11 @@
 
 
     <TextView
+        style="@style/textColorStyle"
         android:id="@+id/textView"
         android:layout_width="0dp"
         android:layout_height="0dp"
+
         android:autoSizeTextType="uniform"
         android:fontFamily="@font/digital7mono"
 
@@ -263,7 +263,7 @@
         android:text="00:00:00"
         android:textAllCaps="true"
 
-        android:textColor="@color/purple_700"
+
         android:textStyle="bold"
         android:typeface="monospace"
         app:layout_constraintBottom_toTopOf="@+id/dashboard"
@@ -408,6 +408,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:weightSum="3"
+            style="@style/textColorStyle"
             tools:ignore="NotSibling">
 
             <TextView
@@ -421,7 +422,7 @@
                 android:text="Cycle per Minute"
                 android:textAlignment="center"
 
-                android:textColor="@color/purple_700"
+                style="@style/textColorStyle"
                 android:textSize="18dp"
                 android:textStyle="bold" />
 
@@ -433,10 +434,10 @@
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
                 android:layout_weight="1"
+                style="@style/textColorStyle"
                 android:fontFamily="@font/digital7"
                 android:text="Observation Time"
                 android:textAlignment="center"
-                android:textColor="@color/purple_700"
                 android:textSize="18dp"
                 android:textStyle="bold" />
 
@@ -450,8 +451,8 @@
                 android:fontFamily="@font/digital7"
                 android:text="Cycle per Hour"
                 android:textAlignment="center"
-                android:textColor="@color/purple_700"
                 android:textSize="18dp"
+                style="@style/textColorStyle"
                 android:textStyle="bold">
 
             </TextView>

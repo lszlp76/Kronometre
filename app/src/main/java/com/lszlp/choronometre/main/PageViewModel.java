@@ -1,4 +1,4 @@
-package com.zlpls.kronometre.ui.main;
+package com.lszlp.choronometre.main;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

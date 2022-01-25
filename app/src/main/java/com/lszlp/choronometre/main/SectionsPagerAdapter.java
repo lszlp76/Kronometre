@@ -1,4 +1,4 @@
-package com.zlpls.kronometre.ui.main;
+package com.lszlp.choronometre.main;
 
 import android.content.Context;
 
@@ -7,10 +7,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.zlpls.kronometre.ChartFragment;
-import com.zlpls.kronometre.FileList;
-import com.zlpls.kronometre.R;
-import com.zlpls.kronometre.TimerFragment;
+import com.lszlp.choronometre.ChartFragment;
+import com.lszlp.choronometre.FileList;
+import com.lszlp.choronometre.R;
+import com.lszlp.choronometre.TimerFragment;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
