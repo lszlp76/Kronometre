@@ -14,17 +14,20 @@
       <item android:id="@+id/nav_save"
           android:icon="@drawable/ic_save"
           android:title="Save"/>
-      <item android:id="@+id/nav_about"
-          android:icon="@drawable/ic_about"
-          android:title="About"/>
+
 
 
   </group>
-    <item android:title="Policy">
+    <item android:title="About">
+
         <menu>
-            <item android:id="@+id/policy"
+            <item android:id="@+id/nav_policy"
                 android:icon="@drawable/ic_policy"
-                android:title="Policy">
+                android:title="Policy"/>
+            <item android:id="@+id/nav_about"
+                android:icon="@drawable/ic_about"
+                android:title="About">
+
 
             </item>
         </menu>

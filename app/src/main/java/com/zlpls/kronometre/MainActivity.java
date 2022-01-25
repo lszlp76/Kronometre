@@ -2,13 +2,12 @@ package com.zlpls.kronometre;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.AbsSavedState;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +19,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ContextThemeWrapper;
-
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -33,31 +31,33 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.zlpls.kronometre.databinding.ActivityMainBinding;
 import com.zlpls.kronometre.ui.main.SectionsPagerAdapter;
-/** TODO
+
+/**
+ * TODO
  * ekran koruyucu kapatma
  * menu ekranı
  * paylaşım
  * about sayfası
- *
- * 
+ * <p>
+ * <p>
  * salise ekleme
- *
- * **/
+ **/
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     ViewPager viewPager;
+    AppBarLayout appBarLayout;
+    Button startButton, lapButton, resetButton, saveButton;
+    boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private DrawerLayout drawer;
     private ActionBarDrawerToggle toggle;
     private Toolbar toolbar;
-
-    AppBarLayout appBarLayout;
-    Button startButton, lapButton,resetButton,saveButton ;
-    boolean auth ;// lap için onay verilmesi lazım
     private ActivityMainBinding binding;
     private int[] TAB_ICONS = {
             R.drawable.ic_baseline_timer_24,
-            R.drawable.ic_baseline_stacked_line_chart_24
+            R.drawable.ic_baseline_stacked_line_chart_24,
+            R.drawable.ic_baseline_save
     };
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,25 +81,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabs.setupWithViewPager(viewPager);
         tabs.getTabAt(0).setIcon(TAB_ICONS[0]);
         tabs.getTabAt(1).setIcon(TAB_ICONS[1]);
+        tabs.getTabAt(2).setIcon(TAB_ICONS[2]);
 
+        viewPager.setOffscreenPageLimit(2);
 
         // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //fragmentTransaction.add(R.id.view_pager,TimerFragment.class,null);
-       toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         drawer = findViewById(R.id.drawer_layout);
+
         //navigation menu aktivasyon
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        //yaratılan toogle toolbar le senkronize olmalı.
 
-        toggle = new ActionBarDrawerToggle(this,drawer,toolbar,R.string.navigation_drawer_open,R.string.navigation_drawer_close);
+        toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         toggle.setDrawerIndicatorEnabled(true);
-
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        startButton = findViewById(R.id.button2);
+        /*if (savedInstanceState == null){
+            viewPager.setCurrentItem(0);
+            navigationView.setCheckedItem(R.id.nav_view);
+
+        }*/
+        /**** navigation sonu ***/
+
+       // startButton = findViewById(R.id.button2);
+        startButton= binding.button2;
         lapButton = findViewById(R.id.button3);
         lapButton.setEnabled(false);
         resetButton = findViewById(R.id.button4);
@@ -117,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               ;
+                ;
                 // fragmenti initial et.
                 // sadece 0nci siradaki fragmeni çalıştır
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
@@ -227,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (fragment.modul == 0) {
                             Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
                         } else {
-                            auth= true;
+                            auth = true;
                             fragment.start();
                             lapButton.setEnabled(true);
                             startButton.setText("STOP");
@@ -237,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     } else {
                         //stop yapılması
-                        auth=false;
+                        auth = false;
                         fragment.stop();
                         startButton.setText("START");
                         lapButton.setEnabled(false);
@@ -263,20 +272,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case (R.id.nav_about):
-               //** TODO webview about
-                break;
-            case(R.id.nav_save):
-                 fragment.save();
+                Intent intent = new Intent(MainActivity.this,WebpagesActivities.class);
+                String link = "https://www.google.com";
+                intent.putExtra("link",link);
+                startActivity(intent);
 
+                break;
+            case (R.id.nav_policy):
+                Intent intent2 = new Intent(MainActivity.this,WebpagesActivities.class);
+                String link2 = "https://www.agromtek.com/indchroprivacypol.html";
+                intent2.putExtra("link",link2);
+                startActivity(intent2);
+                break;
+            case (R.id.nav_save):
+                if (!auth) {
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    fragment.save();
+
+                }
                 break;
             case (R.id.nav_share):
-                  fragment.share();
-                ;
+                if (!auth) {
+                    viewPager.setCurrentItem(viewPager.getCurrentItem() + 2, true);
+                }
                 break;
+
+
         }
         drawer.closeDrawers();
         return true;

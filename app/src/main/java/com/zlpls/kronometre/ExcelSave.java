@@ -69,7 +69,7 @@ public class ExcelSave {
             //  adapter.notifyDataSetChanged();
         }
     }
-    public void share(Context context){
+    public void share(Context context,String fileName){
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
         File folder = new File(path, "IndustrialChoronometer");
         if (!folder.exists()) {
@@ -78,7 +78,7 @@ public class ExcelSave {
         }else{
             //Toast.makeText(context,"Files to share !",Toast.LENGTH_LONG).show();
             Uri fileToShareURI = null;
-            File file = new File(folder, "deneme.xls");
+            File file = new File(folder, fileName);
             file.setReadable(true, true);
             fileToShareURI = Uri.parse(file.toString());
             Intent intent = new Intent(android.content.Intent.ACTION_SEND);
@@ -90,6 +90,12 @@ public class ExcelSave {
 
         }
         ;
+    }
+    public void delete(Context context, String fileName){
+        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
+        File folder = new File(path, "IndustrialChoronometer");
+        File file = new File(folder, fileName);
+        file.delete();
     }
     public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute) {
 

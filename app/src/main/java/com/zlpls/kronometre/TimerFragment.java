@@ -362,7 +362,7 @@ public class TimerFragment extends Fragment {
     }
     public void share(){
 
-        excelSave.share(getActivity());
+       // excelSave.share(getActivity());
 
     }
     public void save() {
