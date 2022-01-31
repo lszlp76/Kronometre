@@ -34,5 +34,8 @@
 
     </style>
 
-
+<style name="totalScoreColor">
+    <item name="android:textColor">@color/purple_200</item>
+    <item name="android:textSize">20dp</item>
+</style>
 </resources>

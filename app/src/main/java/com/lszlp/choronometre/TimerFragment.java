@@ -76,7 +76,7 @@ public class TimerFragment extends Fragment {
     String currentDateandTimeStop;
     String currentDateandTimeStart;
 
-   Typeface tf;
+   //Typeface tf;
     private DateFormat df = new SimpleDateFormat("ddMMyy@HHmm");
     private DateFormat df2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss ", Locale.ENGLISH);
     Date timeStop,timeStart;
@@ -93,9 +93,9 @@ public class TimerFragment extends Fragment {
                     // if (checked)
                     //if windows phone programming book is selected
                     //set the checked radio button's text style bold italic
-                   cminuteButton.setTypeface(tf, Typeface.BOLD_ITALIC);
+                  // cminuteButton.setTypeface(tf, Typeface.BOLD_ITALIC);
                     //set the other two radio buttons text style to default
-                    minuteButton.setTypeface(tf, Typeface.NORMAL);
+                 //   minuteButton.setTypeface(tf, Typeface.NORMAL);
                     modul = 100;
                     milis = 600;
                     unit = "Cmin./cyc";
@@ -106,8 +106,8 @@ public class TimerFragment extends Fragment {
                 case R.id.minuteButton:
                     // if (checked)
 
-                    minuteButton.setTypeface( tf, Typeface.BOLD_ITALIC);
-                    cminuteButton.setTypeface(tf, Typeface.NORMAL);
+                 //   minuteButton.setTypeface( tf, Typeface.BOLD_ITALIC);
+                  //  cminuteButton.setTypeface(tf, Typeface.NORMAL);
                     milis = 1000;
                     modul = 60;
                     unit = "sec./cyc";
@@ -130,7 +130,7 @@ public class TimerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-       tf = getResources().getFont(R.font.digital7);
+      // tf = getResources().getFont(R.font.digital7);
 
         pageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
 

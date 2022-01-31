@@ -42,4 +42,8 @@
         <item name="android:textColorPrimary">#f48fb1</item>
 
     </style>
+    <style name="totalScoreColor">
+        <item name="android:textColor">@color/colorPrimary</item>
+        <item name="android:textSize">20dp</item>
+    </style>
 </resources>

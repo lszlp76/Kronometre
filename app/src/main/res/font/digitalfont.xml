@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+    android:font="@font/digital7"
+    android:fontStyle=["normal" | "italic"]
+    android:fontWeight="weight_value" />
+</font-family>

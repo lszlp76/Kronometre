@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         } else {
         }
-        Typeface tf = getResources().getFont(R.font.digital7);
+        //Typeface tf = getResources().getFont(R.font.digital7);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
