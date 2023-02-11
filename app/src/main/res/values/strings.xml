@@ -53,6 +53,8 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
         <item name="android:backgroundTint">@color/btn_color</item>
         <item name="android:layout_marginLeft">3dp</item>
         <item name="android:layout_marginRight">3dp</item>
+        <item name="android:fontFamily">@font/digital7</item>
+        <item name="android:textSize">20dp</item>
 
     </style>
 

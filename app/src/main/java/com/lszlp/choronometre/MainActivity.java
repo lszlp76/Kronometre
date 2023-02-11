@@ -2,16 +2,22 @@ package com.lszlp.choronometre;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Typeface;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.RatingBar;
+import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -44,11 +50,15 @@ import com.lszlp.choronometre.main.SectionsPagerAdapter;
  **/
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    public DrawerLayout drawer;
+    public Boolean isResetDone;
+    Switch drawerSwitchSec;
+    Switch drawerSwitchCmin;
     ViewPager viewPager;
+    Switch switchSec, switchCmin;
     AppBarLayout appBarLayout;
     Button startButton, lapButton, resetButton, saveButton;
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
-    private DrawerLayout drawer;
     private ActionBarDrawerToggle toggle;
     private Toolbar toolbar;
     private ActivityMainBinding binding;
@@ -87,33 +97,85 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //fragmentTransaction.add(R.id.view_pager,TimerFragment.class,null);
-        toolbar = findViewById(R.id.toolbar);
+
+        toolbar = binding.toolbar;// findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        drawer = findViewById(R.id.drawer_layout);
+        drawer = binding.drawerLayout;// findViewById(R.id.drawer_layout);
 
         //navigation menu aktivasyon
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = binding.navView;// findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         toggle.setDrawerIndicatorEnabled(true);
         drawer.addDrawerListener(toggle);
+/**
+ * drawer open ve close ile açaabilrsin.
+ */
+
         toggle.syncState();
+        ;
+/**
+ * NavigationView üzerine swicth bağlamak için aşağıdaki
+ * komut kümesini eklemelisin
+ */
+        navigationView.getMenu().findItem(R.id.timeUnitSec)
+                .setActionView(new Switch(this));
+        navigationView.getMenu().findItem(R.id.timeUnitCmin)
+                .setActionView(new Switch(this));
 
-        /*if (savedInstanceState == null){
-            viewPager.setCurrentItem(0);
-            navigationView.setCheckedItem(R.id.nav_view);
+//
+       drawerSwitchSec = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitSec).getActionView());
+       drawerSwitchCmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
 
-        }*/
+        drawerSwitchSec.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    drawerSwitchCmin.setChecked(false);
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    fragment.modul = 60;
+                    fragment.milis = 1000;
+
+                    fragment.unit = "Sec.";
+                    fragment.Timeunit = "Sec. - Second ";
+                    fragment.binding.unitValue.setText(fragment.unit);
+                    drawer.close();
+                } else {
+                    drawerSwitchCmin.setChecked(true);
+
+                }
+            }
+        });
+        drawerSwitchCmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    drawerSwitchSec.setChecked(false);
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    fragment.modul = 100;
+                    fragment.milis = 600;
+
+                    fragment.unit = "Cmin.";
+                    fragment.Timeunit = "Cmin. - Hundredth of Minute ";
+                    fragment.binding.unitValue.setText(fragment.unit);
+                    drawer.close();
+                } else {
+                    drawerSwitchSec.setChecked(true);
+                }
+            }
+        });
+
+
         /**** navigation sonu ***/
 
-       // startButton = findViewById(R.id.button2);
-        startButton= binding.button2;
-        lapButton = findViewById(R.id.button3);
+        // startButton = findViewById(R.id.button2);
+        startButton = binding.button2;
+        lapButton = binding.button3;//findViewById(R.id.button3);
         lapButton.setEnabled(false);
-        resetButton = findViewById(R.id.button4);
+        resetButton = binding.button4;//findViewById(R.id.button4);
         resetButton.setEnabled(false);
-        saveButton = findViewById(R.id.button);
+        saveButton = binding.button;//findViewById(R.id.button);
         saveButton.setEnabled(false);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -130,12 +192,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // fragmenti initial et.
                 // sadece 0nci siradaki fragmeni çalıştır
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-
+                isResetDone = false;
                 if (startButton.getText() != "STOP") {
                     if (fragment.modul == 0) {
+                        drawer.open();
                         Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
-                    } else {
+                    }
+                    else {
                         auth = true;
+                        drawerSwitchCmin.setEnabled(false);
+                        drawerSwitchSec.setEnabled(false);
+                        navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
+                        navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+
                         fragment.start();
                         lapButton.setEnabled(true);
                         startButton.setText("STOP");
@@ -143,9 +212,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         saveButton.setEnabled(false);
                     }
 
-                } else {
+                } else  {
                     //stop yapılması
                     auth = false;
+                    if (isResetDone){
+                        drawerSwitchCmin.setEnabled(true);
+                        drawerSwitchSec.setEnabled(true);
+
+                    }
+
+                    navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
+                    navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
+
                     fragment.stop();
                     startButton.setText("START");
                     lapButton.setEnabled(false);
@@ -234,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (startButton.getText() != "STOP") {
 
                         if (fragment.modul == 0) {
+                            drawer.open();
                             Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
                         } else {
                             auth = true;
@@ -270,21 +349,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
+
             case (R.id.nav_about):
-                Intent intent = new Intent(MainActivity.this,WebpagesActivities.class);
+                Intent intent = new Intent(MainActivity.this, WebpagesActivities.class);
                 String link = "about";
-                intent.putExtra("link",link);
+                intent.putExtra("link", link);
                 startActivity(intent);
 
                 break;
             case (R.id.nav_policy):
-                Intent intent2 = new Intent(MainActivity.this,WebpagesActivities.class);
+                Intent intent2 = new Intent(MainActivity.this, WebpagesActivities.class);
                 String link2 = "https://www.agromtek.com/indchroprivacypol.html";
-                intent2.putExtra("link",link2);
+                intent2.putExtra("link", link2);
                 startActivity(intent2);
                 break;
             case (R.id.nav_save):
@@ -300,6 +381,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 break;
 
+            case (R.id.rateApp):
+                Dialog dialog = new Dialog(MainActivity.this);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.setContentView(R.layout.dialog);
+                dialog.show();
+
+                RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
+                TextView tvRating = dialog.findViewById(R.id.tv_rating);
+                Button bt_sbmt = dialog.findViewById(R.id.bt_submit);
+                ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                    @Override
+                    public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
+                        tvRating.setText(String.format("(%s)",v));
+                    }
+                });
+                
+                bt_sbmt.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View view) {
+                        String sRating = String.valueOf(ratingBar.getRating());
+                        //gidecek değer sRaitng
+
+
+                        dialog.dismiss();
+                    }
+                });
+            //https://icons8.com/icons/set/toggle-off-on
 
         }
         drawer.closeDrawers();

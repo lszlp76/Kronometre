@@ -251,6 +251,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         taveLimit.enableDashedLine(10f, 10f, 0f);
         taveLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         taveLimit.setTextSize(12f);
+       ;
         taveLimit.setTypeface(tf);
 
         //sağ y ekseni kapama
@@ -301,8 +302,9 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         LineData linedata = new LineData(iLinedata);
         lineChart.setData(linedata);
         lineChart.invalidate(); //refreshing the line chart
+        lineChart.setBackgroundColor((Color.TRANSPARENT));
 
-        lineChart.setBackgroundColor(getResources().getColor(R.color.colorAccent));
+       // lineChart.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         //lineChart.animateXY(500, 500);
 
 
@@ -315,6 +317,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         des.setTextColor(Color.BLUE);
         des.setEnabled(false);
         ;
+
 
 
     }

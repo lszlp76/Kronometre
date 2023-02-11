@@ -107,7 +107,7 @@ public class FileList extends Fragment {
                 }
 
             }
-            ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, pathArray);
+            ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), R.layout.listviewlayout, pathArray);
             fileList.setAdapter(arrayAdapter);
             arrayAdapter.notifyDataSetChanged();
             ;
@@ -150,7 +150,7 @@ public class FileList extends Fragment {
                     }
 
 
-                    return false;
+                    return true;
                 }
             });
         }
@@ -159,89 +159,6 @@ public class FileList extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, pathArray);
-
-        System.out.println("onViewCreated çalıştı");
-        fileList = view.findViewById(R.id.fileList);
-
-        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
-        File folder = new File(path, "IndustrialChoronometer");
-        if (!folder.exists()) {
-            ;
-
-        } else {
-            File file = new File(String.valueOf(path + "/IndustrialChoronometer"));
-            File[] listFiles = file.listFiles();
-            Arrays.sort(listFiles, new Comparator() {
-                public int compare(Object o1, Object o2) {
-
-                    if (((File) o1).lastModified() > ((File) o2).lastModified()) {
-                        return -1;
-                    } else if (((File) o1).lastModified() < ((File) o2).lastModified()) {
-                        return +1;
-                    } else {
-                        return 0;
-                    }
-                }
-
-            });
-            for (int i = 0; i < listFiles.length; i++) {
-
-                if (listFiles[i].isFile() && (listFiles[i].getName().endsWith(".xls"))) {
-                    pathArray.add(listFiles[i].getName());
-
-                }
-
-            }
-
-        }
-        fileList.setAdapter(arrayAdapter);
-        fileList.isLongClickable();
-        arrayAdapter.notifyDataSetChanged();
-        ;
-
-
-        fileList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String fileName = pathArray.get(i);
-                excelSave.share(getActivity(), fileName);
-            }
-        });
-
-        fileList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String fileName = pathArray.get(i);
-
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogCustom));
-                builder.setTitle("Delete File");
-                builder.setMessage("Are you sure to delete " + fileName + " permanently ?");
-
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int p) {
-                        System.out.println("No ya basıldı");
-                    }
-                });
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int p) {
-                        pathArray.remove(i);
-                        excelSave.delete(getActivity(), fileName);
-                        // arrayAdapter.notifyDataSetChanged();
-                    }
-                });
-
-                builder.show();
-
-                return true;//bundan sonra başka clcik olmasın diye true
-            }
-
-            ;
-
-        });
 
     }
 }

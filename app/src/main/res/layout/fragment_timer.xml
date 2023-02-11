@@ -10,11 +10,12 @@
     android:tag="timer"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <!--LinearLayout
         android:id="@+id/timeUnit"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
 
+        android:orientation="horizontal"
         app:layout_constraintEnd_toStartOf="@+id/guideline6"
         app:layout_constraintStart_toStartOf="@+id/guideline5"
         app:layout_constraintTop_toTopOf="@+id/guideline">
@@ -56,238 +57,54 @@
         </RadioGroup>
 
 
-    </LinearLayout>
-
-
-    <TableLayout
-        android:id="@+id/tableLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:gravity="center_vertical"
-        android:stretchColumns="*"
-        app:layout_constraintBottom_toTopOf="@+id/textView2"
-        app:layout_constraintEnd_toEndOf="@id/guideline6"
-        app:layout_constraintStart_toStartOf="@+id/guideline5"
-        app:layout_constraintTop_toBottomOf="@id/dashboard">
-
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:baselineAligned="false">
-
-            <TextView
-
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="  "
-                android:textAlignment="center"
-                android:textSize="16sp"
-                tools:ignore="RtlCompat"
-                tools:layout_conversion_absoluteHeight="35dp"
-                tools:layout_conversion_absoluteWidth="100dp"
-                tools:layout_editor_absoluteX="37dp"
-                tools:layout_editor_absoluteY="359dp" />
-
-            <TextView
-                android:id="@+id/textView8"
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Second"
-
-                />
-
-            <TextView
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-
-                android:text="Cminute" />
-
-            <TextView
-                style="@style/TableText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="Lap" />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-
-                android:layout_height="wrap_content"
-                android:text="Min.Cyc.:" />
-
-            <TextView
-
-                android:id="@+id/minval"
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---"
-
-                tools:layout_editor_absoluteX="126dp"
-                tools:layout_editor_absoluteY="49dp" />
-
-            <TextView
-                android:id="@+id/minvalcmin"
-                style="@style/TableText"
-                android:layout_width="130dp"
-                android:layout_height="41dp"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---" />
-
-            <TextView
-                android:id="@+id/lapnomin"
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---" />
-
-
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tableRow2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                style="@style/TableText"
-
-                android:layout_width="wrap_content"
-                android:text="Max.Cyc:" />
-
-            <TextView
-                android:id="@+id/maxval"
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---"
-                android:textColorHighlight="@android:color/holo_green_light" />
-
-            <TextView
-                android:id="@+id/maxvalcmin"
-                style="@style/TableText"
-                android:layout_width="126dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---" />
-
-            <TextView
-                android:id="@+id/lapnomax"
-                style="@style/TableText"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---" />
-
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                style="@style/TableText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ave.Cyc.:" />
-
-            <TextView
-                android:id="@+id/aveval"
-                style="@style/TableText"
-
-                android:layout_width="wrap_content"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-
-
-                android:text="---" />
-
-            <TextView
-                android:id="@+id/avevalcmin"
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---" />
-
-            <TextView
-                android:id="@+id/laptotal"
-                style="@style/TableText"
-                android:layout_width="wrap_content"
-                android:fontFamily="@font/digital7"
-                android:gravity="center"
-                android:padding="7dp"
-                android:text="---" />
-        </TableRow>
-
-
-    </TableLayout>
+    </LinearLayout-->
 
 
     <TextView
-        style="@style/textColorStyle"
         android:id="@+id/textView"
+        style="@style/textColorStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
 
-        android:autoSizeTextType="uniform"
-        android:textSize="100sp"
         android:fontFamily="@font/digital7mono"
 
-        android:gravity="center"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="00:00:00."
+        android:textAppearance="?android:attr/textAppearanceLarge"
 
-        android:text="00:00:00"
-        android:textAllCaps="true"
 
-
+        android:textSize="65dp"
         android:textStyle="bold"
-        android:typeface="monospace"
         app:layout_constraintBottom_toTopOf="@+id/dashboard"
-        app:layout_constraintEnd_toEndOf="@+id/guideline6"
+        app:layout_constraintEnd_toStartOf="@+id/unitValue"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="@+id/guideline5"
-        app:layout_constraintTop_toBottomOf="@+id/timeUnit" />
-
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/unitValue"
+        style="@style/textColorStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/digital7mono"
+        android:gravity="center_horizontal"
+        android:text="No Unit"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        app:layout_constraintEnd_toEndOf="@+id/guideline6"
+        app:layout_constraintStart_toEndOf="@+id/textView"
+        app:layout_constraintTop_toTopOf="parent"
+         />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lapList"
         android:layout_width="0dp"
         android:layout_height="0dp"
-
-        android:fontFamily="@font/digital7"
-        android:gravity="center_horizontal"
-        android:hint="@string/your_laps_will_be_here"
-        android:scrollbars="vertical"
-        android:textColor="#2E7D32"
-        android:textSize="25sp"
         app:layout_constraintBottom_toBottomOf="@+id/guideline8"
         app:layout_constraintEnd_toEndOf="@id/guideline6"
         app:layout_constraintStart_toStartOf="@id/guideline5"
-        app:layout_constraintTop_toBottomOf="@id/tableLayout" />
+        app:layout_constraintTop_toBottomOf="@id/dashboard" />
 
     <Button
         android:id="@+id/button3"
@@ -355,21 +172,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp" />
+        app:layout_constraintGuide_percent="0.12722299" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.23" />
+        app:layout_constraintGuide_percent="0.1504788" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.02" />
+        app:layout_constraintGuide_begin="8dp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline6"
@@ -396,54 +213,55 @@
         android:id="@+id/dashboard"
 
         android:layout_width="0dp"
-        android:layout_height="70dp"
-
-        app:layout_constraintBottom_toTopOf="@id/tableLayout"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/lapList"
         app:layout_constraintEnd_toEndOf="@id/guideline6"
         app:layout_constraintStart_toStartOf="@id/guideline5"
-        app:layout_constraintTop_toBottomOf="@id/textView">
+        app:layout_constraintTop_toBottomOf="@id/guideline4">
 
         <LinearLayout
             android:id="@+id/texts"
+            style="@style/textColorStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+
             android:gravity="center_vertical"
             android:weightSum="3"
-            style="@style/textColorStyle"
             tools:ignore="NotSibling">
 
             <TextView
                 android:id="@+id/textView3"
+                style="@style/textColorStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
                 android:layout_weight="1"
                 android:fontFamily="@font/digital7"
-                android:text="Cycle per Minute"
+                android:text="Cycle per Min."
+
                 android:textAlignment="center"
 
-                style="@style/textColorStyle"
-                android:textSize="18dp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textView4"
+                style="@style/textColorStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginLeft="3dp"
                 android:layout_marginRight="3dp"
                 android:layout_weight="1"
-                style="@style/textColorStyle"
                 android:fontFamily="@font/digital7"
-                android:text="Observation Time"
+                android:text="Total Time"
                 android:textAlignment="center"
-                android:textSize="18dp"
+
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textView5"
+                style="@style/textColorStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="3dp"
@@ -451,9 +269,8 @@
                 android:layout_weight="1"
                 android:fontFamily="@font/digital7"
                 android:text="Cycle per Hour"
+
                 android:textAlignment="center"
-                android:textSize="18dp"
-                style="@style/textColorStyle"
                 android:textStyle="bold">
 
             </TextView>
@@ -462,6 +279,7 @@
         </LinearLayout>
 
         <LinearLayout
+
             android:id="@+id/boxes"
             android:layout_width="match_parent"
             android:layout_height="40dp"
@@ -472,6 +290,7 @@
 
             <TextView
                 android:id="@+id/cycPerMinute"
+                style="@style/totalScoreColor"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_below="@id/textView3"
@@ -481,12 +300,12 @@
                 android:background="@drawable/textviewborder"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
-                style="@style/totalScoreColor"
 
                 />
 
             <TextView
                 android:id="@+id/totalObservationTime"
+                style="@style/totalScoreColor"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_below="@id/textView4"
@@ -496,30 +315,155 @@
                 android:background="@drawable/textviewborder"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
-                style="@style/totalScoreColor"
 
 
                 />
 
             <TextView
                 android:id="@+id/cycPerHour"
+                style="@style/totalScoreColor"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_below="@id/textView5"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_weight="1"
 
+                android:layout_weight="1"
                 android:background="@drawable/textviewborder"
                 android:fontFamily="@font/digital7"
                 android:gravity="center"
-                style="@style/totalScoreColor"
 
 
                 />
         </LinearLayout>
 
+        <LinearLayout
 
+            android:id="@+id/titles"
+            style="@style/textColorStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/boxes"
+            android:layout_margin="5dp"
+            android:gravity="center_vertical"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/s"
+                style="@style/TableText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Min.Cyc" />
+
+            <TextView
+                style="@style/TableText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Max.Cyc" />
+
+            <TextView
+                style="@style/TableText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Mean Cyc" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/values"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_below="@+id/titles"
+            android:layout_marginTop="5dp"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/minVal"
+                style="@style/totalScoreColor"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/textviewborder"
+                android:fontFamily="@font/digital7"
+
+                android:gravity="center"
+
+                />
+
+            <TextView
+                android:id="@+id/maxVal"
+                style="@style/totalScoreColor"
+                android:layout_width="0dp"
+
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:background="@drawable/textviewborder"
+                android:fontFamily="@font/digital7"
+                android:gravity="center"
+
+
+                />
+
+            <TextView
+                android:id="@+id/aveVal"
+                style="@style/totalScoreColor"
+                android:layout_width="0dp"
+
+                android:layout_height="match_parent"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+
+                android:layout_weight="1"
+                android:background="@drawable/textviewborder"
+                android:fontFamily="@font/digital7"
+                android:gravity="center"
+
+
+                />
+        </LinearLayout>
+
+        <LinearLayout
+
+            android:id="@+id/titlesforLaps"
+            style="@style/textColorStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/values"
+            android:layout_margin="10dp"
+            android:gravity="center_vertical"
+            android:weightSum="3">
+
+            <TextView
+
+                style="@style/TableText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingLeft="0dp"
+                android:text="Lap" />
+
+            <TextView
+                style="@style/TableText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Value" />
+
+            <TextView
+                style="@style/TableText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Cycle" />
+
+        </LinearLayout>
     </RelativeLayout>
 
 

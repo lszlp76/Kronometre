@@ -3,3 +3,14 @@ setting gradle için maven url kısmını ekle
 gradle içine dependecies ekle
 https://github.com/PhilJay/MPAndroidChart/releases/tag/v3.1.0
 https://weeklycoding.com/mpandroidchart-documentation/
+
+
+TODO
+* stop anında zaman seçimi olmayacak şekilde düzenlenecek.
+*filelist yazı rengi değişecek
+*chart background ve yazı ayarı
+*chart ekranı ayarı
+* dark them light theme ayarı
+*rate me
+* about web
+* reklam

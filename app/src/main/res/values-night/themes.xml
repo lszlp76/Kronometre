@@ -12,11 +12,11 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
     </style>
-        <!-- Customize your theme here. -->
+    <!-- Customize your theme here. -->
 
-        <style name="TableText">
+    <style name="TableText">
         <item name="android:fontFamily">@font/digital7</item>
-        <item name="android:textSize">25dp</item>
+        <item name="android:textSize">20dp</item>
         <item name="android:textColor">@color/purple_200</item>
         <item name="android:padding">0dp</item>
         <item name="android:gravity">center</item>
@@ -25,17 +25,21 @@
         <!--item name="android:autoSizeTextType">uniform</item-->
 
     </style>
-<style name ="textColorStyle">
-    <item name="android:textColor">@color/purple_200</item>
-</style>
+
+    <style name="textColorStyle">
+        <item name="android:textColor">@color/purple_200</item>
+        <item name="android:textSize">20dp</item>
+
+    </style>
+
     <style name="menuStyle">
         <item name="android:actionMenuTextColor">@color/purple_200</item>
         <item name="android:textColorPrimary">#f48fb1</item>
 
     </style>
 
-<style name="totalScoreColor">
-    <item name="android:textColor">@color/purple_200</item>
-    <item name="android:textSize">20dp</item>
-</style>
+    <style name="totalScoreColor">
+        <item name="android:textColor">@color/purple_200</item>
+        <item name="android:textSize">20dp</item>
+    </style>
 </resources>

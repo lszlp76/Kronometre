@@ -1,18 +1,15 @@
 package com.lszlp.choronometre;
 
-import static com.google.android.material.math.MathUtils.floorMod;
-
-import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.method.ScrollingMovementMethod;
+import android.os.SystemClock;
+import android.text.SpannableString;
+import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +20,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.lszlp.choronometre.databinding.FragmentTimerBinding;
 import com.lszlp.choronometre.main.PageViewModel;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
@@ -36,30 +36,47 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Stack;
 
+/**
+ * https://www.android-examples.com/android-create-stopwatch-example-tutorial-in-android-studio/
+ */
 
 public class TimerFragment extends Fragment {
-    TextView textView, textView2, maxvalue, minvalue,totalObservationTime,
-            lapTotal, avevalue, minvalcmin, maxvalcmin, avevalcmin, lapnoMin, lapnoMax,cycPerHour,cycPerMinute;
+    FragmentTimerBinding binding;
+    long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
+    int Hours, Seconds, Minutes, MilliSeconds;
+
+    TextView  /*textView2*/
+            maxvalue, minvalue, totalObservationTime,
+            lapTotal, avevalue, minvalcmin, maxvalcmin, avevalcmin, lapnoMin, lapnoMax, cycPerHour, cycPerMinute;
     Button button2, button1, button3, button4, button;
-    RadioButton radioButton, minuteButton, cminuteButton;
+    //ListView lapList;
+    RecyclerView lapList;
+    String lapToWrite;
+    // String[] ListElements = new String[] {  };
+    Lap lapValue;
+    ArrayList<Lap> ListElementsArrayList;
+    Stack<String> StackList;
+    LapListAdapter lapListAdapter;
+    // RadioButton radioButton, minuteButton, cminuteButton;
     Runnable runnable;// bir işlemi belirli periyodda yapamya yarar
     Handler handler; // runnable ile çalışmaya yarar
-    RadioGroup radioGroup;
+    //RadioGroup radioGroup;
     TableLayout tableLayout;
     boolean go; // uygulama çalışma izini. radiobutonlar seçili değilse başlamaz
-    int number;
+    int number, micro;
     Toolbar toolbar;
-    String unit,diffTime; //birim
+    String unit, diffTime; //birim
     String
             second = null, minute = null, hour = null;
-    String timer = "00:00:00";
+    String timer = "00:00:00.000";
     String departure = "---";
     int modul; // modul saniye ,cminute olacak değer. saniye için 60, cminute için 100 olmalı
     int milis; // saniye için 1000, cm,müte için 600 olmalı
     int m;// dakika
     int h;// saat
-    String hh, mm, ss;
+    String hh, mm, ss, msec;
     int scm = 0;// chronos modu seçimi . Açılışta sıfır olmalı
     int lapsayisi = 0;
     ArrayList<String> laps = new ArrayList<String>(); // bu lapların olduğu dizi
@@ -73,16 +90,17 @@ public class TimerFragment extends Fragment {
     SectionsPagerAdapter viewPager;
     ExcelSave excelSave = new ExcelSave();
     List<String> saveValue;
+
     String currentDateandTimeStop;
     String currentDateandTimeStart;
-
-   //Typeface tf;
+    Date timeStop, timeStart;
+    boolean isNoPressed; // resetleme kutusu çıktığında No'ya basıldı bilgisi MainActivity'e gitmeli.O nedenle bu var.
+    //Typeface tf;
     private DateFormat df = new SimpleDateFormat("ddMMyy@HHmm");
     private DateFormat df2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss ", Locale.ENGLISH);
-    Date timeStop,timeStart;
-    boolean isNoPressed; // resetleme kutusu çıktığında No'ya basıldı bilgisi MainActivity'e gitmeli.O nedenle bu var.
-    /*** operasyonel fonksiyonlar***/
 
+    /*** operasyonel fonksiyonlar***/
+/*
     private RadioGroup.OnCheckedChangeListener onCheckedChangeListener = new RadioGroup.OnCheckedChangeListener() {
 
         @Override
@@ -98,10 +116,11 @@ public class TimerFragment extends Fragment {
                  //   minuteButton.setTypeface(tf, Typeface.NORMAL);
                     modul = 100;
                     milis = 600;
-                    unit = "Cmin./cyc";
+                    unit = "Cmin";
                     Timeunit = "Cmin. - Hunderedth Minute";
                     // Toast.makeText(getApplicationContext(),cminuteButton.getText(),Toast.LENGTH_SHORT).show();
                     go = true;
+                    ;
                     break;
                 case R.id.minuteButton:
                     // if (checked)
@@ -110,7 +129,7 @@ public class TimerFragment extends Fragment {
                   //  cminuteButton.setTypeface(tf, Typeface.NORMAL);
                     milis = 1000;
                     modul = 60;
-                    unit = "sec./cyc";
+                    unit = "Sec.";
                     Timeunit = "Sec. - Second ";
                     // Toast.makeText(getApplicationContext(),minuteButton.getText(),Toast.LENGTH_SHORT).show();
                     go = true;
@@ -118,10 +137,10 @@ public class TimerFragment extends Fragment {
                     break;
             }
 
-
+            binding.unitValue.setText(unit);
         }
     };
-
+*/
     public static TimerFragment newInstance() {
         return new TimerFragment();
     }
@@ -130,7 +149,7 @@ public class TimerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-      // tf = getResources().getFont(R.font.digital7);
+        // tf = getResources().getFont(R.font.digital7);
 
         pageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
 
@@ -143,8 +162,10 @@ public class TimerFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
+        binding = FragmentTimerBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
 
-        return inflater.inflate(R.layout.fragment_timer, container, false);
+        return view;
 
 
     }
@@ -156,47 +177,47 @@ public class TimerFragment extends Fragment {
         /**** ESAS HESAPLAYICI KOD *****/
 
 
+        // tableLayout = view.findViewById(R.id.tableLayout);
 
-        tableLayout = view.findViewById(R.id.tableLayout);
-        textView = view.findViewById(R.id.textView);
-        textView2 = view.findViewById(R.id.textView2);
-        cycPerHour = view.findViewById(R.id.cycPerHour);
-        cycPerMinute = view.findViewById(R.id.cycPerMinute);
-        totalObservationTime = view.findViewById(R.id.totalObservationTime);
-        button2 = view.findViewById(R.id.button2);
+
+        cycPerHour = binding.cycPerHour;
+        cycPerMinute = binding.cycPerMinute;
+        totalObservationTime = binding.totalObservationTime;
+        button2 = binding.button2;
         button2.setVisibility(View.GONE);
-        button1 = view.findViewById(R.id.button);
+        button1 = binding.button;
         button1.setVisibility(View.GONE);// bunlar gözükmesin .silersen kodu bozabilirsin
-        button3 = view.findViewById(R.id.button3);
+        button3 = binding.button3;
         button3.setVisibility(View.GONE);
-        button4 = view.findViewById(R.id.button4);
+        button4 = binding.button4;
         button4.setVisibility(View.GONE);
-        button = view.findViewById(R.id.button);// save butonu
+        button = binding.button;// save butonu
         button.setVisibility(View.GONE);
-        maxvalue = view.findViewById(R.id.maxval);
-        minvalue = view.findViewById(R.id.minval);
-        avevalue = view.findViewById(R.id.aveval);
-        minvalcmin = view.findViewById(R.id.minvalcmin);
-        maxvalcmin = view.findViewById(R.id.maxvalcmin);
-        avevalcmin = view.findViewById(R.id.avevalcmin);
-        lapnoMax = view.findViewById(R.id.lapnomax);
-        lapnoMin = view.findViewById(R.id.lapnomin);
-        lapTotal = view.findViewById(R.id.laptotal);
-        //minuteButton =view.findViewById(R.id.minuteButton);
-        //cminuteButton=view.findViewById(R.id.cminuteButton);
-        radioGroup = view.findViewById(R.id.radioGroup);
-        radioGroup.setOnCheckedChangeListener(onCheckedChangeListener);
-        //modul = 60; // bu kısım radio button olacak
-        //milis = 1000;
-        textView.setText(timer);
+        maxvalue = binding.maxVal;
+        minvalue = binding.minVal;
+        avevalue = binding.aveVal;
+        ;
+//        radioGroup = view.findViewById(R.id.radioGroup);
+//        radioGroup.setOnCheckedChangeListener(onCheckedChangeListener);
+
+
+        SpannableString ssp = new SpannableString(timer);
+        ssp.setSpan(new RelativeSizeSpan(0.5f), 9, ssp.length(), 0);
+        binding.textView.setText(ssp);
 
         button3.setEnabled(false);// lap tuşu kapanıyor
 
         button.setEnabled(false);// save butonu kapalı
         button4.setEnabled(false);// reset butonu kapalı v1.nci release hata verdi.
-
+        handler = new Handler();
         Auth = true;// açılışta auth true olmalı
         // START STOP butonu yazılması --> button2 değişecek
+
+
+        ListElementsArrayList = new ArrayList();
+        binding.lapList.setLayoutManager(new LinearLayoutManager(getContext()));
+        lapListAdapter = new LapListAdapter(ListElementsArrayList);
+        binding.lapList.setAdapter(lapListAdapter);
 
 
         button2.setOnClickListener(new View.OnClickListener() {
@@ -217,12 +238,13 @@ public class TimerFragment extends Fragment {
                         button4.setEnabled(true);// reset butonu açık
                     }
                 } else {
-                    Toast.makeText(getContext(), "Choose time unit !", Toast.LENGTH_SHORT).show();
+                    ((MainActivity) getActivity()).drawer.open();
+                    // Toast.makeText(getContext(), "Choose time unit !", Toast.LENGTH_SHORT).show();
                 }
             }
         });
-        minuteButton = (RadioButton) view.findViewById(R.id.minuteButton);
-        cminuteButton = (RadioButton) view.findViewById(R.id.cminuteButton);
+        //minuteButton = (RadioButton) view.findViewById(R.id.minuteButton);
+        //cminuteButton = (RadioButton) view.findViewById(R.id.cminuteButton);
 
         isNoPressed = false;// ilk olarak resetlemede kullanılacak.
 // reset butonuna basılınca olanlar
@@ -230,6 +252,7 @@ public class TimerFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 reset();
+
 
             }
         });
@@ -245,6 +268,7 @@ public class TimerFragment extends Fragment {
     }
 
     public void takeLap() {
+        //binding.lapList.setAdapter(adapter);
         //System.out.println("Modul değeri-->"+modul);
         if (go) {
             System.out.println("go var");
@@ -261,14 +285,12 @@ public class TimerFragment extends Fragment {
         double sum = 0;
 
 
-
-
         // laps dizisinde string olarak tutulan ifadelerin sayıya çevrilmiş olarak tutuldukları dizi
-        String lap = hh + ":" + mm + ":" + ss;
+        String lap = hh + ":" + mm + ":" + ss + "." + msec;
         laps.add(lap);
 
 
-        textView2.setMovementMethod(new ScrollingMovementMethod());
+        // textView2.setMovementMethod(new ScrollingMovementMethod());
         if (lapsayisi > 0) {
 
 
@@ -326,22 +348,33 @@ public class TimerFragment extends Fragment {
             ave = sum / lapsval.size();
 
             // tablodaki yerine yazdırmak
-            maxvalue.setText(dec.format(max * 60)); // saniye olarak yazıyor
-            maxvalcmin.setText(dec.format(max * 100));
-            minvalcmin.setText(dec.format(min * 100));
-            minvalue.setText(dec.format(min * 60));
-            avevalue.setText(dec.format(ave * 60));
-            avevalcmin.setText(dec.format(ave * 100));
-            lapnoMin.setText(String.valueOf(lapnomin));
-            lapnoMax.setText(String.valueOf(lapnomax));
-            lapTotal.setText(String.valueOf(lapsval.size()));
+            maxvalue.setText(dec.format(max * modul)); // saniye olarak yazıyor
+            //   maxvalcmin.setText(dec.format(max * 100));
+            //  minvalcmin.setText(dec.format(min * 100));
+            minvalue.setText(dec.format(min * modul));
+            avevalue.setText(dec.format(ave * modul));
+            //  avevalcmin.setText(dec.format(ave * 100));
+            //  lapnoMin.setText(String.valueOf(lapnomin));
+            //  lapnoMax.setText(String.valueOf(lapnomax));
+            //  lapTotal.setText(String.valueOf(lapsval.size()));
         }
         // EN SON YAZILAN EN ÜSTE  version
-        textView2.setText("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta * modul) + " " + unit + "\n\n" + textView2.getText().toString());
+
+
+        // textView2.setText("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta * modul) + " " + unit + "\n\n" + textView2.getText().toString());
+
+        lapToWrite = (lapsayisi + 1) + "      " + lap + "     " + dec.format(delta * modul) + " " + unit;
+        //her zaman ilk değer olarak ekler,
+
+        lapValue = new Lap(lapsayisi + 1, lap, (dec.format(delta * modul) + " " + unit));
+
+
+        ListElementsArrayList.add(0, lapValue);
+        System.out.println("Dizi---> " + ListElementsArrayList);
         cycPerMinute.setText(String.valueOf(dec.format(calculateCycPerMinute(ave))));
         cycPerHour.setText(String.valueOf(dec.format(calculateCycPerHour(ave))));
         /* BU KISIM EN SON YAZILANI EN ALTA ATIYOR
-        textView2.append("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta) + " min/cyc ");
+        textView2.append("Lap " + (lapsayisi + 1) + ": " + lap, + "  Cyc.Time: " + dec.format(delta) + " min/cyc ");
         textView2.append(System.getProperty("line.separator"));*/
         //textView2.setSingleLine(true);
         lapsayisi++;
@@ -353,20 +386,24 @@ public class TimerFragment extends Fragment {
         pageViewModel.setAvgTimeValue((float) (ave * modul));
         pageViewModel.setIndex(lapsayisi);// lapsayıbilgisini gönderiyor
         pageViewModel.setTimeUnit(unit);
+
+        lapListAdapter.notifyDataSetChanged();
+
         //System.out.println("deneme değeri "+pageViewModel.getTimeValue().getValue());
         // System.out.println("deneme lapsayısı "+lapsval.get(lapsayisi-1));
     }
-    public void share(){
 
-       // excelSave.share(getActivity());
+    public void share() {
+
+        // excelSave.share(getActivity());
 
     }
+
     public void save() {
         // activity nin context i için getActivity kullan
         if (Auth)
-        excelSave.save(getActivity(), unit, laps, lapsval, ave, modul,diffTime,calculateCycPerHour(ave),calculateCycPerMinute(ave));
-        else
-        {
+            excelSave.save(getActivity(), unit, laps, lapsval, ave, modul, diffTime, calculateCycPerHour(ave), calculateCycPerMinute(ave));
+        else {
             Toast.makeText(getContext(), "Chrono is running !", Toast.LENGTH_SHORT).show();
         }
 
@@ -375,6 +412,7 @@ public class TimerFragment extends Fragment {
 
     public void start() {
         Auth = false;
+        ((MainActivity) getActivity()).isResetDone = false ;
         // buraya number=XX yazrsan o saniyeden başlatabilirsin
         // mainden çalıştıracaksan if i bunu kaldır
         //if (button2.getText() == "STOP")
@@ -382,34 +420,78 @@ public class TimerFragment extends Fragment {
         {
             if (modul > 0) {
                 getStartTime();
-                cminuteButton.setEnabled(false);
-                minuteButton.setEnabled(false);
+                //cminuteButton.setEnabled(false);
+                //minuteButton.setEnabled(false);
                 button3.setEnabled(true); // lap tuşu açılıyor
-                handler = new Handler();
+                //  handler = new Handler();
+
                 runnable = new Runnable() {
                     @RequiresApi(api = Build.VERSION_CODES.N)
                     @Override
                     public void run() {
                         // buradaki her şey belirtilen periyyotta olaaktır.
-                        number++;
-                        if (number > 0 && floorMod(number, modul) == 0) {
-                            m++;
-                            number = 0;
-                        }
-                        if (m >= 60) { //dakika 1e eşit ve büyükse ve 60 olursa
-                            h++;
-                            m = 0;
 
-                        }
-                        hh = h < 10 ? "0" + h : h + "";
-                        mm = m < 10 ? "0" + m : m + "";
-                        ss = number < 10 ? "0" + Math.floorMod(number, modul) : Math.floorMod(number, modul) + "";
+                        MillisecondTime = SystemClock.uptimeMillis() - StartTime;
 
-                        textView.setText(hh + ":" + mm + ":" + ss);
+                        UpdateTime = TimeBuff + MillisecondTime;
 
-                        pageViewModel.setTimerValue(textView.getText().toString()); //diğer fragmanda
+                        Seconds = (int) (UpdateTime / milis);
+
+                        Minutes = Seconds / modul;
+
+                        Seconds = Seconds % modul;
+
+                        Hours = Minutes / 60;
+
+
+                        MilliSeconds = (int) (UpdateTime % 1000);
+
+                        hh = Hours < 10 ? "0" + Hours : Hours + "";
+                        mm = Minutes < 10 ? "0" + Minutes : Minutes + "";
+                        ss = Seconds < 10 ? "0" + Math.floorMod(Seconds, modul) : Math.floorMod(Seconds, modul) + "";
+                        msec = String.valueOf(MilliSeconds);
+                        String string = String.format("%02d", Hours)
+                                + ":" + String.format("%02d", Minutes)
+                                + ":"
+                                + String.format("%02d", Seconds)
+                                + "."
+                                + String.format("%03d", MilliSeconds);
+
+                        SpannableString spannableString = new SpannableString(string);
+                        spannableString.setSpan(new RelativeSizeSpan(0.5f), 9, spannableString.length(), 0);
+
+                        binding.textView.setText(spannableString);
+
+
+                        /**
+                         micro ++ ;
+                         if (micro == 100) {
+                         number++;
+                         micro = 0;
+
+                         }
+                         if (number == modul) {
+                         m++;
+
+                         number = 0;
+                         }
+                         if (m == 60) { //dakika 1e eşit ve büyükse ve 60 olursa
+                         h++;
+                         m = 0;
+
+                         }
+
+
+                         hh = h < 10 ? "0" + h : h + "";
+                         mm = m < 10 ? "0" + m : m + "";
+                         ss = number < 10 ? "0" + Math.floorMod(number, modul) : Math.floorMod(number, modul) + "";
+
+                         textView.setText(hh + ":" + mm + ":" + ss + "." + micro);
+                         */
+                        pageViewModel.setTimerValue(binding.textView.getText().toString()); //diğer fragmanda
                         //görünmesi için
-                        handler.postDelayed(runnable, milis);
+                        handler.postDelayed(runnable, 0);
+                        // handler.postDelayed(runnable, delaymilissecond)
 
 
                     }
@@ -419,7 +501,8 @@ public class TimerFragment extends Fragment {
 
                 //button2.setEnabled(false);
             } else {
-                Toast.makeText(getContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
+                ((MainActivity) getActivity()).drawer.open();
+                //  Toast.makeText(getContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
             }
         }
         ;
@@ -431,7 +514,9 @@ public class TimerFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStart = sdf.format(new Date());
         timeStart = new Date();
-        System.out.println(currentDateandTimeStart);
+        StartTime = SystemClock.uptimeMillis();
+        handler.postDelayed(runnable, 0);
+        System.out.println("start time : >> " + StartTime);
 
     }
 
@@ -440,7 +525,11 @@ public class TimerFragment extends Fragment {
         //button2.setEnabled(true);
 //        totalObservationTime.setText(String.valueOf(calculateTotalObservationTime()));
         getStopTime();
+        TimeBuff += MillisecondTime;
+
         handler.removeCallbacks(runnable);
+
+
         ; // double serisi verirken içine kaç tane yazacağını belirt
 
     }
@@ -449,6 +538,7 @@ public class TimerFragment extends Fragment {
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStop = sdf.format(new Date());
+        StopTime = SystemClock.uptimeMillis();
         Date date1 = null;
         try {
             date1 = sdf.parse(currentDateandTimeStart);
@@ -470,172 +560,74 @@ public class TimerFragment extends Fragment {
         minutes = timeInSeconds / 60;
         timeInSeconds = timeInSeconds - (minutes * 60);
         seconds = timeInSeconds;
-        diffTime = (hours<10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds) ;
+        diffTime = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
         System.out.println(diffTime);
         totalObservationTime.setText(diffTime);
+        System.out.println("stop time : >> " + StopTime);
 
     }
 
     public void reset() {
+        ((MainActivity) getActivity()).drawerSwitchCmin.setEnabled(true);
+        ((MainActivity) getActivity()).drawerSwitchSec.setEnabled(true);
         handler.removeCallbacks(runnable);
-        if (go == true) {
+        Auth = true;
+        button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
+        button2.setText("START");
+        m = 0;
+        h = 0;
+        number = 0;
 
-            Auth = true;
-            button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-            button2.setText("START");
-            cminuteButton.setEnabled(true);
-            minuteButton.setEnabled(true);
+        MillisecondTime = 0L;
+        StartTime = 0L;
+        TimeBuff = 0L;
+        UpdateTime = 0L;
+        Seconds = 0;
+        Minutes = 0;
+        MilliSeconds = 0;
 
+        SpannableString ssp = new SpannableString(timer);
+        ssp.setSpan(new RelativeSizeSpan(0.5f), 9, ssp.length(), 0);
+        binding.textView.setText(ssp);
+        cycPerHour.setText("");
+        cycPerMinute.setText("");
+        totalObservationTime.setText("");
+        button2.setEnabled(true);// start tuşu açılıyor
+        button3.setEnabled(false);// lap tuşu kapanıyor
+        button.setEnabled(false);
+        lapsayisi = 0;
+        avevalue.setText(departure);
+        binding.lapList.setAdapter(null);
+        ListElementsArrayList.clear();
+        lapListAdapter.notifyDataSetChanged();
+        laps.clear(); // lapları siliyor
+        lapsval.clear();// aralık değerlerini siliyor
+        maxvalue.setText(departure);
+        minvalue.setText(departure);
 
-            textView2.setText("");
-
-            m = 0;
-            h = 0;
-            number = 0;
-
-            //handler.removeCallbacks(runnable);
-            textView.setText(timer);
-            cycPerHour.setText("");
-            cycPerMinute.setText("");
-            totalObservationTime.setText("");
-            cminuteButton.setEnabled(true);
-            minuteButton.setEnabled(true);
-            button2.setEnabled(true);// start tuşu açılıyor
-            button3.setEnabled(false);// lap tuşu kapanıyor
-            button.setEnabled(false);
-            lapsayisi = 0;
-            laps.clear(); // lapları siliyor
-            lapsval.clear();// aralık değerlerini siliyor
-            maxvalue.setText(departure);
-            maxvalcmin.setText(departure);
-            minvalcmin.setText(departure);
-            minvalue.setText(departure);
-            avevalue.setText(departure);
-            avevalcmin.setText(departure);
-            lapnoMin.setText(departure);
-            lapnoMax.setText(departure);
-            lapTotal.setText(departure);
-            ;
-
-
-        } else {
-
-        }
 
     }
 
-    private double calculateCycPerMinute(double ave){
+    private double calculateCycPerMinute(double ave) {
         double cycPerMinute = 0;
-        switch (modul){//modul saniye ,cminute olacak değer. saniye için 60, cminute için 100 olmalı
+        switch (modul) {//modul saniye ,cminute olacak değer. saniye için 60, cminute için 100 olmalı
             case 60:
-                cycPerMinute = (60/ave)/100;
+                cycPerMinute = (60 / ave) / 100;
             case 100:
-                cycPerMinute = (100/ave)/100;
-            }
-        return cycPerMinute;
+                cycPerMinute = (100 / ave) / 100;
         }
+        return cycPerMinute;
+    }
 
 
-
-
-    private double calculateCycPerHour(double ave){
+    private double calculateCycPerHour(double ave) {
         double cycPerHour = 0;
-        switch (modul){//modul saniye ,cminute olacak değer. saniye için 60, cminute için 100 olmalı
+        switch (modul) {//modul saniye ,cminute olacak değer. saniye için 60, cminute için 100 olmalı
             case 60:
-                cycPerHour = (3600/ave)/100;
+                cycPerHour = (3600 / ave) / 100;
             case 100:
-                cycPerHour = (6000/ave)/100;
+                cycPerHour = (6000 / ave) / 100;
         }
         return cycPerHour;
     }
 }
-/*
- public void start() {
-            Auth = false;
-            // buraya number=XX yazrsan o saniyeden başlatabilirsin
-            if (button2.getText() == "STOP") {
-                if (modul > 0) {
-                    cminuteButton.setEnabled(false);
-                    minuteButton.setEnabled(false);
-                    button3.setEnabled(true); // lap tuşu açılıyor
-                    handler = new Handler();
-                    runnable = new Runnable() {
-                        @RequiresApi(api = Build.VERSION_CODES.N)
-                        @Override
-                        public void run() {
-                            // buradaki her şey belirtilen periyyotta olaaktır.
-                            number++;
-                            if (number > 0 && floorMod(number, modul) == 0) {
-                                m++;
-                                number = 0;
-                            }
-                            if (m >= 60) { //dakika 1e eşit ve büyükse ve 60 olursa
-                                h++;
-                                m = 0;
-
-                            }
-                            hh = h < 10 ? "0" + h : h + "";
-                            mm = m < 10 ? "0" + m : m + "";
-                            ss = number < 10 ? "0" + Math.floorMod(number, modul) : Math.floorMod(number, modul) + "";
-
-                            textView.setText(hh + ":" + mm + ":" + ss);
-
-                            handler.postDelayed(runnable, milis);
-
-                        }
-                    };
-                    handler.post(runnable);
-                    //button2.setEnabled(false);
-                } else {
-                    Toast.makeText(getContext(), "Choose your chrono type!", Toast.LENGTH_SHORT).show();
-                }
-            }
-            ;
-
-
-        }
-
-        public void reset() {
-            Auth = true;
-            button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-            button2.setText("START");
-
-
-            textView2.setText("");
-
-            m = 0;
-            h = 0;
-            number = 0;
-
-            //handler.removeCallbacks(runnable);
-            textView.setText(timer);
-            cminuteButton.setEnabled(true);
-            minuteButton.setEnabled(true);
-            button2.setEnabled(true);// start tuşu açılıyor
-            button3.setEnabled(false);// lap tuşu kapanıyor
-            button.setEnabled(false);
-            lapsayisi = 0;
-            laps.clear(); // lapları siliyor
-            lapsval.clear();// aralık değerlerini siliyor
-            maxvalue.setText(departure);
-            maxvalcmin.setText(departure);
-            minvalcmin.setText(departure);
-            minvalue.setText(departure);
-            avevalue.setText(departure);
-            avevalcmin.setText(departure);
-            lapnoMin.setText(departure);
-            lapnoMax.setText(departure);
-            lapTotal.setText(departure);
-
-        }
-
-
-        public void stop() {
-            Auth = true;
-            //button2.setEnabled(true);
-            handler.removeCallbacks(runnable);
-            ; // double serisi verirken içine kaç tane yazacağını belirt
-
-
-        }
- */
