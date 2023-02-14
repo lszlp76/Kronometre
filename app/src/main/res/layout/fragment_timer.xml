@@ -69,11 +69,11 @@
         android:fontFamily="@font/digital7mono"
 
         android:gravity="center_horizontal|center_vertical"
-        android:text="00:00:00."
+        android:text="@string/_00_00_00"
         android:textAppearance="?android:attr/textAppearanceLarge"
 
 
-        android:textSize="65dp"
+        android:textSize="65sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/dashboard"
         app:layout_constraintEnd_toStartOf="@+id/unitValue"
@@ -99,9 +99,10 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lapList"
+        style="@style/textColorStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        style="@style/textColorStyle"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="@+id/guideline8"
         app:layout_constraintEnd_toEndOf="@id/guideline6"
         app:layout_constraintStart_toStartOf="@id/guideline5"
@@ -201,7 +202,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.59" />
+        app:layout_constraintGuide_end="59dp" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline8"

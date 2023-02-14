@@ -42,7 +42,7 @@ import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.play.core.review.model.ReviewErrorCode;
 import com.google.android.play.core.review.testing.FakeReviewManager;
-import com.google.android.play.core.tasks.Task;
+import com.google.android.gms.tasks.*;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
@@ -184,7 +184,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startButton = binding.button2;
         lapButton = binding.button3;//findViewById(R.id.button3);
         lapButton.setEnabled(false);
-        resetButton = binding.button4;//findViewById(R.id.button4);
+        resetButton = binding.button4;//findVi
+        // ewById(R.id.button4);
         resetButton.setEnabled(false);
         saveButton = binding.button;//findViewById(R.id.button);
         saveButton.setEnabled(false);
@@ -296,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setAction("Action", null).show();
             }
         });*/
-        activateReviewInfo();
+        //activateReviewInfo();
 
     }
 
@@ -410,16 +411,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     dialog.setContentView(R.layout.dialog);
                     dialog.show();
 
-//                RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
+                    RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
                     TextView tvRating = dialog.findViewById(R.id.tv_rating);
                     Button bt_sbmt = dialog.findViewById(R.id.bt_submit);
-         /*       ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                  ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
                     public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
                         tvRating.setText(String.format("(%s)",v));
                     }
-                });
-            */
+                }
+
+                );
+
                     bt_sbmt.setOnClickListener(new View.OnClickListener(){
                         @Override
                         public void onClick(View view) {

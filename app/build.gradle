@@ -3,14 +3,14 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.lszlp.choronometre"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 24
-        versionName "3.1"
+        versionName "4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -28,10 +28,11 @@ android {
     buildFeatures {
         viewBinding true
     }
+    buildToolsVersion '34.0.0'
 }
 
 dependencies {
-  implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
@@ -39,12 +40,13 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
 
-    implementation 'com.google.android.play:core:1.10.3'
+    implementation("com.google.android.play:review:2.0.1")
+
     testImplementation 'junit:junit:'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
 }

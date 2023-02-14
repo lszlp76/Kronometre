@@ -1,5 +1,6 @@
 package com.lszlp.choronometre;
 
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -214,12 +215,12 @@ public class TimerFragment extends Fragment {
         // START STOP butonu yazılması --> button2 değişecek
 
 
-        ListElementsArrayList = new ArrayList();
+        ListElementsArrayList = new ArrayList<>();
         binding.lapList.setLayoutManager(new LinearLayoutManager(getContext()));
         lapListAdapter = new LapListAdapter(ListElementsArrayList);
         binding.lapList.setAdapter(lapListAdapter);
 
-
+        lapListAdapter.notifyDataSetChanged();
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -267,6 +268,7 @@ public class TimerFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void takeLap() {
         //binding.lapList.setAdapter(adapter);
         //System.out.println("Modul değeri-->"+modul);
@@ -361,7 +363,7 @@ public class TimerFragment extends Fragment {
         // EN SON YAZILAN EN ÜSTE  version
 
 
-        // textView2.setText("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta * modul) + " " + unit + "\n\n" + textView2.getText().toString());
+        //textView2.setText("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta * modul) + " " + unit + "\n\n" + textView2.getText().toString());
 
         lapToWrite = (lapsayisi + 1) + "      " + lap + "     " + dec.format(delta * modul) + " " + unit;
         //her zaman ilk değer olarak ekler,
@@ -370,7 +372,7 @@ public class TimerFragment extends Fragment {
 
 
         ListElementsArrayList.add(0, lapValue);
-        System.out.println("Dizi---> " + ListElementsArrayList);
+        System.out.println("Dizi---> " + ListElementsArrayList.size());
         cycPerMinute.setText(String.valueOf(dec.format(calculateCycPerMinute(ave))));
         cycPerHour.setText(String.valueOf(dec.format(calculateCycPerHour(ave))));
         /* BU KISIM EN SON YAZILANI EN ALTA ATIYOR
@@ -389,8 +391,8 @@ public class TimerFragment extends Fragment {
 
         lapListAdapter.notifyDataSetChanged();
 
-        //System.out.println("deneme değeri "+pageViewModel.getTimeValue().getValue());
-        // System.out.println("deneme lapsayısı "+lapsval.get(lapsayisi-1));
+      //  System.out.println("deneme değeri "+pageViewModel.getTimeValue().getValue());
+      //  System.out.println("deneme lapsayısı "+lapsval.get(lapsayisi-1));
     }
 
     public void share() {

@@ -9,9 +9,15 @@
 
     <ListView
         android:id="@+id/fileList"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+
+        style="@style/textColorStyle"
+        android:textSize="25sp"
+        android:fontFamily="@font/digital7"
+
         android:longClickable="true"
         android:focusable="true"
-        android:layout_margin="5px"
+        android:layout_margin="5dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
