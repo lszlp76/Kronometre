@@ -568,8 +568,8 @@ public class TimerFragment extends Fragment {
     }
 
     public void reset() {
-        ((MainActivity) getActivity()).drawerSwitchCmin.setEnabled(true);
-        ((MainActivity) getActivity()).drawerSwitchSec.setEnabled(true);
+       ((MainActivity) getActivity()).drawerSwitchCmin.setEnabled(true);
+       ((MainActivity) getActivity()).drawerSwitchSec.setEnabled(true);
         handler.removeCallbacks(runnable);
         Auth = true;
         button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
@@ -597,15 +597,15 @@ public class TimerFragment extends Fragment {
         button.setEnabled(false);
         lapsayisi = 0;
         avevalue.setText(departure);
-        binding.lapList.setAdapter(null);
+        //binding.lapList.setAdapter(null);
         ListElementsArrayList.clear();
-        lapListAdapter.notifyDataSetChanged();
+
         laps.clear(); // lapları siliyor
         lapsval.clear();// aralık değerlerini siliyor
         maxvalue.setText(departure);
         minvalue.setText(departure);
 
-
+        lapListAdapter.notifyDataSetChanged();
     }
 
     private double calculateCycPerMinute(double ave) {

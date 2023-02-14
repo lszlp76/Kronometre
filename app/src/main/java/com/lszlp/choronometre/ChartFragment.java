@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -76,7 +77,7 @@ public class ChartFragment extends Fragment {
         }
         lineChart = view.findViewById(R.id.chart);
         lineChart.setNoDataTextTypeface(tf);
-        lineChart.setNoDataTextColor(Color.BLUE);
+        lineChart.setNoDataTextColor(R.color.colorPrimary);
         lineEntry = new ArrayList<>();
         lapValue = new ArrayList<>();
         chartTimer = view.findViewById(R.id.chartTimer);
@@ -209,7 +210,9 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         /** LAPS ***/
         LineDataSet lapValueDataSet = new LineDataSet(lapValue, "Cyc.Time Value");
         lapValueDataSet.setColor(Color.BLUE);
+
         lapValueDataSet.setValueTextSize(12);
+        lapValueDataSet.setValueTextColor(ContextCompat.getColor(getActivity(),R.color.colorPrimary )); // rakamların rengini çıkartır dark/light
         lapValueDataSet.setCircleColor(Color.GREEN);
         lapValueDataSet.setCircleRadius(5);
         lapValueDataSet.setValueTypeface(tf);
@@ -233,6 +236,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         LimitLine tmaxLimit = new LimitLine(tmax, "Maximum Cycle Time: " + dec.format(tmax) + " cyc/unit ");
         tmaxLimit.setLineWidth(4f);
+        tmaxLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         tmaxLimit.enableDashedLine(10f, 10f, 0f);
         tmaxLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         tmaxLimit.setTextSize(12f);
@@ -240,6 +244,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         LimitLine tminLimit = new LimitLine(tmin, "Minimum Cycle Time: " + dec.format(tmin) + " cyc/unit ");
         tminLimit.setLineWidth(4f);
+        tminLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         tminLimit.enableDashedLine(10f, 10f, 0f);
         tminLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         tminLimit.setTextSize(12f);
@@ -247,6 +252,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         LimitLine taveLimit = new LimitLine(tave, "Mean Cycle Time: " + dec.format(tave) + " cyc/unit ");
         taveLimit.setLineWidth(4f);
+        taveLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         taveLimit.setLineColor(Color.MAGENTA);
         taveLimit.enableDashedLine(10f, 10f, 0f);
         taveLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
@@ -302,9 +308,9 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         LineData linedata = new LineData(iLinedata);
         lineChart.setData(linedata);
         lineChart.invalidate(); //refreshing the line chart
-        lineChart.setBackgroundColor((Color.TRANSPARENT));
 
-       // lineChart.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+
+      // lineChart.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
         //lineChart.animateXY(500, 500);
 
 

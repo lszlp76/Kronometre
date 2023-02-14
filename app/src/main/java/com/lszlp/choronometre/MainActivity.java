@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -32,9 +33,16 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
+import com.google.android.play.core.review.model.ReviewErrorCode;
+import com.google.android.play.core.review.testing.FakeReviewManager;
+import com.google.android.play.core.tasks.Task;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
@@ -52,6 +60,9 @@ import com.lszlp.choronometre.main.SectionsPagerAdapter;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public DrawerLayout drawer;
     public Boolean isResetDone;
+    private ReviewInfo reviewInfo;
+    private ReviewManager manager;
+    NavigationView navigationView;
     Switch drawerSwitchSec;
     Switch drawerSwitchCmin;
     ViewPager viewPager;
@@ -103,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer = binding.drawerLayout;// findViewById(R.id.drawer_layout);
 
         //navigation menu aktivasyon
-        NavigationView navigationView = binding.navView;// findViewById(R.id.nav_view);
+        navigationView = binding.navView;// findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -285,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setAction("Action", null).show();
             }
         });*/
+        activateReviewInfo();
 
     }
 
@@ -382,35 +394,78 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
 
             case (R.id.rateApp):
-                Dialog dialog = new Dialog(MainActivity.this);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                dialog.setContentView(R.layout.dialog);
-                dialog.show();
+                if (reviewInfo != null){
+                    Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
+                    flow.addOnCompleteListener(task -> {
+                        // The flow has finished. The API does not indicate whether the user
+                        // reviewed or not, or even whether the review dialog was shown. Thus, no
+                        // matter the result, we continue our app flow.
+                        Toast.makeText(this,"Review completed",Toast.LENGTH_LONG).show();
+                        navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
+                    });
+                }else
+                {
+                    Dialog dialog = new Dialog(MainActivity.this);
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                    dialog.setContentView(R.layout.dialog);
+                    dialog.show();
 
-                RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
-                TextView tvRating = dialog.findViewById(R.id.tv_rating);
-                Button bt_sbmt = dialog.findViewById(R.id.bt_submit);
-                ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+//                RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
+                    TextView tvRating = dialog.findViewById(R.id.tv_rating);
+                    Button bt_sbmt = dialog.findViewById(R.id.bt_submit);
+         /*       ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
                     public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
                         tvRating.setText(String.format("(%s)",v));
                     }
                 });
-                
-                bt_sbmt.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View view) {
-                        String sRating = String.valueOf(ratingBar.getRating());
-                        //gidecek değer sRaitng
+            */
+                    bt_sbmt.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View view) {
+                            //String sRating = String.valueOf(ratingBar.getRating());
+                            //gidecek değer sRaitng
+                            startReviewFlow();
 
+                            dialog.dismiss();
+                        }
+                    });
+                    //https://icons8.com/icons/set/toggle-off-on
+                }
 
-                        dialog.dismiss();
-                    }
-                });
-            //https://icons8.com/icons/set/toggle-off-on
 
         }
         drawer.closeDrawers();
         return true;
     }
+    void activateReviewInfo(){
+        manager = ReviewManagerFactory.create(this);
+        Task<ReviewInfo> managerInfoTask = manager.requestReviewFlow();
+        managerInfoTask.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                // We can get the ReviewInfo object
+              reviewInfo = task.getResult();
+            } else {
+                // There was some problem, log or handle the error code.
+Toast.makeText(this,"Review failed to start",Toast.LENGTH_LONG).show();
+
+                  }
+        });
+    }
+    void startReviewFlow(){
+        if (reviewInfo != null){
+            Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
+            flow.addOnCompleteListener(task -> {
+                // The flow has finished. The API does not indicate whether the user
+                // reviewed or not, or even whether the review dialog was shown. Thus, no
+                // matter the result, we continue our app flow.
+                Toast.makeText(this,"Review completed",Toast.LENGTH_LONG).show();
+                navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
+            });
+        }
+
+    }
 }
+//rate app teset internal
+
+//https://www.youtube.com/watch?v=bKJeDD-tP_Y
