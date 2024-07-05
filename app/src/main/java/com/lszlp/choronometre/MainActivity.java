@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -46,6 +47,8 @@ import com.google.android.gms.tasks.*;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
+import java.io.Console;
+
 /**
  * TODO
  * ekran koruyucu kapatma
@@ -79,10 +82,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             R.drawable.ic_baseline_save
     };
 
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        System.out.println("deneme");
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 //Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
 
 
