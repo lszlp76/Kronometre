@@ -108,7 +108,7 @@ public class FileList extends Fragment {
 
             }
 
-           ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_expandable_list_item_1, pathArray);
+           ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(),  R.layout.customfilelistrow,R.id.listviewrow, pathArray);
             fileList.setAdapter(arrayAdapter);
             arrayAdapter.notifyDataSetChanged();
             ;
