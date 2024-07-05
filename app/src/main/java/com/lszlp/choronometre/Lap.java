@@ -7,7 +7,7 @@ public class Lap {
     public String lap;
 
 
-    public Lap(int lapsayisi, String unit,String lap) {
+    public Lap(String unit,String lap,int lapsayisi) {
         this.unit = unit;
         this.lapsayisi = lapsayisi;
         this.lap = lap;

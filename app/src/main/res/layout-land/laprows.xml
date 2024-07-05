@@ -8,7 +8,7 @@
     android:orientation="horizontal">
 
     <TextView
-        android:id="@+id/laprow"
+        android:id="@+id/laprow_1"
         android:textAppearance="?android:attr/textAppearanceLarge"
 
         style="@style/textColorStyle"
@@ -21,7 +21,7 @@
         android:text="Deneme" />
 
     <TextView
-        android:id="@+id/laprow3"
+        android:id="@+id/laprow_2"
         style="@style/textColorStyle"
         android:textAppearance="?android:attr/textAppearanceLarge"
 
@@ -36,7 +36,7 @@
          />
 
     <TextView
-        android:id="@+id/laprow2"
+        android:id="@+id/laprow_3"
         android:textAppearance="?android:attr/textAppearanceLarge"
 
         style="@style/textColorStyle"

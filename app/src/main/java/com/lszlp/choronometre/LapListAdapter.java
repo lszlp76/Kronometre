@@ -27,9 +27,11 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
 
     @Override
     public void onBindViewHolder(@NonNull LapListViewHolder holder, int position) {
-        holder.itemView.laprow.setText(lapArrayList.get(position).unit);
-        holder.itemView.laprow2.setText(String.valueOf(lapArrayList.get(position).lapsayisi));
-        holder.itemView.laprow3.setText(lapArrayList.get(position).lap);
+        holder.itemView.laprow3.setText(lapArrayList.get(position).unit);
+        holder.itemView.laprow1.setText(String.valueOf(lapArrayList.get(position).lapsayisi));
+        holder.itemView.laprow2.setText(lapArrayList.get(position).lap);
+
+
     }
     @Override
     public int getItemCount() {

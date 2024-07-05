@@ -368,7 +368,7 @@ public class TimerFragment extends Fragment {
         lapToWrite = (lapsayisi + 1) + "      " + lap + "     " + dec.format(delta * modul) + " " + unit;
         //her zaman ilk değer olarak ekler,
 
-        lapValue = new Lap(lapsayisi + 1, lap, (dec.format(delta * modul) + " " + unit));
+        lapValue = new Lap(dec.format(delta * modul) + " " + unit, lap, lapsayisi + 1);
 
 
         ListElementsArrayList.add(0, lapValue);

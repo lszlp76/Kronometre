@@ -31,6 +31,7 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
     <string name="lap">LAP</string>
     <string name="reset">RESET</string>
     <string name="save">SAVE</string>
+    <string name="ratetext">How much did you like Industrial Chronometer?</string>
 
     <style name="AlertDialogCustom" parent="@android:style/Theme.Dialog">
         <item name="android:textColor">#FF3700B3</item>
