@@ -24,7 +24,7 @@
         <activity
             android:name="com.lszlp.choronometre.MainActivity"
             android:exported="true"
-            android:configChanges="screenLayout|orientation|keyboardHidden"
+            android:configChanges="orientation|screenLayout"
             android:label="@string/app_name"
             android:screenOrientation="fullSensor"
             android:theme="@style/Theme.Kronometre.NoActionBar">

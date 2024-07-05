@@ -2,10 +2,10 @@
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
 
@@ -40,18 +40,15 @@
         </com.google.android.material.appbar.AppBarLayout>
 
 
-
-
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            app:layout_constraintTop_toBottomOf="@id/mainToolbar"
-            app:layout_constraintStart_toStartOf="@+id/mainToolbar"
+            app:layout_constraintBottom_toTopOf="@id/butonlar"
             app:layout_constraintEnd_toEndOf="@id/mainToolbar"
-           app:layout_constraintBottom_toTopOf="@id/butonlar"
-            >
+            app:layout_constraintStart_toStartOf="@+id/mainToolbar"
+            app:layout_constraintTop_toBottomOf="@id/mainToolbar">
 
 
         </androidx.viewpager.widget.ViewPager>
@@ -64,10 +61,9 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:weightSum="5"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            >
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
             <Button
                 android:id="@id/button2"
@@ -96,17 +92,15 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
-
-
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        android:animateLayoutChanges="false"
         android:theme="@style/menuStyle"
-        app:headerLayout="@layout/nav_drawer"
 
+        app:headerLayout="@layout/nav_drawer"
         app:itemIconTint="@color/colorPrimary"
         app:menu="@menu/drawermenu">
 

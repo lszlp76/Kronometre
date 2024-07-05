@@ -85,6 +85,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+       /*
+        if (newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE){
+            setContentView(R.layout.activity_main);
+
+        }
+        *
+        */
         System.out.println("deneme");
     }
 
@@ -92,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
 
 //Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
 
