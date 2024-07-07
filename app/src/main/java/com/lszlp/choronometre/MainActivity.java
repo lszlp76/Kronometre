@@ -479,8 +479,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 // There was some problem, log or handle the error code.
 //Toast.makeText(this,"Review failed to start",Toast.LENGTH_LONG).show();
-               // navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
-             //   navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated !");
+               navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
+               navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated !");
                   }
         });
     }
