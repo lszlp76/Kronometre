@@ -9,7 +9,7 @@ android {
         applicationId "com.lszlp.choronometre"
         minSdk 21
         targetSdk 34
-        versionCode 24
+        versionCode 25
         versionName "4"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
