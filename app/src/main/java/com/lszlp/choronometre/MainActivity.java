@@ -389,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case (R.id.nav_about):
                 Intent intent = new Intent(MainActivity.this, WebpagesActivities.class);
-                String link = "about";
+                String link = "https://www.agromtek.com/industrialchronometer/about.html";
                 intent.putExtra("link", link);
                 startActivity(intent);
 
@@ -463,9 +463,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
                 break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + item.getItemId());
-        }
+            }
         drawer.closeDrawers();
         return true;
     }

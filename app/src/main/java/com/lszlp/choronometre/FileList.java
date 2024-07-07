@@ -17,9 +17,11 @@ import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.fragment.app.Fragment;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -100,7 +102,12 @@ public class FileList extends Fragment {
                 for (int i = 0; i < listFiles.length; i++) {
 
                     if (listFiles[i].isFile() && (listFiles[i].getName().endsWith(".xls"))) {
-                        pathArray.add(listFiles[i].getName());
+                        Date date = new Date(listFiles[i].getParentFile().lastModified());
+                        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                        String formattedDate = formatter.format(date);
+
+                        System.out.println("dosya adı : "+ listFiles[i].getName()+" -@"+formattedDate);
+                        pathArray.add(formattedDate+"   "+listFiles[i].getName());
 
                     }
 

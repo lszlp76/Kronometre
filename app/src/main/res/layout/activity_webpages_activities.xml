@@ -57,9 +57,9 @@
             android:nestedScrollingEnabled="true"
             android:autoSizeTextType="uniform"
             android:fontFamily="sans-serif"
-            android:layout_gravity="fill_horizontal"
+            android:layout_gravity="clip_horizontal"
             android:text="@string/aciklama"
-            android:textAlignment="gravity"
+            android:textAlignment="inherit"
             android:textAppearance="?android:attr/textAppearanceSmall">
 
         </TextView>
