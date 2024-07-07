@@ -1,7 +1,6 @@
 package com.lszlp.choronometre;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -42,7 +41,8 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
-
+import com.google.android.play.core.review.model.ReviewErrorCode;
+import com.google.android.play.core.review.testing.FakeReviewManager;
 import com.google.android.gms.tasks.*;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
@@ -85,13 +85,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-       /*
-        if (newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE){
-            setContentView(R.layout.activity_main);
-
-        }
-        *
-        */
         System.out.println("deneme");
     }
 
@@ -100,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        activateReviewInfo();
 //Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
 
 
@@ -315,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setAction("Action", null).show();
             }
         });*/
-
+        //activateReviewInfo();
 
     }
 
@@ -381,7 +373,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    @SuppressLint("ResourceAsColor")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
@@ -426,13 +417,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }else
                 {
                     Dialog dialog = new Dialog(MainActivity.this);
-
-                    dialog.getWindow().setBackgroundDrawable
-                            (new ColorDrawable
-                            (Color.parseColor
-                                    ("#"+Integer.toHexString
-                                            (ContextCompat.getColor
-                                                    (this,R.color.colorDisable)))));
+                    dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                     dialog.setContentView(R.layout.dialog);
                     dialog.show();
 
@@ -442,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                   ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
                     @Override
                     public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-                        //tvRating.setText(String.format("(%s)",v));
+                        tvRating.setText(String.format("(%s)",v));
                     }
                 }
 
@@ -462,9 +447,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
 
-                break;
-            default:
-                throw new IllegalStateException("Unexpected value: " + item.getItemId());
         }
         drawer.closeDrawers();
         return true;
@@ -478,9 +460,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
               reviewInfo = task.getResult();
             } else {
                 // There was some problem, log or handle the error code.
-//Toast.makeText(this,"Review failed to start",Toast.LENGTH_LONG).show();
-               navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
-               navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated !");
+Toast.makeText(this,"Review failed to start",Toast.LENGTH_LONG).show();
+
                   }
         });
     }
@@ -493,7 +474,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // matter the result, we continue our app flow.
                 Toast.makeText(this,"Review completed",Toast.LENGTH_LONG).show();
                 navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated!");
             });
         }
 

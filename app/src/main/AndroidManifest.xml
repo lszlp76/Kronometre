@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.lszlp.choronometre" >
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32"
-        tools:ignore="ScopedStorage" />
+        android:maxSdkVersion="32" />
 
     <application
         android:allowBackup="true"
@@ -18,24 +16,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Kronometre">
         <activity
-            android:theme="@style/splashScreenTheme"
             android:name="com.lszlp.choronometre.WebpagesActivities"
             android:exported="false"
             android:parentActivityName="com.lszlp.choronometre.MainActivity"
             android:screenOrientation="fullSensor"
             android:launchMode="singleInstance"/>
-            <activity
+        <activity
             android:name="com.lszlp.choronometre.MainActivity"
             android:exported="true"
+            android:configChanges="screenLayout|orientation|keyboardHidden"
             android:label="@string/app_name"
-            android:screenOrientation="portrait"
+            android:screenOrientation="fullSensor"
             android:theme="@style/Theme.Kronometre.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-           </activity>
+        </activity>
     </application>
 
 </manifest>
