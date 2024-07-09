@@ -10,54 +10,7 @@
     android:tag="timer"
     tools:context=".MainActivity">
 
-    <!--LinearLayout
-        android:id="@+id/timeUnit"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
 
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toStartOf="@+id/guideline6"
-        app:layout_constraintStart_toStartOf="@+id/guideline5"
-        app:layout_constraintTop_toTopOf="@+id/guideline">
-
-        <RadioGroup
-            android:id="@+id/radioGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            style="@style/textColorStyle"
-            android:weightSum="2">
-
-
-            <RadioButton
-                android:id="@+id/minuteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="1"
-                style="@style/textColorStyle"
-                android:button="@android:drawable/btn_radio"
-                android:fontFamily="@font/digital7"
-                android:text="@string/sn_second"
-                 android:textSize="16sp" />
-
-            <RadioButton
-                android:id="@+id/cminuteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                style="@style/textColorStyle"
-                android:button="@android:drawable/btn_radio"
-                android:fontFamily="@font/digital7"
-                android:text="@string/cmin"
-                android:textSize="16sp" />
-
-
-        </RadioGroup>
-
-
-    </LinearLayout-->
 
 
     <TextView
@@ -73,7 +26,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
 
 
-        android:textSize="65sp"
+        android:textSize="60sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/dashboard"
         app:layout_constraintEnd_toStartOf="@+id/unitValue"
