@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<font-family xmlns:android="http://schemas.android.com/apk/res/android">
+<font-family xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    tools:ignore="ExtraText">
     android:font="@font/digital7"
     android:fontStyle=["normal" | "italic"]
     android:fontWeight="weight_value" />

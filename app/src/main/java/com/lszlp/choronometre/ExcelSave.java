@@ -93,6 +93,7 @@ public class ExcelSave {
     }
     public void delete(Context context, String fileName){
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
+        System.out.println("Path : "+path.toString());
         File folder = new File(path, "IndustrialChoronometer");
         File file = new File(folder, fileName);
         file.delete();

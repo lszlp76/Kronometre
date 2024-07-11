@@ -13,6 +13,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +38,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -48,6 +54,8 @@ import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
 import java.io.Console;
+
+//rate app teset internal
 
 /**
  * TODO
@@ -71,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ViewPager viewPager;
     Switch switchSec, switchCmin;
     AppBarLayout appBarLayout;
+    AdView adView ;
     Button startButton, lapButton, resetButton, saveButton;
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
@@ -100,7 +109,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         activateReviewInfo();
+
+        //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
+        //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
+        new Thread(
+                () -> {
+                    // Initialize the Google Mobile Ads SDK on a background thread.
+                    MobileAds.initialize(this, initializationStatus -> {});
+                })
+                .start();
+
+        adView = binding.adView;
+        AdRequest adRequest = new AdRequest.Builder()
+                .build();
+        adView.loadAd(adRequest);
+
 //Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
 
 
@@ -109,9 +135,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         } else {
         }
-        //Typeface tf = getResources().getFont(R.font.digital7);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         viewPager = binding.viewPager;
@@ -153,9 +177,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.getMenu().findItem(R.id.timeUnitCmin)
                 .setActionView(new Switch(this));
 
-//
-       drawerSwitchSec = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitSec).getActionView());
-       drawerSwitchCmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
+
+        drawerSwitchSec = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitSec).getActionView());
+        drawerSwitchCmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
 
         drawerSwitchSec.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -227,8 +251,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (fragment.modul == 0) {
                         drawer.open();
                         Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
+                    } else {
                         auth = true;
                         drawerSwitchCmin.setEnabled(false);
                         drawerSwitchSec.setEnabled(false);
@@ -242,10 +265,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         saveButton.setEnabled(false);
                     }
 
-                } else  {
+                } else {
                     //stop yapılması
                     auth = false;
-                    if (isResetDone){
+                    if (isResetDone) {
                         drawerSwitchCmin.setEnabled(true);
                         drawerSwitchSec.setEnabled(true);
 
@@ -316,9 +339,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });*/
 
+    }
+//** ADMOB FUNCS***
+private AdSize getAdSize() {
+    // Determine the screen width (less decorations) to use for the ad width.
+    Display display = getWindowManager().getDefaultDisplay();
+    DisplayMetrics outMetrics = new DisplayMetrics();
+    display.getMetrics(outMetrics);
 
+    float density = outMetrics.density;
+
+    float adWidthPixels = adView.getWidth();
+
+    // If the ad hasn't been laid out, default to the full screen width.
+    if (adWidthPixels == 0) {
+        adWidthPixels = outMetrics.widthPixels;
     }
 
+    int adWidth = (int) (adWidthPixels / density);
+    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
+}
+    private void loadBanner() {
+
+        // Create a new ad view.
+       /*
+        AdView adView = new AdView(this);
+        adView.setAdSize(getAdSize());
+        adView.setAdUnitId("ca-app-pub-3940256099942544/9214589741");
+*/
+        // Replace ad container with new ad view.
+       //
+        //adContainerView.removeAllViews();
+        //adContainerView.addView(adView);
+
+        // Start loading the ad in the background.
+        AdView adView = new AdView(this);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
+    }
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -429,24 +487,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     dialog.getWindow().setBackgroundDrawable
                             (new ColorDrawable
-                            (Color.parseColor
-                                    ("#"+Integer.toHexString
-                                            (ContextCompat.getColor
-                                                    (this,R.color.colorDisable)))));
+                                    (Color.parseColor
+                                            ("#"+Integer.toHexString
+                                                    (ContextCompat.getColor
+                                                            (this,R.color.colorDisable)))));
                     dialog.setContentView(R.layout.dialog);
                     dialog.show();
 
                     RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
                     TextView tvRating = dialog.findViewById(R.id.tv_rating);
                     Button bt_sbmt = dialog.findViewById(R.id.bt_submit);
-                  ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-                    @Override
-                    public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-                        //tvRating.setText(String.format("(%s)",v));
-                    }
-                }
+                    ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+                                                               @Override
+                                                               public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
+                                                                   //tvRating.setText(String.format("(%s)",v));
+                                                               }
+                                                           }
 
-                );
+                    );
 
                     bt_sbmt.setOnClickListener(new View.OnClickListener(){
                         @Override
@@ -463,7 +521,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
                 break;
-            }
+        }
         drawer.closeDrawers();
         return true;
     }
@@ -473,13 +531,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         managerInfoTask.addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 // We can get the ReviewInfo object
-              reviewInfo = task.getResult();
+                reviewInfo = task.getResult();
             } else {
                 // There was some problem, log or handle the error code.
 //Toast.makeText(this,"Review failed to start",Toast.LENGTH_LONG).show();
-               navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
-               navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated !");
-                  }
+                navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated !");
+            }
         });
     }
     void startReviewFlow(){
@@ -497,6 +555,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 }
-//rate app teset internal
-
 //https://www.youtube.com/watch?v=bKJeDD-tP_Y

@@ -48,18 +48,18 @@ public class FileList extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println("onCreat calıştı");
+
 
 
     }
 
-    ArrayList<String> pathArray = new ArrayList<String>();
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        System.out.println("onCreateView çalıştı");
+
         return inflater.inflate(R.layout.fragment_file_list, container, false);
 
     }
@@ -75,7 +75,7 @@ public class FileList extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            System.out.println("set user  çalıştı");
+
             fileList = getView().findViewById(R.id.fileList);
             ArrayList<String> pathArray = new ArrayList<String>();
             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
@@ -106,8 +106,7 @@ public class FileList extends Fragment {
                         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                         String formattedDate = formatter.format(date);
 
-                        System.out.println("dosya adı : "+ listFiles[i].getName()+" -@"+formattedDate);
-                        pathArray.add(formattedDate+"   "+listFiles[i].getName());
+                        pathArray.add(listFiles[i].getName());
 
                     }
 

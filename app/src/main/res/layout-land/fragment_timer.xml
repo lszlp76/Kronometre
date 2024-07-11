@@ -25,7 +25,8 @@ android:padding="3dp"
 
 
         android:textSize="65sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:ignore="MissingConstraints" />
     <LinearLayout
 
         android:id="@+id/titlesforLaps"
@@ -75,7 +76,8 @@ android:padding="3dp"
         android:text="No Unit"
         app:layout_constraintStart_toEndOf="@id/textView"
 
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:ignore="MissingConstraints" />
 
 
     <androidx.recyclerview.widget.RecyclerView

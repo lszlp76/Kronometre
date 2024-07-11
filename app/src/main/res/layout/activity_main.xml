@@ -9,7 +9,7 @@
     tools:context=".MainActivity"
     >
 <androidx.coordinatorlayout.widget.CoordinatorLayout
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -24,33 +24,40 @@
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             android:background="@color/colorPrimary"
             android:elevation="4dp"
-            android:text="@string/app_name"
+           
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
         </androidx.appcompat.widget.Toolbar>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
-
-
-            android:fontFamily ="@font/digital7"
+            
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:contentDescription="@string/lap"
+            android:fontFamily="@font/digital7" />
+        
+        <com.google.android.gms.ads.AdView
+          xmlns:ads="http://schemas.android.com/apk/res-auto"
+          android:id="@+id/adView"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_alignParentBottom= "true"
+          ads:adUnitId="ca-app-pub-2013051048838339/4888424937"
+          ads:adSize="BANNER"
+          >
+  
+</com.google.android.gms.ads.AdView>
+    
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.fragment.app.FragmentContainerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/fragments_layout">
-
-    </androidx.fragment.app.FragmentContainerView>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
+        android:contentDescription=" "
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-    </androidx.viewpager.widget.ViewPager>
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        tools:ignore="HardcodedText" />
 
     <RelativeLayout
         android:layout_width="match_parent"
