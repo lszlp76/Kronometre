@@ -19,7 +19,11 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2013051048838339~7696349859"/>
+            android:value="ca-app-pub-2013051048838339~7696349859"
+          
+          
+          
+          />
         <activity
             android:name="com.lszlp.choronometre.WebpagesActivities"
             android:exported="false"
@@ -39,6 +43,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- SHARING AYARLARI -->
+        <provider
+          android:name="androidx.core.content.FileProvider"
+          android:authorities="com.lszlp.choronometre.fileprovider"
+          android:exported="false"
+          android:grantUriPermissions="true">
+          
+          <meta-data
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/path"/>
+        </provider>
+      
     </application>
     <!--android:label="@string/app_name"-->
 </manifest>
