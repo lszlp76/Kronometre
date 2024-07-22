@@ -2,6 +2,7 @@ package com.lszlp.choronometre;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -54,6 +55,7 @@ import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
 
 import java.io.Console;
+import java.util.Random;
 
 //rate app teset internal
 
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        new ThemeColors(this); // renk değiştirme sınıfı
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -150,9 +153,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //fragmentTransaction.add(R.id.view_pager,TimerFragment.class,null);
-
         toolbar = binding.toolbar;// findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+       // toolbar.setBackgroundColor(Color.parseColor("#80000000")) ;
+
         drawer = binding.drawerLayout;// findViewById(R.id.drawer_layout);
 
         //navigation menu aktivasyon
@@ -288,8 +293,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         lapButton.setOnClickListener(new View.OnClickListener() {
                                          @Override
                                          public void onClick(View view) {
+                                             // lap butonuna deneme amaçlı renk değiştirme sınıfı kodu çalıştırma eklendi
+                                             int red= new Random().nextInt(255);
+                                             int green= new Random().nextInt(255);
+                                             int blue= new Random().nextInt(255);
+
+
                                              TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                                              fragment.takeLap();
+                                         //    ThemeColors.setNewThemeColor(MainActivity.this, red, green, blue);
+
                                          }
                                      }
         );
@@ -467,7 +480,21 @@ private AdSize getAdSize() {
                 break;
             case (R.id.nav_share):
                 if (!auth) {
-                    viewPager.setCurrentItem(viewPager.getCurrentItem() + 2, true);
+                    //en son tab sayfasını açmak
+                   /* viewPager.setCurrentItem(viewPager.getCurrentItem() + 2, true);
+                    */
+                    //play store adresini paylaşmak
+
+                    String sharedLink = "https://play.google.com/store/apps/details?id=com.lszlp.choronometre";
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT,  sharedLink);
+                    sendIntent.putExtra(Intent.EXTRA_TITLE, "Sending Industrial Chronometer");
+
+                    sendIntent.setType("text/plain");
+
+                    Intent shareIntent = Intent.createChooser(sendIntent, null);
+                    startActivity(shareIntent);
                 }
                 break;
 

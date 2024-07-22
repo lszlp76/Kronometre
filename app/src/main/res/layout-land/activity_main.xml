@@ -30,13 +30,30 @@
                 android:elevation="4dp"
                 android:text="@string/app_name"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+                app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+
+
+
+                />
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/digital7" />
+                android:fontFamily="@font/digital7"
+                />
+
+            <com.google.android.gms.ads.AdView
+                xmlns:ads="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom= "true"
+                ads:adUnitId="ca-app-pub-2013051048838339/4888424937"
+                ads:adSize="BANNER"
+                >
+
+            </com.google.android.gms.ads.AdView>
         </com.google.android.material.appbar.AppBarLayout>
 
 
@@ -95,9 +112,9 @@
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="start"
-        android:animateLayoutChanges="false"
+        android:animateLayoutChanges="true"
         android:theme="@style/menuStyle"
 
         app:headerLayout="@layout/nav_drawer"
