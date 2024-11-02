@@ -24,7 +24,7 @@ public class ThemeColors {
         String stringColor = sharedPreferences.getString(KEY, "004bff");
         color = Color.parseColor("#" + stringColor);
 
-        if (isLightActionBar()) context.setTheme(R.style.AppTheme);
+        if (isLightActionBar()) context.setTheme(R.style.Theme_Kronometre);
         context.setTheme(context.getResources().getIdentifier("T_" + stringColor, "style", context.getPackageName()));
     System.out.println("tema : " + context.getResources().getIdentifier("T_" + stringColor, "style", context.getPackageName()));
     }
@@ -40,7 +40,7 @@ public class ThemeColors {
         editor.putString(KEY, stringColor);
         editor.apply();
         Intent i = activity.getPackageManager().getLaunchIntentForPackage(activity.getPackageName());
-        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activity.startActivity(i);
 
     }

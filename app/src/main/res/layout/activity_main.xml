@@ -116,6 +116,12 @@
 
     app:headerLayout="@layout/nav_drawer"
     app:menu="@menu/drawermenu">
+    <!--Button
+        android:id="@+id/footer_item_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="Footer Button 1" /-->
 
 </com.google.android.material.navigation.NavigationView>
 

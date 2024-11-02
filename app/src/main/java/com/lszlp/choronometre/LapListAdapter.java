@@ -1,7 +1,9 @@
 package com.lszlp.choronometre;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,16 +14,21 @@ import java.util.ArrayList;
 
 public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListViewHolder>{
     ArrayList<Lap> lapArrayList;
+
+    private OnItemClickListener mlistener;
     public LapListAdapter(ArrayList<Lap> lapArrayList) {
         this.lapArrayList = lapArrayList;
     }
 
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.mlistener = listener;
+    }
 
     @NonNull
     @Override
     public LapListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
       LaprowsBinding laprowsBinding = LaprowsBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
-        return new LapListViewHolder(laprowsBinding);
+        return new LapListViewHolder(laprowsBinding,mlistener);
 
     }
 
@@ -38,14 +45,41 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
         return lapArrayList.size();
     }
 
+    public interface OnItemClickListener {
+
+        void onAddMessage ( int position);
+
+
+    }
+
+
     public class LapListViewHolder extends RecyclerView.ViewHolder{
 
+        //Note kısmı ekleme
+        ImageView addNote;
 
-private LaprowsBinding itemView;
 
-        public LapListViewHolder(@NonNull LaprowsBinding itemView) {
+        private LaprowsBinding itemView;
+
+        public LapListViewHolder(@NonNull LaprowsBinding itemView, OnItemClickListener listener) {
             super(itemView.getRoot());
+
             this.itemView = itemView;
+            addNote = itemView.addnote.findViewById(R.id.addnote);
+                addNote.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                  if (listener != null){
+                        int position = getBindingAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION){
+                            listener.onAddMessage(position);
+
+                        }
+                    }
+
+                }
+            });
+
         }
     }
 

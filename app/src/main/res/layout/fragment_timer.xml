@@ -13,6 +13,7 @@
 
 
 
+
     <TextView
         android:id="@+id/textView"
         style="@style/textColorStyle"
@@ -48,7 +49,7 @@
         app:layout_constraintStart_toEndOf="@+id/textView"
         app:layout_constraintTop_toTopOf="parent"
          />
-
+    />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lapList"
@@ -393,7 +394,7 @@
             android:layout_below="@+id/values"
             android:layout_margin="10dp"
             android:gravity="center_vertical"
-            android:weightSum="3">
+            android:weightSum="4">
 
             <TextView
 
@@ -417,6 +418,12 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Cycle" />
+            <TextView
+                style="@style/TableText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Note" />
 
         </LinearLayout>
     </RelativeLayout>

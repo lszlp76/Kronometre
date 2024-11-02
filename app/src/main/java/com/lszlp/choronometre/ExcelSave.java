@@ -111,7 +111,7 @@ public class ExcelSave {
         File file = new File(folder, fileName);
         file.delete();
     }
-    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute) {
+    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute, ArrayList<Lap> lapsArray) {
 
 
         if (laps.size() > 0) {
@@ -177,7 +177,7 @@ alert dialog için
                             Label no = new Label(0, 11, "Lap No :");
                             Label lbl9 = new Label(1, 11, "Laps Value:");
                             Label lbl10 = new Label(2, 11, "Cycle Time [" + timeUnit + "] :");
-
+                            Label lbl10_ = new Label(3, 11, "Notes:");
 // başlık değerleri
                             Label lbl11 = new Label(1, 1, xlString);
 
@@ -195,9 +195,11 @@ alert dialog için
                                 Label lbls0 = new Label(0, 12 + i, String.valueOf(i + 1));
                                 Label lbls = new Label(1, 12 + i, laps.get(i));// lap yazma
                                 Label lbls2 = new Label(2, 12 + i, String.valueOf(dec.format(lapsval.get(i) * modul))); // cycle time yazma
+                                Label lbls3 = new Label(3, 12 + i, String.valueOf(lapsArray.get(i).message));
                                 sheet.addCell(lbls);
                                 sheet.addCell(lbls0);
                                 sheet.addCell(lbls2);
+                                sheet.addCell(lbls3);
                                 i++;
                             }
                             try {
@@ -214,6 +216,7 @@ alert dialog için
                                 sheet.addCell(lblCycPerMinute);
                                 sheet.addCell(lbl9);
                                 sheet.addCell(lbl10);
+                                sheet.addCell(lbl10_);
                                 sheet.addCell(lbl11);
                                 sheet.addCell(lbl12);
                                 sheet.addCell(lbl13);

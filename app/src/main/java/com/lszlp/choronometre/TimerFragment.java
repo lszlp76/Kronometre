@@ -1,16 +1,21 @@
 package com.lszlp.choronometre;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.text.InputFilter;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,12 +23,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
+import com.google.android.material.textfield.TextInputEditText;
 import com.lszlp.choronometre.databinding.FragmentTimerBinding;
 import com.lszlp.choronometre.main.PageViewModel;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
@@ -57,6 +66,7 @@ public class TimerFragment extends Fragment {
     String lapToWrite;
     // String[] ListElements = new String[] {  };
     Lap lapValue;
+    ArrayList<Lap> lapsArray = new ArrayList<Lap>();
     ArrayList<Lap> ListElementsArrayList;
     Stack<String> StackList;
     LapListAdapter lapListAdapter;
@@ -99,6 +109,7 @@ public class TimerFragment extends Fragment {
     //Typeface tf;
     private DateFormat df = new SimpleDateFormat("ddMMyy@HHmm");
     private DateFormat df2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss ", Locale.ENGLISH);
+    private String m_Text = "";
 
     /*** operasyonel fonksiyonlar***/
 /*
@@ -221,6 +232,45 @@ public class TimerFragment extends Fragment {
         binding.lapList.setAdapter(lapListAdapter);
 
         lapListAdapter.notifyDataSetChanged();
+        lapListAdapter.setOnItemClickListener(new LapListAdapter.OnItemClickListener() {
+            @Override
+            public void onAddMessage(int position) {
+
+                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                 View view = getLayoutInflater().inflate(R.layout.addnotedialogbox, null);
+
+
+                 builder.setTitle("Add notes for Lap "+ ListElementsArrayList.get(position).lapsayisi);
+
+                    final EditText input =  view.findViewById(R.id.message);
+                    builder.setView(view);
+
+                input.setText(lapsArray.get(lapsayisi-position-1).message);
+          ;
+
+
+// Set up the buttons
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        dialog.dismiss();
+
+                        m_Text = input.getText().toString();
+                       lapsArray.get(lapsayisi-position-1).message = m_Text;
+
+                        }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.show();
+            }
+        });
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -288,7 +338,7 @@ public class TimerFragment extends Fragment {
 
 
         // laps dizisinde string olarak tutulan ifadelerin sayıya çevrilmiş olarak tutuldukları dizi
-        String lap = hh + ":" + mm + ":" + ss + "." + msec;
+        String lap = hh + ":" + mm + ":" + ss; //+ "." + msec;
         laps.add(lap);
 
 
@@ -364,14 +414,14 @@ public class TimerFragment extends Fragment {
 
 
         //textView2.setText("Lap " + (lapsayisi + 1) + ": " + lap + "  Cyc.Time: " + dec.format(delta * modul) + " " + unit + "\n\n" + textView2.getText().toString());
-
+        m_Text = "";// her seferinde 0 laman lazım yoksa hepsine aynı m_text'i yazarsin
         lapToWrite = (lapsayisi + 1) + "      " + lap + "     " + dec.format(delta * modul) + " " + unit;
         //her zaman ilk değer olarak ekler,
 
-        lapValue = new Lap(dec.format(delta * modul) + " " + unit, lap, lapsayisi + 1);
+        lapValue = new Lap(dec.format(delta * modul) + " " + unit, lap, lapsayisi + 1,m_Text);
 
-
-        ListElementsArrayList.add(0, lapValue);
+        lapsArray.add(lapsayisi,lapValue);
+        ListElementsArrayList.add(0, lapValue);//her zaman üste eklemek için
         System.out.println("Dizi---> " + ListElementsArrayList.size());
         cycPerMinute.setText(String.valueOf(dec.format(calculateCycPerMinute(ave))));
         cycPerHour.setText(String.valueOf(dec.format(calculateCycPerHour(ave))));
@@ -404,7 +454,7 @@ public class TimerFragment extends Fragment {
     public void save() {
         // activity nin context i için getActivity kullan
         if (Auth)
-            excelSave.save(getActivity(), unit, laps, lapsval, ave, modul, diffTime, calculateCycPerHour(ave), calculateCycPerMinute(ave));
+            excelSave.save(getActivity(), unit, laps, lapsval, ave, modul, diffTime, calculateCycPerHour(ave), calculateCycPerMinute(ave),lapsArray);
         else {
             Toast.makeText(getContext(), "Chrono is running !", Toast.LENGTH_SHORT).show();
         }
@@ -563,7 +613,7 @@ public class TimerFragment extends Fragment {
         timeInSeconds = timeInSeconds - (minutes * 60);
         seconds = timeInSeconds;
         diffTime = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
-        System.out.println(diffTime);
+        System.out.println("difftime : "+diffTime);
         totalObservationTime.setText(diffTime);
         System.out.println("stop time : >> " + StopTime);
 

@@ -19,6 +19,7 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.RatingBar;
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
     Switch drawerSwitchSec;
     Switch drawerSwitchCmin;
+    Switch screenSaverSwitch;
     ViewPager viewPager;
     Switch switchSec, switchCmin;
     AppBarLayout appBarLayout;
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Button startButton, lapButton, resetButton, saveButton;
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
+
     private Toolbar toolbar;
     private ActivityMainBinding binding;
     private int[] TAB_ICONS = {
@@ -181,11 +184,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .setActionView(new Switch(this));
         navigationView.getMenu().findItem(R.id.timeUnitCmin)
                 .setActionView(new Switch(this));
+        navigationView.getMenu().findItem(R.id.screenSaver)
+                .setActionView(new Switch(this));
 
 
         drawerSwitchSec = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitSec).getActionView());
         drawerSwitchCmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
+        screenSaverSwitch = ((Switch) navigationView.getMenu().findItem(R.id.screenSaver).getActionView());
+//menu item'a ulaşmak için menuıtem olarak çağırmalısın
+        MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
+        screenSaverSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked){
 
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı açık tutma
+                    scren.setTitle(getString(R.string.screenOff));
+                }else{
+                    screenSaverSwitch.setChecked(false);
+                    scren.setTitle(getString(R.string.screenOn));
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı kapatma
+                }
+            }
+        });
         drawerSwitchSec.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -301,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                                              TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                                              fragment.takeLap();
-                                         //    ThemeColors.setNewThemeColor(MainActivity.this, red, green, blue);
+                                           //  ThemeColors.setNewThemeColor(MainActivity.this, red, green, blue);
 
                                          }
                                      }

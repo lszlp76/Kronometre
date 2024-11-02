@@ -16,6 +16,7 @@
                     android:title="Second"
                     app:actionLayout="@layout/togglebutton"
                     app:showAsAction="always" />
+
                 <item
                     android:id="@+id/timeUnitCmin"
                     android:icon="@drawable/ic_cmin"
@@ -23,7 +24,12 @@
                     app:actionLayout="@layout/togglebuttonsec"
                     app:showAsAction="always" />
 
-
+                <item
+                    android:id="@+id/screenSaver"
+                    android:icon="@drawable/outline_screenshot_monitor_24"
+                    android:title="@string/screenOn"
+                    app:actionLayout="@layout/togglebuttonscreen"
+                    app:showAsAction="always" />
 
                 <item
                     android:id="@+id/nav_save"
@@ -43,6 +49,13 @@
                 android:title="Rate Me"
                 android:icon="@android:drawable/btn_star_big_on"
                 />
+            <!--item
+                android:id="@+id/colorplt"
+                android:checkable="true"
+                android:icon="@drawable/ic_seconds"
+                android:title="Personalize "
+                app:actionLayout="@layout/colorpalette"
+                app:showAsAction="always" /-->
             <item
                 android:id="@+id/nav_about"
                 android:icon="@drawable/ic_about"
