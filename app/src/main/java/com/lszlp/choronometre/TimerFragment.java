@@ -41,6 +41,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -236,18 +237,24 @@ public class TimerFragment extends Fragment {
             @Override
             public void onAddMessage(int position) {
 
-                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                 View view = getLayoutInflater().inflate(R.layout.addnotedialogbox, null);
+                // AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
+                 //View view = getLayoutInflater().inflate(R.layout.addnotedialogbox, null);
 
-                 builder.setTitle("Add notes for Lap "+ ListElementsArrayList.get(position).lapsayisi);
+                android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogCustom));
 
-                    final EditText input =  view.findViewById(R.id.message);
-                    builder.setView(view);
+                builder.setTitle("Add notes for Lap "+ ListElementsArrayList.get(position).lapsayisi);
+
+                final TextInputEditText input =  new TextInputEditText(getActivity());//view.findViewById(R.id.message);
+
+                //builder.setView(view);
 
                 input.setText(lapsArray.get(lapsayisi-position-1).message);
           ;
-
+                LinearLayout layoutName = new LinearLayout(getActivity());
+                layoutName.setOrientation(LinearLayout.VERTICAL);
+                layoutName.addView(input); // displays the user input bar
+                builder.setView(layoutName);
 
 // Set up the buttons
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -567,6 +574,8 @@ public class TimerFragment extends Fragment {
         currentDateandTimeStart = sdf.format(new Date());
         timeStart = new Date();
         StartTime = SystemClock.uptimeMillis();
+
+
         handler.postDelayed(runnable, 0);
         System.out.println("start time : >> " + StartTime);
 
@@ -618,6 +627,12 @@ public class TimerFragment extends Fragment {
         System.out.println("stop time : >> " + StopTime);
 
     }
+    public void getTotalObservationTime
+            (){
+        long diff = StopTime-StartTime;
+
+
+    }
 
     public void reset() {
        ((MainActivity) getActivity()).drawerSwitchCmin.setEnabled(true);
@@ -632,6 +647,7 @@ public class TimerFragment extends Fragment {
 
         MillisecondTime = 0L;
         StartTime = 0L;
+        StopTime =0L;
         TimeBuff = 0L;
         UpdateTime = 0L;
         Seconds = 0;

@@ -11,4 +11,5 @@
     <color name="colorPrimaryDark">#a00037</color>
     <color name="colorAccent">#fff</color>
     <color name="colorDisable">#f48fb1</color>
+    <color name="colorDisableq">#F1DCDC</color>
 </resources>

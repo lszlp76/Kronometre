@@ -1,11 +1,13 @@
 package com.lszlp.choronometre;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.lszlp.choronometre.databinding.LaprowsBinding;
@@ -27,6 +29,7 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
     @NonNull
     @Override
     public LapListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
       LaprowsBinding laprowsBinding = LaprowsBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
         return new LapListViewHolder(laprowsBinding,mlistener);
 
@@ -34,10 +37,23 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
 
     @Override
     public void onBindViewHolder(@NonNull LapListViewHolder holder, int position) {
+    ;
+        Context context = holder.itemView.lapline.getContext();
         holder.itemView.laprow3.setText(lapArrayList.get(position).unit);
         holder.itemView.laprow1.setText(String.valueOf(lapArrayList.get(position).lapsayisi));
         holder.itemView.laprow2.setText(lapArrayList.get(position).lap);
 
+//listedeki her bir satırın rengini değiştiriyor
+if (position % 2 == 0) {
+           holder.itemView.lapline.setBackgroundColor(
+               ContextCompat.getColor(
+                   holder.itemView.lapline.getContext(),
+                   R.color.colorDisable
+               )
+           );
+       } else {
+           holder.itemView.lapline.setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisableq));
+       }
 
     }
     @Override
@@ -57,7 +73,6 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
 
         //Note kısmı ekleme
         ImageView addNote;
-
 
         private LaprowsBinding itemView;
 
