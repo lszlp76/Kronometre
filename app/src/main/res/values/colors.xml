@@ -3,13 +3,29 @@
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
+    <color name="ozelrenkdenemesi">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="darkbuttonrengi">#d81b60</color>
     <color name="colorPrimary">#d81b60</color>
+    <color name="chartColor">#a00037</color>
     <color name="colorPrimaryDark">#a00037</color>
     <color name="colorAccent">#fff</color>
     <color name="colorDisable">#f48fb1</color>
     <color name="colorDisableq">#F1DCDC</color>
+    <color name="my_disabled_thumb_color">#ABB73A</color>
+    <color name="my_enabled_thumb_color">#4CAF50</color>
+    <color name="my_disabled_track_color">#D3CAE4</color>
+    <color name="my_enabled_track_color">#9C27B0</color>
+    <!-- Thumb Colors -->
+    <color name="disabled_thumb_color">#CCCCCC</color> <!-- Light Gray -->
+    <color name="checked_thumb_color">#FF6200EE</color> <!-- Purple -->
+    <color name="unchecked_thumb_color">#FFFFFF</color> <!-- White -->
+
+    <!-- Track Colors -->
+    <color name="disabled_track_color">#EEEEEE</color> <!-- Very Light Gray -->
+    <color name="checked_track_color">#FFBB86FC</color> <!-- Light Purple -->
+    <color name="unchecked_track_color">#AAAAAA</color> <!-- Gray -->
 </resources>

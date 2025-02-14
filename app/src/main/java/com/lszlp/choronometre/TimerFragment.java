@@ -1,8 +1,12 @@
 package com.lszlp.choronometre;
 
+import static android.graphics.Color.parseColor;
+
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,11 +23,11 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.graphics.ColorUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -184,6 +188,7 @@ public class TimerFragment extends Fragment {
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
@@ -248,7 +253,7 @@ public class TimerFragment extends Fragment {
                 final TextInputEditText input =  new TextInputEditText(getActivity());//view.findViewById(R.id.message);
 
                 //builder.setView(view);
-
+                input.setHint("Add notes here");
                 input.setText(lapsArray.get(lapsayisi-position-1).message);
           ;
                 LinearLayout layoutName = new LinearLayout(getActivity());
@@ -274,8 +279,30 @@ public class TimerFragment extends Fragment {
                         dialog.cancel();
                     }
                 });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                // Get the positive button and set its text color
+                Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                if (positiveButton != null) {
+                    positiveButton.setTextColor(parseColor("#FFFFFFFF"));
+                   positiveButton.setTextSize(20);
+                   positiveButton.setPadding(0,0,5,0);
+                   positiveButton.setBackgroundColor(getResources().getColor(R.color.colorDisable));;
 
-                builder.show();
+
+                }
+                Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                if (negativeButton != null) {
+                    negativeButton.setTextColor(parseColor("#FFFFFFFF"));
+                    negativeButton.setTextSize(20);
+                    negativeButton.setPadding(0,0,5,0);
+                    negativeButton.setBackgroundColor(getResources().getColor(R.color.colorDisable));;
+
+
+                }
+                // Arka plan rengini ayarlayın.
+
+
             }
         });
         button2.setOnClickListener(new View.OnClickListener() {
@@ -439,7 +466,7 @@ public class TimerFragment extends Fragment {
         lapsayisi++;
 
 
-        pageViewModel.setTimeValue((lapsval.get(lapsayisi - 1)).floatValue() * modul);
+        pageViewModel.setTimeValue((float) ((lapsval.get(lapsayisi - 1)) * modul));
         pageViewModel.setMaxTimeValue((float) (max * modul));
         pageViewModel.setMinTimeValue((float) (min * modul));
         pageViewModel.setAvgTimeValue((float) (ave * modul));
@@ -472,6 +499,7 @@ public class TimerFragment extends Fragment {
     public void start() {
         Auth = false;
         ((MainActivity) getActivity()).isResetDone = false ;
+
         // buraya number=XX yazrsan o saniyeden başlatabilirsin
         // mainden çalıştıracaksan if i bunu kaldır
         //if (button2.getText() == "STOP")
@@ -501,7 +529,9 @@ public class TimerFragment extends Fragment {
                         Seconds = Seconds % modul;
 
                         Hours = Minutes / 60;
-
+                        //dakika ve saat 0lanması
+                        Minutes = Minutes % 60;
+                        Hours = Hours % 24;
 
                         MilliSeconds = (int) (UpdateTime % 1000);
 
@@ -635,8 +665,10 @@ public class TimerFragment extends Fragment {
     }
 
     public void reset() {
-       ((MainActivity) getActivity()).drawerSwitchCmin.setEnabled(true);
-       ((MainActivity) getActivity()).drawerSwitchSec.setEnabled(true);
+
+
+
+
         handler.removeCallbacks(runnable);
         Auth = true;
         button4.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
@@ -672,6 +704,9 @@ public class TimerFragment extends Fragment {
         lapsval.clear();// aralık değerlerini siliyor
         maxvalue.setText(departure);
         minvalue.setText(departure);
+        ((MainActivity) getActivity()).drawerSwitchCmin.setEnabled(true);
+        ((MainActivity) getActivity()).drawerSwitchSec.setEnabled(true);
+        ((MainActivity) getActivity()).drawerSwitchDmin.setEnabled(true);
 
         lapListAdapter.notifyDataSetChanged();
     }
@@ -683,6 +718,8 @@ public class TimerFragment extends Fragment {
                 cycPerMinute = (60 / ave) / 100;
             case 100:
                 cycPerMinute = (100 / ave) / 100;
+            case 166:
+                cycPerMinute = (166.67/ ave) / 100;
         }
         return cycPerMinute;
     }
@@ -695,7 +732,29 @@ public class TimerFragment extends Fragment {
                 cycPerHour = (3600 / ave) / 100;
             case 100:
                 cycPerHour = (6000 / ave) / 100;
+            case 166:
+                cycPerHour = (10000 / ave) / 100;
         }
         return cycPerHour;
+
+    }
+    /**
+     * Bir düğmenin arka plan rengini ayarlar.
+     *
+     * @param button              Arka plan rengi ayarlanacak düğme.
+     * @param backgroundColor Düğmenin arka plan rengi.
+     */
+    private static void setButtonBackgroundColor(Button button, int backgroundColor) {
+        // Yeni bir GradientDrawable oluşturun.
+        GradientDrawable backgroundDrawable = new GradientDrawable();
+
+        // Arka plan rengini ayarlayın.
+        backgroundDrawable.setColor(backgroundColor);
+
+        // Köşeleri yuvarlatın.
+        backgroundDrawable.setCornerRadius(10); // Köşe yarıçapını ayarlayın (piksel cinsinden).
+
+        // Düğmenin arka planını ayarlayın.
+        button.setBackground(backgroundDrawable);
     }
 }

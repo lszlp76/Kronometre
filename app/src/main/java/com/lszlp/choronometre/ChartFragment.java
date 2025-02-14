@@ -45,6 +45,7 @@ public class ChartFragment extends Fragment {
     TextView chartTimer;
     PageViewModel pageViewModel;
     Typeface tf;
+    Float textSize;
 
     public static ChartFragment newInstance() {
         return new ChartFragment();
@@ -77,7 +78,7 @@ public class ChartFragment extends Fragment {
         }
         lineChart = view.findViewById(R.id.chart);
         lineChart.setNoDataTextTypeface(tf);
-        lineChart.setNoDataTextColor(R.color.colorPrimary);
+        lineChart.setNoDataTextColor(R.color.chartColor);
         lineEntry = new ArrayList<>();
         lapValue = new ArrayList<>();
         chartTimer = view.findViewById(R.id.chartTimer);
@@ -156,7 +157,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         //lineEntry.add(new Entry(i, j));// burası aslında drawchart içinde olmalı.
         lapValue.add(new Entry(i, j)); //cycle time value
-
+        textSize = 16f;
         //limitline koyunca gerek kalmadı alttakilere
      /*   tMaxValue.add(new Entry(i, tmax));
 //sabit değer göstermek iiçin
@@ -211,8 +212,8 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         LineDataSet lapValueDataSet = new LineDataSet(lapValue, "Cyc.Time Value");
         lapValueDataSet.setColor(Color.BLUE);
 
-        lapValueDataSet.setValueTextSize(12);
-        lapValueDataSet.setValueTextColor(ContextCompat.getColor(getActivity(),R.color.colorPrimary )); // rakamların rengini çıkartır dark/light
+        lapValueDataSet.setValueTextSize(textSize);
+        lapValueDataSet.setValueTextColor(ContextCompat.getColor(getActivity(),R.color.chartColor )); // rakamların rengini çıkartır dark/light
         lapValueDataSet.setCircleColor(Color.GREEN);
         lapValueDataSet.setCircleRadius(5);
         lapValueDataSet.setValueTypeface(tf);
@@ -236,27 +237,27 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         LimitLine tmaxLimit = new LimitLine(tmax, "Maximum Cycle Time: " + dec.format(tmax) + " cyc/unit ");
         tmaxLimit.setLineWidth(4f);
-        tmaxLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
+        tmaxLimit.setTextColor(getResources().getColor(R.color.chartColor));
         tmaxLimit.enableDashedLine(10f, 10f, 0f);
         tmaxLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
-        tmaxLimit.setTextSize(12f);
+        tmaxLimit.setTextSize(textSize);
         tmaxLimit.setTypeface(tf);
 
         LimitLine tminLimit = new LimitLine(tmin, "Minimum Cycle Time: " + dec.format(tmin) + " cyc/unit ");
         tminLimit.setLineWidth(4f);
-        tminLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
+        tminLimit.setTextColor(getResources().getColor(R.color.chartColor));
         tminLimit.enableDashedLine(10f, 10f, 0f);
         tminLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
-        tminLimit.setTextSize(12f);
+        tminLimit.setTextSize(textSize);
         tminLimit.setTypeface(tf);
 
         LimitLine taveLimit = new LimitLine(tave, "Mean Cycle Time: " + dec.format(tave) + " cyc/unit ");
         taveLimit.setLineWidth(4f);
-        taveLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
+        taveLimit.setTextColor(getResources().getColor(R.color.chartColor));
         taveLimit.setLineColor(Color.MAGENTA);
         taveLimit.enableDashedLine(10f, 10f, 0f);
         taveLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
-        taveLimit.setTextSize(12f);
+        taveLimit.setTextSize(textSize);
        ;
         taveLimit.setTypeface(tf);
 

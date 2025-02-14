@@ -15,7 +15,7 @@
                     android:icon="@drawable/ic_seconds"
                     android:title="Second"
                     app:actionLayout="@layout/togglebutton"
-                    app:showAsAction="always" />
+                    app:showAsAction="ifRoom" />
 
                 <item
                     android:id="@+id/timeUnitCmin"
@@ -23,6 +23,14 @@
                     android:title="Hunderths minute "
                     app:actionLayout="@layout/togglebuttonsec"
                     app:showAsAction="always" />
+
+                <item
+                    android:id="@+id/timeUnitDmin"
+                    android:icon="@drawable/ic_cmin"
+                    android:title="@string/ten_thousandth_of_hours"
+                    app:actionLayout="@layout/togglebuttonsec"
+                    app:showAsAction="always" />
+
 
                 <item
                     android:id="@+id/screenSaver"

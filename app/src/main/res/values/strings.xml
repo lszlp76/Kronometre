@@ -34,15 +34,9 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
     <string name="reset">RESET</string>
     <string name="save">SAVE</string>
     <string name="ratetext">How much did you like Industrial Chronometer?</string>
+    <string name="ten_thousandth_of_hours">Ten thousandth of hours</string>
 
-    <style name="AlertDialogCustom" parent="@android:style/Theme.Dialog">
-        <item name="android:textColor">#FF3700B3</item>
 
-        <item name="android:backgroundTint">#f48fb1</item>
-
-        <item name="android:typeface">sans</item>
-        <item name="android:textSize">15sp</item>
-    </style>
 
     <style name="AlertDialogCustom2" parent="@style/AlertDialogCustom">
         <item name="android:textColor">#FF3700B3</item>
@@ -54,14 +48,15 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
     </style>
 
 
-
     <style name="ButtonAdjustmentStyle">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1.25</item>
+
         <item name="android:backgroundTint">@color/btn_color</item>
         <item name="android:layout_marginLeft">3dp</item>
         <item name="android:layout_marginRight">3dp</item>
+        <item name="android:textColor">@color/btn_text_color</item>
         <item name="android:fontFamily">@font/digital7</item>
         <item name="android:textSize">20dp</item>
 

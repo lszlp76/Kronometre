@@ -83,17 +83,20 @@
 
             <Button
                 android:id="@+id/button3"
+
                 style="@style/ButtonAdjustmentStyle"
                 android:text="LAP" />
 
             <Button
                 android:id="@+id/button4"
+
                 style="@style/ButtonAdjustmentStyle"
 
                 android:text="Reset" />
 
             <Button
                 android:id="@+id/button"
+
                 style="@style/ButtonAdjustmentStyle"
                 android:text="Save"
 

@@ -77,14 +77,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ReviewInfo reviewInfo;
     private ReviewManager manager;
     NavigationView navigationView;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     Switch drawerSwitchSec;
     Switch drawerSwitchCmin;
+    Switch drawerSwitchDmin;
     Switch screenSaverSwitch;
     ViewPager viewPager;
-    Switch switchSec, switchCmin;
+    Switch switchSec, switchCmin, switchDmin;
     AppBarLayout appBarLayout;
     AdView adView ;
     Button startButton, lapButton, resetButton, saveButton;
+
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
 
@@ -180,9 +183,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
  * NavigationView üzerine swicth bağlamak için aşağıdaki
  * komut kümesini eklemelisin
  */
+
         navigationView.getMenu().findItem(R.id.timeUnitSec)
                 .setActionView(new Switch(this));
         navigationView.getMenu().findItem(R.id.timeUnitCmin)
+                .setActionView(new Switch(this));
+        navigationView.getMenu().findItem(R.id.timeUnitDmin)
                 .setActionView(new Switch(this));
         navigationView.getMenu().findItem(R.id.screenSaver)
                 .setActionView(new Switch(this));
@@ -190,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawerSwitchSec = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitSec).getActionView());
         drawerSwitchCmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
+        drawerSwitchDmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitDmin).getActionView());
         screenSaverSwitch = ((Switch) navigationView.getMenu().findItem(R.id.screenSaver).getActionView());
 //menu item'a ulaşmak için menuıtem olarak çağırmalısın
         MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
@@ -207,11 +214,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+        //Mark:--> SWİÇLER
+        drawerSwitchSec.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
+        drawerSwitchSec.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
+        drawerSwitchCmin.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
+        drawerSwitchCmin.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
+        drawerSwitchDmin.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
+        drawerSwitchDmin.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
+        screenSaverSwitch.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
+        screenSaverSwitch.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
         drawerSwitchSec.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    drawerSwitchSec.setEnabled(false);
                     drawerSwitchCmin.setChecked(false);
+                    drawerSwitchDmin.setChecked(false);
                     TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                     fragment.modul = 60;
                     fragment.milis = 1000;
@@ -221,7 +239,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fragment.binding.unitValue.setText(fragment.unit);
                     drawer.close();
                 } else {
-                    drawerSwitchCmin.setChecked(true);
+                   // drawerSwitchCmin.setChecked(true);
+                    //drawerSwitchDmin.setChecked(true);
+                    drawerSwitchSec.setEnabled(true);
 
                 }
             }
@@ -230,7 +250,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    drawerSwitchCmin.setEnabled(false);
                     drawerSwitchSec.setChecked(false);
+                    drawerSwitchDmin.setChecked(false);
                     TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                     fragment.modul = 100;
                     fragment.milis = 600;
@@ -240,11 +262,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fragment.binding.unitValue.setText(fragment.unit);
                     drawer.close();
                 } else {
-                    drawerSwitchSec.setChecked(true);
+                    //drawerSwitchSec.setChecked(true);
+                    //drawerSwitchDmin.setChecked(true);
+                    drawerSwitchCmin.setEnabled(true);
                 }
             }
         });
+        drawerSwitchDmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    drawerSwitchDmin.setEnabled(false);
+                    drawerSwitchCmin.setChecked(false);
+                    drawerSwitchSec.setChecked(false);
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    fragment.modul = 166;// çalışıyor
+                    fragment.milis = 360;
 
+                    fragment.unit = "Dmh.";
+                    fragment.Timeunit = "Dmh. - 10Thounsandth of Minute ";
+                    fragment.binding.unitValue.setText(fragment.unit);
+                    drawer.close();
+                } else {
+                   // drawerSwitchCmin.setChecked(true);
+                   // drawerSwitchSec.setChecked(true);
+                    drawerSwitchDmin.setEnabled(true);
+                }
+            }
+        });
 
         /**** navigation sonu ***/
 
@@ -281,8 +326,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         auth = true;
                         drawerSwitchCmin.setEnabled(false);
                         drawerSwitchSec.setEnabled(false);
+                        drawerSwitchDmin.setEnabled(false);
                         navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
                         navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+                        navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
 
                         fragment.start();
                         lapButton.setEnabled(true);
@@ -297,11 +344,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (isResetDone) {
                         drawerSwitchCmin.setEnabled(true);
                         drawerSwitchSec.setEnabled(true);
+                        drawerSwitchDmin.setEnabled(true);
 
                     }
 
                     navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
                     navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
+                    navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
 
                     fragment.stop();
                     startButton.setText("START");
@@ -329,6 +378,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         );
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
+
             public void onClick(View view) {
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                 ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
@@ -336,14 +386,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AlertDialogCustom));
                 builder.setTitle("Delete All Datas");
                 builder.setMessage("Are you sure to delete all datas ?");
-
                 builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         System.out.println("No ya basıldı");
                     }
-                });
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                } );
+               builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
@@ -356,10 +407,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         chartFragment.ClearChart();
                     }
                 });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                // Get the positive button and set its text color
+                Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                if (positiveButton != null) {
+                    positiveButton.setTextColor(Color.parseColor("#FFFFFFFF"));
+                    positiveButton.setTextSize(20);
 
+                }
+                Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                if (negativeButton != null) {
+                    negativeButton.setTextColor(Color.parseColor("#FFFFFFFF"));
+                    negativeButton.setTextSize(20);
 
-                builder.show();
-
+                }
             }
         });
 

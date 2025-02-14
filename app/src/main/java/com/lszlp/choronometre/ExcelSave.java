@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.InputFilter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -267,7 +268,21 @@ alert dialog için
 
                 ;
             });
-            alertName.show();
+            AlertDialog dialog = alertName.create();
+            dialog.show();
+            // Get the positive button and set its text color
+            Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+            if (positiveButton != null) {
+                positiveButton.setTextColor(Color.parseColor("#FFFFFFFF"));
+                positiveButton.setTextSize(20);
+
+            }
+            Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+            if (negativeButton != null) {
+                negativeButton.setTextColor(Color.parseColor("#FFFFFFFF"));
+                negativeButton.setTextSize(20);
+
+            }
         } else {
             Toast.makeText(context, "No lap to store ! ", Toast.LENGTH_SHORT).show();
         }
