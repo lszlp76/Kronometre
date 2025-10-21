@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Notification Debug Information"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"
+            android:textColor="@android:color/black" />
+
+        <TextView
+            android:id="@+id/tvDebugInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Loading debug information..."
+            android:textSize="12sp"
+            android:textColor="@android:color/black"
+            android:background="@android:color/darker_gray"
+            android:padding="12dp"
+            android:textIsSelectable="true" />
+
+        <Button
+            android:id="@+id/btnTestNotification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test Notification Now"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/colorPrimary" />
+
+        <Button
+            android:id="@+id/btnCheckPermissions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Check Notification Permissions"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnOpenSettings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Open Notification Settings"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/btnClose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Close"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+
+</ScrollView>

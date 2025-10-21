@@ -1,12 +1,16 @@
 package com.lszlp.choronometre;
 
+import static android.content.ContentValues.TAG;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -14,7 +18,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -26,8 +32,10 @@ import android.widget.RatingBar;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.core.splashscreen.SplashScreen;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,10 +48,14 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -72,6 +84,29 @@ import java.util.Random;
  **/
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Uygulama arka plana geçtiğinde servisin çalışmaya devam etmesi için
+        // Burada özel bir şey yapmıyoruz, servis zaten foreground'da çalışıyor
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Uygulama ön plana geldiğinde servis durdurulmaz
+        // Sadece UI güncellemesi yapılır
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Uygulama tamamen kapatıldığında servisi temizle
+        stopService(new Intent(this, ChronometerService.class));
+    }
+
+
+
     public DrawerLayout drawer;
     public Boolean isResetDone;
     private ReviewInfo reviewInfo;
@@ -79,70 +114,86 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     Switch drawerSwitchSec;
+    @SuppressLint("UseSwitchCompatOrMaterialCode")
     Switch drawerSwitchCmin;
     Switch drawerSwitchDmin;
     Switch screenSaverSwitch;
     ViewPager viewPager;
     Switch switchSec, switchCmin, switchDmin;
     AppBarLayout appBarLayout;
-    AdView adView ;
+    private AdView adView ;
     Button startButton, lapButton, resetButton, saveButton;
-
+    private ActivityMainBinding binding;
+    private static final String TAG = "MainActivity";
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
 
     private Toolbar toolbar;
-    private ActivityMainBinding binding;
     private int[] TAB_ICONS = {
             R.drawable.ic_baseline_timer_24,
             R.drawable.ic_baseline_stacked_line_chart_24,
             R.drawable.ic_baseline_save
     };
 
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-       /*
-        if (newConfig.orientation != Configuration.ORIENTATION_LANDSCAPE){
-            setContentView(R.layout.activity_main);
 
-        }
-        *
-        */
-        System.out.println("deneme");
-    }
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+       // SplashScreen.installSplashScreen(this) ; //splash screen i çağırır
+
         super.onCreate(savedInstanceState);
         new ThemeColors(this); // renk değiştirme sınıfı
 
+
+
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         activateReviewInfo();
 
         //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
         //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
-        new Thread(
-                () -> {
-                    // Initialize the Google Mobile Ads SDK on a background thread.
-                    MobileAds.initialize(this, initializationStatus -> {});
-                })
-                .start();
 
-        adView = binding.adView;
-        AdRequest adRequest = new AdRequest.Builder()
-                .build();
-        adView.loadAd(adRequest);
+       // / Initialize the Google Mobile Ads SDK on the main thread.
+        MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+                // SDK is initialized, now load the ad.
+                loadBannerAd();
+            }
+        });
+
+        // MainActivity.java onCreate'de
+//        Button btnOpenDebug = findViewById(R.id.btnOpenDebug);
+//        btnOpenDebug.setOnClickListener(v -> {
+//            Intent debugIntent = new Intent(MainActivity.this, TestNotificationActivity.class);
+//            startActivity(debugIntent);
+//        });
+         adView = binding.adView;
+
+
+//        new Thread(
+//                () -> {
+//                    // Initialize the Google Mobile Ads SDK on a background thread.
+//                    MobileAds.initialize(this, initializationStatus -> {});
+//                })
+//                .start();
+//
+//    adView = binding.adView;
+//       AdRequest adRequest = new AdRequest.Builder()
+//            .build();
+//    adView.loadAd(adRequest);
 
 //Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
 
 
+        // Check for WRITE_EXTERNAL_STORAGE permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-
-        } else {
         }
 
 
@@ -156,28 +207,36 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         tabs.getTabAt(2).setIcon(TAB_ICONS[2]);
 
         viewPager.setOffscreenPageLimit(2);
+        
 
         // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         //fragmentTransaction.add(R.id.view_pager,TimerFragment.class,null);
-        toolbar = binding.toolbar;// findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
        // toolbar.setBackgroundColor(Color.parseColor("#80000000")) ;
 
         drawer = binding.drawerLayout;// findViewById(R.id.drawer_layout);
+        toolbar = binding.toolbar;// findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         //navigation menu aktivasyon
         navigationView = binding.navView;// findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        toggle.setDrawerIndicatorEnabled(true);
-        drawer.addDrawerListener(toggle);
+        toggle = new ActionBarDrawerToggle(
+                this,
+                drawer,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+                 toggle.setDrawerIndicatorEnabled(true);
+                drawer.addDrawerListener(toggle);
 /**
  * drawer open ve close ile açaabilrsin.
  */
+        // Now, syncState() should be called in onPostCreate()
+        //toggle.syncState(); // Remove this line from onCreate()
 
-        toggle.syncState();
+
         ;
 /**
  * NavigationView üzerine swicth bağlamak için aşağıdaki
@@ -424,17 +483,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-
-       /* FloatingActionButton fab = binding.fab;
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
-
     }
 //** ADMOB FUNCS***
 private AdSize getAdSize() {
@@ -455,24 +503,6 @@ private AdSize getAdSize() {
     int adWidth = (int) (adWidthPixels / density);
     return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
 }
-    private void loadBanner() {
-
-        // Create a new ad view.
-       /*
-        AdView adView = new AdView(this);
-        adView.setAdSize(getAdSize());
-        adView.setAdUnitId("ca-app-pub-3940256099942544/9214589741");
-*/
-        // Replace ad container with new ad view.
-       //
-        //adContainerView.removeAllViews();
-        //adContainerView.addView(adView);
-
-        // Start loading the ad in the background.
-        AdView adView = new AdView(this);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
-    }
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -567,11 +597,12 @@ private AdSize getAdSize() {
                    /* viewPager.setCurrentItem(viewPager.getCurrentItem() + 2, true);
                     */
                     //play store adresini paylaşmak
-
+                    String subject = "Try Industrial Chronometer ⏱️";
                     String sharedLink = "https://play.google.com/store/apps/details?id=com.lszlp.choronometre";
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
                     sendIntent.putExtra(Intent.EXTRA_TEXT,  sharedLink);
+                    sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject );
                     sendIntent.putExtra(Intent.EXTRA_TITLE, "Sending Industrial Chronometer");
 
                     sendIntent.setType("text/plain");
@@ -664,5 +695,61 @@ private AdSize getAdSize() {
         }
 
     }
+    private void loadBannerAd() {
+        //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
+        //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
+       // String adUnitId = "ca-app-pub-2013051048838339/8612047524"; // Replace with your actual ad unit ID
+
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+                Log.d(TAG, "Ad loaded successfully");
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError adError) {
+                // Code to be executed when an ad request fails.
+                Log.e(TAG, "Ad failed to load: " + adError.getMessage());
+                Toast.makeText(MainActivity.this, "Ad failed to load", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when an ad opens an overlay that covers the screen.
+            }
+
+            @Override
+            public void onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when the user is about to return to the app after tapping on an ad.
+            }
+        });
+    }
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        toggle.syncState();
+    }
+    // MainActivity veya TimerFragment'ta
+    private void showDndGuide() {
+        new AlertDialog.Builder(this)
+                .setTitle("Rahatsız Etmeyin İzni Nasıl Verilir?")
+                .setMessage("1. 'Ayarlara Git' butonuna tıklayın\n" +
+                        "2. 'Gelişmiş' veya 'Diğer ayarlar'a gidin\n" +
+                        "3. 'Rahatsız Etmeyin' bölümünü bulun\n" +
+                        "4. 'Chronometre' uygulamasına izin verin\n" +
+                        "5. Uygulamaya geri dönün")
+                .setPositiveButton("Anladım", null)
+                .show();
+    }
 }
+
 //https://www.youtube.com/watch?v=bKJeDD-tP_Y

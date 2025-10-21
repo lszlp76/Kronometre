@@ -76,6 +76,8 @@ public class ExcelSave {
         }
     }
     public void share(Context context,String fileName){
+
+
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
         File folder = new File(path, "IndustrialChoronometer");
         if (!folder.exists()) {
@@ -86,17 +88,23 @@ public class ExcelSave {
             Uri fileToShareURI = null;
 
             File file = new File(folder, fileName);
+            if (!file.exists()) {
+                Toast.makeText(context, "File not found!", Toast.LENGTH_LONG).show();
+                return;
+            }
             file.setReadable(true, true);
 
            // fileToShareURI = Uri.parse(file.toString());
             fileToShareURI = FileProvider.getUriForFile(context,"com.lszlp.choronometre.fileprovider",file);
             Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+            intent.setType("application/vnd.ms-excel");
+            intent.putExtra(Intent.EXTRA_STREAM, fileToShareURI); //Uri.fromFile(file));
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Industrial Chronometer App.send "+fileName);
+            intent.putExtra(Intent.EXTRA_TEXT, "This file sent by Industrial Chronometer app. \nHave a nice day!");
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            intent.setType("application/xls");
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(Intent.EXTRA_STREAM, fileToShareURI); //Uri.fromFile(file));
 
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             context.startActivity((Intent.createChooser(intent, "Share File : ")));
 

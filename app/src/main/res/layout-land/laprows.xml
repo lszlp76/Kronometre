@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lapline"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:id="@+id/lapline"
 
     android:orientation="horizontal">
 
@@ -13,23 +13,26 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
 
         style="@style/textColorStyle"
-        android:textSize="18sp"
-        android:fontFamily="@font/digital7"
+        android:textSize="25sp"
+android:fontFamily="@font/digital7"
         android:layout_weight="1"
         android:textAlignment="center"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textStyle="bold"
         android:text="Deneme" />
 
     <TextView
         android:id="@+id/laprow_2"
         style="@style/textColorStyle"
         android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textStyle="bold"
+        android:textSize="25sp"
 
-        android:textSize="18sp"
         android:fontFamily="@font/digital7"
+
         android:textAlignment="center"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Deneme"
@@ -39,14 +42,27 @@
     <TextView
         android:id="@+id/laprow_3"
         android:textAppearance="?android:attr/textAppearanceLarge"
-
+        android:textStyle="bold"
         style="@style/textColorStyle"
         android:fontFamily="@font/digital7"
-        android:textSize="18sp"
+        android:textSize="25sp"
         android:layout_weight="1"
         android:text="Deneme"
         android:textAlignment="center"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
        />
+
+    <ImageView
+        android:id="@+id/addnote"
+        style="@style/textColorStyle"
+        android:textAlignment="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:src="@drawable/outline_speaker_notes_24"
+
+
+        />
+
   </LinearLayout>

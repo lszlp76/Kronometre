@@ -7,10 +7,10 @@ android {
 
     defaultConfig {
         applicationId "com.lszlp.choronometre"
-        minSdk 21
+        minSdk 24
         targetSdk 34
-        versionCode 34
-        versionName '4.3'
+        versionCode 39
+        versionName '4.4'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -22,12 +22,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     buildFeatures {
         viewBinding true
     }
+    namespace 'com.lszlp.choronometre'
 
 }
 
@@ -36,7 +37,8 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.navigation:navigation-ui:2.5.3'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -44,6 +46,7 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("com.google.android.play:review:2.0.1")
     implementation 'it.xabaras.android:recyclerview-swipedecorator:1.4'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
 
     testImplementation 'junit:junit:'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.12'

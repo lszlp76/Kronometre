@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/timerFragment"
+    android:layout_width="match_parent"
+
+    android:layout_height="match_parent"
+    android:background="@drawable/backgroun"
+    android:tag="timer"
+    tools:context=".MainActivity">
+
+
+    <TextView
+        android:id="@+id/textView"
+        style="@style/textColorStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:fontFamily="@font/digital7mono"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="@string/_00_00_00"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+
+
+        android:textSize="60sp"
+        android:textStyle="bold"
+        tools:layout_editor_absoluteY="110dp" />
+
+
+
+
+    <TextView
+        android:id="@+id/unitValue"
+        style="@style/textColorStyle"
+        android:layout_width="wrap_content"
+
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/digital7mono"
+        android:gravity="center_horizontal"
+        android:text="No Unit"
+
+        android:textStyle="bold"
+        tools:layout_editor_absoluteX="339dp"
+        tools:layout_editor_absoluteY="122dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lapList"
+        style="@style/textColorStyle"
+        android:layout_width="395dp"
+        android:layout_height="270dp"
+        android:scrollbars="vertical"
+        app:layout_constraintEnd_toStartOf="@+id/guideline6"
+        tools:layout_editor_absoluteY="403dp" />
+
+    <Button
+        android:id="@+id/button3"
+
+        android:layout_width="82dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="@color/btn_color"
+        android:text="LAP"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="116dp"
+        tools:layout_editor_absoluteY="713dp" />
+
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:backgroundTint="@color/btn_color"
+        android:text="Reset"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="311dp"
+        tools:layout_editor_absoluteY="713dp" />
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="@color/btn_color"
+
+        android:text="Save"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="218dp"
+        tools:layout_editor_absoluteY="713dp" />
+
+    <Button
+        android:id="@id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:backgroundTint="@color/btn_color"
+        android:baselineAligned="true"
+        android:text="Start"
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="713dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.12722299" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1504788" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="8dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.98" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_end="59dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.92" />
+
+
+    <TextView
+        android:id="@+id/cycPerMinute"
+        style="@style/totalScoreColor"
+        android:layout_width="133dp"
+        android:layout_height="44dp"
+
+        android:layout_weight="1"
+        android:background="@drawable/textviewborder"
+        android:fontFamily="@font/digital7"
+        android:gravity="center"
+
+        app:layout_constraintBottom_toTopOf="@+id/lapList"
+        app:layout_constraintEnd_toStartOf="@+id/guideline6"
+        app:layout_constraintHorizontal_bias="0.194"
+        app:layout_constraintStart_toStartOf="@+id/guideline5"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.403" />
+
+    <TextView
+        android:id="@+id/cycPerHour"
+        style="@style/totalScoreColor"
+        android:layout_width="133dp"
+        android:layout_height="44dp"
+
+
+        android:background="@drawable/textviewborder"
+        android:fontFamily="@font/digital7"
+        android:gravity="center"
+
+
+        app:layout_constraintBottom_toTopOf="@+id/lapList"
+        app:layout_constraintEnd_toStartOf="@+id/guideline6"
+        app:layout_constraintHorizontal_bias="0.194"
+        app:layout_constraintStart_toStartOf="@+id/guideline5"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintVertical_bias="0.852" />
+
+    <TextView
+        android:id="@+id/minVal"
+        style="@style/totalScoreColor"
+        android:layout_width="133dp"
+        android:layout_height="44dp"
+
+        android:layout_weight="1"
+        android:background="@drawable/textviewborder"
+        android:fontFamily="@font/digital7"
+
+        android:gravity="center"
+
+        tools:layout_editor_absoluteX="225dp"
+        tools:layout_editor_absoluteY="242dp" />
+
+    <TextView
+        android:id="@+id/aveVal"
+        style="@style/totalScoreColor"
+        android:layout_width="133dp"
+        android:layout_height="44dp"
+
+        android:layout_weight="1"
+        android:background="@drawable/textviewborder"
+        android:fontFamily="@font/digital7"
+        android:gravity="center"
+
+
+        tools:layout_editor_absoluteX="218dp"
+        tools:layout_editor_absoluteY="343dp" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

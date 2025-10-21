@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="75dp" android:tint="#000000" android:viewportHeight="24" android:viewportWidth="24" android:width="75dp">
+    <Button
+        android:id="@id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:backgroundTint="@color/btn_color"
+        android:baselineAligned="true"
+        android:text="Start"
+       />
+</vector>

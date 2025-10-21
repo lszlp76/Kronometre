@@ -1,64 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.lszlp.choronometre" >
+    xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="33" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="33" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="33" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="33" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:requestLegacyExternalStorage="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Kronometre">
+        android:theme="@style/Theme.Kronometre"
+        android:exported="true">
 
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2013051048838339~7696349859"
-          
-          
-          
-          />
-        <activity
-            android:name="com.lszlp.choronometre.WebpagesActivities"
-            android:exported="false"
-            android:parentActivityName="com.lszlp.choronometre.MainActivity"
-            android:screenOrientation="fullSensor"
-            android:launchMode="singleInstance"/>
         <activity
             android:name="com.lszlp.choronometre.MainActivity"
-            android:configChanges="screenLayout|orientation"
             android:exported="true"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
-
-
             android:theme="@style/Theme.Kronometre.NoActionBar"
             tools:ignore="DiscouragedApi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- SHARING AYARLARI -->
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-2013051048838339~7696349859"/>
+
+        <activity
+            android:name="com.lszlp.choronometre.WebpagesActivities"
+            android:exported="false"
+            android:parentActivityName="com.lszlp.choronometre.MainActivity" />
+        <!-- AndroidManifest.xml'e bu aktiviteyi ekleyin -->
+        <activity
+            android:name=".TestNotificationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Kronometre" />
         <provider
-          android:name="androidx.core.content.FileProvider"
-          android:authorities="com.lszlp.choronometre.fileprovider"
-          android:exported="false"
-          android:grantUriPermissions="true">
-          
-          <meta-data
-            android:name="android.support.FILE_PROVIDER_PATHS"
-            android:resource="@xml/path"/>
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.lszlp.choronometre.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/path"/>
         </provider>
-      
+
+        <!-- Foreground service type ekleyin -->
+        <service
+            android:name=".ChronometerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+
+        <receiver
+            android:name="com.lszlp.choronometre.ChronometerWidget"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/chronometer_widget_info" />
+        </receiver>
     </application>
-    <!--android:label="@string/app_name"-->
 </manifest>
