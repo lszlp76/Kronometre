@@ -44,16 +44,16 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
         holder.itemView.laprow2.setText(lapArrayList.get(position).lap);
 
 //listedeki her bir satırın rengini değiştiriyor
-if (position % 2 == 0) {
-           holder.itemView.lapline.setBackgroundColor(
-               ContextCompat.getColor(
-                   holder.itemView.lapline.getContext(),
-                   R.color.colorDisable
-               )
-           );
-       } else {
-           holder.itemView.lapline.setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisableq));
-       }
+//if (position % 2 == 0) {
+//           holder.itemView.lapline.setBackgroundColor(
+//               ContextCompat.getColor(
+//                   holder.itemView.lapline.getContext(),
+//                   R.color.colorDisable
+//               )
+//           );
+//       } else {
+//           holder.itemView.lapline.setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisableq));
+//       }
 
     }
     @Override

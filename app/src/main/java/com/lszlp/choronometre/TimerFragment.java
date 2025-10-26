@@ -51,16 +51,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import com.lszlp.choronometre.Constants;
+import androidx.fragment.app.Fragment; // Bunu import ettiğinizden emin olun
 public class TimerFragment extends Fragment {
     public String Timeunit;
     FragmentTimerBinding binding;
     long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     int Hours, Seconds, Minutes, MilliSeconds;
     private BroadcastReceiver timeUpdateReceiver;
-
+    SpannableString spannableString;
     TextView maxvalue, minvalue, totalObservationTime, cycPerHour, cycPerMinute;
     Button button2, button1, button3, button4, button;
     String lapToWrite;
+    String timeString;
     Lap lapValue;
     ArrayList<Lap> lapsArray = new ArrayList<>();
     ArrayList<Lap> ListElementsArrayList;
@@ -88,7 +90,10 @@ public class TimerFragment extends Fragment {
     PageViewModel pageViewModel;
     ExcelSave excelSave = new ExcelSave();
     List<String> saveValue;
+    public long elapsedTime = 0;
+    public boolean running = false;
 
+    private long startTime = 0;
     String currentDateandTimeStop;
     String currentDateandTimeStart;
     Date timeStop, timeStart;
@@ -101,7 +106,42 @@ public class TimerFragment extends Fragment {
     public static TimerFragment newInstance() {
         return new TimerFragment();
     }
+    public void resumeFromRotation() {
+        if (running && handler != null) {
+            handler.removeCallbacks(runnable);
+            startTime = SystemClock.elapsedRealtime() - elapsedTime;
+            handler.postDelayed(runnable, 0);
 
+        }
+    }
+    // State'leri kaydet
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("elapsedTime", elapsedTime);
+        outState.putBoolean("running", running);
+        outState.putLong("startTime", startTime);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            elapsedTime = savedInstanceState.getLong("elapsedTime", 0);
+            running = savedInstanceState.getBoolean("running", false);
+            startTime = savedInstanceState.getLong("startTime", 0);
+
+            if (running) {
+                // Kronometre çalışıyorsa devam et
+                startTime = SystemClock.elapsedRealtime() - elapsedTime;
+                handler.post(runnable);
+            } else if (elapsedTime > 0) {
+                // Duraklatılmışsa display'i güncelle
+                updateDisplay();
+            }
+        }
+
+    }
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -143,17 +183,18 @@ public class TimerFragment extends Fragment {
         int seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
         int millis = (int) (elapsedMillis % 1000);
 
-        String timeString = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, millis);
+        timeString = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, millis);
 
-        SpannableString spannableString = new SpannableString(timeString);
+        spannableString = new SpannableString(timeString);
         spannableString.setSpan(new RelativeSizeSpan(0.5f), 9, spannableString.length(), 0);
         binding.textView.setText(spannableString);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        binding = FragmentTimerBinding.inflate(getLayoutInflater());
+       binding = FragmentTimerBinding.inflate(getLayoutInflater());
         return binding.getRoot();
+
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -180,7 +221,7 @@ public class TimerFragment extends Fragment {
         avevalue = binding.aveVal;
 
         // Butonları görünür yap
-        setWidgetsVisibility(true);
+        setWidgetsVisibility(false);
 
         SpannableString ssp = new SpannableString(timer);
         ssp.setSpan(new RelativeSizeSpan(0.5f), 9, ssp.length(), 0);
@@ -232,55 +273,63 @@ public class TimerFragment extends Fragment {
         button3.setOnClickListener(v -> takeLap());
     }
 
+    // ================================================================
+    // DEĞİŞEN METOT: showNoteDialog
+    // ================================================================
     private void showNoteDialog(int position) {
         if (getActivity() == null) return;
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogCustom));
-        builder.setTitle("Add notes for Lap " + ListElementsArrayList.get(position).lapsayisi);
+        // RecyclerView listesinden doğru Lap objesini al
+        // (ListElementsArrayList'in ters sıralı olduğunu varsayarak)
+        Lap lapToEdit = ListElementsArrayList.get(position);
+        int lapNumber = lapToEdit.lapsayisi;
+        String currentNote = lapToEdit.message;
 
-        final TextInputEditText input = new TextInputEditText(getActivity());
-        input.setHint("Add notes here");
+        // Eski AlertDialog.Builder kodunu silin ve bunu kullanın:
+        CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForNote(
+                position,    // RecyclerView'daki pozisyon
+                lapNumber,   // Lap'ın gerçek numarası (örn: Lap 5)
+                currentNote  // Mevcut not (varsa)
+        );
 
-        if (lapsArray != null && lapsayisi > position && lapsArray.get(lapsayisi - position - 1) != null) {
-            input.setText(lapsArray.get(lapsayisi - position - 1).message);
-        }
-
-        LinearLayout layoutName = new LinearLayout(getActivity());
-        layoutName.setOrientation(LinearLayout.VERTICAL);
-        layoutName.addView(input);
-        builder.setView(layoutName);
-
-        builder.setPositiveButton("OK", (dialog, which) -> {
-            dialog.dismiss();
-            m_Text = input.getText().toString();
-            if (lapsArray != null && lapsayisi > position && lapsArray.get(lapsayisi - position - 1) != null) {
-                lapsArray.get(lapsayisi - position - 1).message = m_Text;
-            }
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        setupDialogButtons(dialog);
+        // Diyaloğu MainActivity'nin FragmentManager'ı üzerinden göster
+        dialog.show(requireActivity().getSupportFragmentManager(), "ADD_NOTE_DIALOG_TAG");
     }
+// ================================================================
+    // YENİ METOT: updateNoteForLap (MainActivity tarafından çağrılır)
+    // ================================================================
+    /**
+     * CustomAlertDialogFragment'tan gelen veriyi işler ve notu günceller.
+     * @param position RecyclerView'daki öğenin pozisyonu.
+     * @param newNoteText Kullanıcının girdiği yeni not.
+     */
+    public void updateNoteForLap(int position, String newNoteText) {
+        if (ListElementsArrayList != null && ListElementsArrayList.size() > position) {
 
-    private void setupDialogButtons(AlertDialog dialog) {
-        Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        if (positiveButton != null) {
-            positiveButton.setTextColor(parseColor("#FFFFFFFF"));
-            positiveButton.setTextSize(20);
-            positiveButton.setPadding(0, 0, 5, 0);
-            positiveButton.setBackgroundColor(getResources().getColor(R.color.colorDisable));
-        }
+            // 1. Ana UI listesini güncelle (ListElementsArrayList)
+            Lap lapInUI = ListElementsArrayList.get(position);
+            lapInUI.message = newNoteText;
 
-        Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        if (negativeButton != null) {
-            negativeButton.setTextColor(parseColor("#FFFFFFFF"));
-            negativeButton.setTextSize(20);
-            negativeButton.setPadding(0, 0, 5, 0);
-            negativeButton.setBackgroundColor(getResources().getColor(R.color.colorDisable));
+            // 2. Ana veri kaynağı listesini güncelle (lapsArray)
+            // lapsArray'in nasıl sıralandığına bağlı olarak doğru indeksi bulmalıyız.
+            // Eski kodunuz (lapsayisi - position - 1) kullanıyordu,
+            // ama bu ListElementsArrayList'e bağlıydı.
+            // En güvenli yol, Lap numarasını kullanarak asıl objeyi bulmaktır.
+            int lapNumberToFind = lapInUI.lapsayisi;
+
+            for (Lap originalLap : lapsArray) {
+                if (originalLap.lapsayisi == lapNumberToFind) {
+                    originalLap.message = newNoteText;
+                    break;
+                }
+            }
+
+            // 3. RecyclerView'ı uyar
+            if (lapListAdapter != null) {
+                lapListAdapter.notifyItemChanged(position);
+            }
+
+            Toast.makeText(getContext(), "Note for Lap " + lapNumberToFind + " saved.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -353,12 +402,12 @@ public class TimerFragment extends Fragment {
         cycPerHour.setText(dec.format(calculateCycPerHour(ave)));
     }
 
-    public void save() {
+    public void save(String fileName) {
         if (getActivity() == null) return;
 
         if (Auth) {
             excelSave.save(getActivity(), unit, laps, lapsval, ave, modul, diffTime,
-                    calculateCycPerHour(ave), calculateCycPerMinute(ave), lapsArray);
+                    calculateCycPerHour(ave), calculateCycPerMinute(ave), lapsArray,fileName);
         } else {
             Toast.makeText(getContext(), "Chrono is running!", Toast.LENGTH_SHORT).show();
         }
@@ -368,7 +417,7 @@ public class TimerFragment extends Fragment {
         if (getActivity() == null) return;
 
         Log.d("TimerFragment", "Start method called");
-        debugTimeUnitInfo(); // Debug info
+        //debugTimeUnitInfo(); // Debug info
 
         Auth = false;
         button2.setText("STOP");
@@ -548,7 +597,8 @@ public class TimerFragment extends Fragment {
         if (button3 != null) button3.setVisibility(visibility);
         if (button4 != null) button4.setVisibility(visibility);
         if (button != null) button.setVisibility(visibility);
-    }
+
+     }
 
     private void startForegroundService() {
         Intent serviceIntent = new Intent(getContext(), ChronometerService.class);

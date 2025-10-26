@@ -60,7 +60,7 @@ android:fontFamily="@font/digital7"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:src="@drawable/outline_speaker_notes_24"
+        android:src="@drawable/notes"
 
 
         />

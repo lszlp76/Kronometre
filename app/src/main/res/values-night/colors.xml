@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ozelrenkdenemesi">#FFFFFFFF</color>
+    <color name="ozelrenkdenemesi">#00fFFF</color>
     <color name="colorDisable">#4C90DD</color>
     <color name="darkbuttonrengi">#7AACE4</color>
-    <color name="colorPrimary">#7AACE4</color>
+    <color name="colorPrimary">#00fFFF</color>
     <color name="colorPrimaryDark">#586FE4</color>
     <color name="colorDisableq">#7AACE4</color>
     <color name="chartColor">#FFFFFFFF</color>

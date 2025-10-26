@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:fitsSystemWindows="false"
+    style="@style/textTitleColorStyle"
     android:id="@+id/drawer_layout"
-
-
+    android:background="@drawable/futuristik"
     tools:context=".MainActivity"
     >
 
@@ -18,7 +18,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorDisable"
+        android:background="@color/fully_transparent"
         android:id="@+id/mainToolbar" >
 
 
@@ -28,48 +28,51 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            android:layout_height="?attr/actionBarSize"
+            style="@style/textTitleColorStyle"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
-            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight.ActionBar">
+            android:background="@color/fully_transparent"
+            app:theme="@style/Theme.Kronometre.NoActionBar"
+            app:popupTheme="@style/Theme.Kronometre.NoActionBar">
+            <com.google.android.gms.ads.AdView
+                xmlns:ads="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/adView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom= "true"
+                ads:adUnitId="ca-app-pub-2013051048838339/4888424937"
+                ads:adSize="BANNER"
+                >
+
+            </com.google.android.gms.ads.AdView>
         </androidx.appcompat.widget.Toolbar>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
+           style="@style/MyTabLayoutStyle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="25dp"
             android:contentDescription="@string/lap"
-            android:background="@color/colorDisable"
-
+            android:background="@color/fully_transparent"
             android:fontFamily="@font/digital7" />
 
-        <com.google.android.gms.ads.AdView
-          xmlns:ads="http://schemas.android.com/apk/res-auto"
-          android:id="@+id/adView"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-            android:layout_alignParentBottom= "true"
-          ads:adUnitId="ca-app-pub-2013051048838339/4888424937"
-          ads:adSize="BANNER"
-           >
 
-</com.google.android.gms.ads.AdView>
 
     </com.google.android.material.appbar.AppBarLayout>
 
-        <ImageView
+        <!--ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:adjustViewBounds="true"
             android:fitsSystemWindows="true"
-            android:src="@drawable/backgroundcam" />
+            android:src="@drawable/backgroundcam" /-->
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
-
+        android:background="@color/fully_transparent"
         android:contentDescription=" "
-        android:background="@color/colorDisable"
+
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -79,7 +82,6 @@
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_gravity="bottom"
-
 
         >
 
@@ -91,18 +93,13 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             >
-            <!-- activity_main.xml'de bu butonu ekleyin -->
-            <!--Button
-                android:id="@+id/btnOpenDebug"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Debug Notification"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true"
-                android:layout_margin="8dp" /-->
+
             <Button
                 android:id="@id/button2"
                 style="@style/ButtonAdjustmentStyle"
+                android:layout_width="wrap_content"
+
+
 
                 android:text="Start" />
 
@@ -110,17 +107,21 @@
                 android:id="@+id/button3"
 
                 style="@style/ButtonAdjustmentStyle"
+                android:layout_width="wrap_content"
+
                 android:text="LAP" />
 
             <Button
                 android:id="@+id/button4"
 
                 style="@style/ButtonAdjustmentStyle"
+                android:layout_width="wrap_content"
 
                 android:text="Reset" />
 
             <Button
                 android:id="@+id/button"
+                android:layout_width="wrap_content"
 
                 style="@style/ButtonAdjustmentStyle"
                 android:text="Save"
@@ -137,10 +138,14 @@
 <com.google.android.material.navigation.NavigationView
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
+    android:background="@color/fully_transparent"
     android:layout_gravity="start"
+    android:alpha="0.9"
     android:id="@+id/nav_view"
-    app:itemIconTint="@color/colorPrimary"
-    android:theme="@style/menuStyle"
+    app:itemIconTint="@color/elektrikturuncu"
+    app:itemTextAppearance="@style/MyNavigationTextAppearance"
+    app:itemTextColor="@color/checked_track_color"
+    android:theme="@style/MyNavigationViewStyle"
 
     app:headerLayout="@layout/nav_drawer"
     app:menu="@menu/drawermenu">
@@ -153,15 +158,4 @@
 
 </com.google.android.material.navigation.NavigationView>
 
-
-
-    <!--
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginEnd="@dimen/fab_margin"
-            android:layout_marginBottom="16dp"
-            app:srcCompat="@android:drawable/ic_dialog_email" /-->
 </androidx.drawerlayout.widget.DrawerLayout>

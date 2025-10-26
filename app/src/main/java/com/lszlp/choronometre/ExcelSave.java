@@ -120,14 +120,14 @@ public class ExcelSave {
         File file = new File(folder, fileName);
         file.delete();
     }
-    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute, ArrayList<Lap> lapsArray) {
+    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute, ArrayList<Lap> lapsArray,String fileName) {
 
 
         if (laps.size() > 0) {
 /*
 https://medium.com/@gracekim1611/android-studio-dialogs-edb96717a64e
 alert dialog için
- */
+
             AlertDialog.Builder alertName = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom));
             final EditText editTextName1 = new EditText(context);
             editTextName1.setSingleLine();
@@ -146,9 +146,9 @@ alert dialog için
 
             alertName.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    txt = editTextName1; // variable to collect user input
 
-                    collectInput(context); // analyze input (txt) in this method
+ */
+
                     File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
                     File folder = new File(path, "IndustrialChoronometer");
                     if (!folder.exists()) {
@@ -266,47 +266,7 @@ alert dialog için
                     }
                 }
 
-            });
-            alertName.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    dialog.cancel(); // closes dialog
-                    // display the dialog
+  }
 
-                }
-
-                ;
-            });
-            AlertDialog dialog = alertName.create();
-            dialog.show();
-            // Get the positive button and set its text color
-            Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            if (positiveButton != null) {
-                positiveButton.setTextColor(Color.parseColor("#FFFFFFFF"));
-                positiveButton.setTextSize(20);
-
-            }
-            Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-            if (negativeButton != null) {
-                negativeButton.setTextColor(Color.parseColor("#FFFFFFFF"));
-                negativeButton.setTextSize(20);
-
-            }
-        } else {
-            Toast.makeText(context, "No lap to store ! ", Toast.LENGTH_SHORT).show();
-        }
-
-
-// Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
-        /*
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-
-        } else {*/
-        // Eğer izin varsa aşağıdaki kodu uygular
-        // File sdCard = new File(Environment.getExternalStorageDirectory().getAbsolutePath());
-        //File path = getApplicationContext().getFilesDir();
-
-
-    }
 }
 

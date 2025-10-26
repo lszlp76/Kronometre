@@ -1,48 +1,34 @@
 package com.lszlp.choronometre;
 
-import static android.content.ContentValues.TAG;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.ActionBar;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.AttributeSet;
-import android.util.DisplayMetrics;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.RatingBar;
-import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
-import androidx.core.splashscreen.SplashScreen;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
@@ -50,13 +36,9 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.play.core.review.ReviewInfo;
@@ -66,9 +48,6 @@ import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.gms.tasks.*;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
-
-import java.io.Console;
-import java.util.Random;
 
 //rate app teset internal
 
@@ -83,7 +62,45 @@ import java.util.Random;
  * salise ekleme
  **/
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+        CustomAlertDialogFragment.CustomDialogListener {
+
+    private boolean keepSplashOnScreen = true;
+
+
+
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+
+        super.onSaveInstanceState(outState);
+        // Gerekli state'leri kaydet
+        if (viewPager != null) {
+            outState.putInt("currentTab", viewPager.getCurrentItem());
+        }
+        outState.putBoolean("isRunning", auth);
+
+    }
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // State'leri geri yükle
+        if (viewPager != null) {
+            int currentTab = savedInstanceState.getInt("currentTab", 0);
+            viewPager.setCurrentItem(currentTab);
+        }
+        auth = savedInstanceState.getBoolean("isRunning", false);
+        // Ekran açık/kapalı durumunu geri yükle
+        boolean isScreenOn = savedInstanceState.getBoolean("isScreenOn", false);
+        if (isScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            screenSaverSwitch.setChecked(true);
+        }
+    }
+
+
+
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -113,44 +130,76 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ReviewManager manager;
     NavigationView navigationView;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    Switch drawerSwitchSec;
+    androidx.appcompat.widget.SwitchCompat drawerSwitchSec;
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    Switch drawerSwitchCmin;
-    Switch drawerSwitchDmin;
-    Switch screenSaverSwitch;
+    androidx.appcompat.widget.SwitchCompat drawerSwitchCmin;
+    androidx.appcompat.widget.SwitchCompat drawerSwitchDmin;
+    androidx.appcompat.widget.SwitchCompat screenSaverSwitch;
     ViewPager viewPager;
-    Switch switchSec, switchCmin, switchDmin;
-    AppBarLayout appBarLayout;
     private AdView adView ;
     Button startButton, lapButton, resetButton, saveButton;
-    private ActivityMainBinding binding;
     private static final String TAG = "MainActivity";
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
 
-    private Toolbar toolbar;
-    private int[] TAB_ICONS = {
+    private final int[] TAB_ICONS = {
             R.drawable.ic_baseline_timer_24,
             R.drawable.ic_baseline_stacked_line_chart_24,
             R.drawable.ic_baseline_save
     };
 
 
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Drawer toggle'ı yeniden sync et
+        toggle.syncState();
+    }
 
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-       // SplashScreen.installSplashScreen(this) ; //splash screen i çağırır
+        // Splash screen'i yükle
+       // SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
 
         super.onCreate(savedInstanceState);
+        // ActionBar'ı gizle
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // Splash screen özelleştirme
+//        splashScreen.setKeepOnScreenCondition(new SplashScreen.KeepOnScreenCondition() {
+//            @Override
+//            public boolean shouldKeepOnScreen() {
+//                return keepSplashOnScreen;
+//            }
+//        });
+        // Uygulama hazır olduğunda splash screen'i kapat
+        initializeApp();
+    }
+
+    private void initializeApp() {
+        setupAppContent();
+//        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                keepSplashOnScreen = false;
+//                // Ana uygulama içeriğini yükle
+//                setupAppContent();
+//            }
+//        }, 2000); // 2 saniye
+    }
+
+
+    private void setupAppContent() {
+        // Ana uygulama içeriğini hazırla
+
         new ThemeColors(this); // renk değiştirme sınıfı
-
-
-
-
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        com.lszlp.choronometre.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         activateReviewInfo();
@@ -158,37 +207,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
         //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
 
-       // / Initialize the Google Mobile Ads SDK on the main thread.
-        MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-                // SDK is initialized, now load the ad.
-                loadBannerAd();
-            }
+        // / Initialize the Google Mobile Ads SDK on the main thread.
+        MobileAds.initialize(this, initializationStatus -> {
+            // SDK is initialized, now load the ad.
+            loadBannerAd();
         });
 
-        // MainActivity.java onCreate'de
-//        Button btnOpenDebug = findViewById(R.id.btnOpenDebug);
-//        btnOpenDebug.setOnClickListener(v -> {
-//            Intent debugIntent = new Intent(MainActivity.this, TestNotificationActivity.class);
-//            startActivity(debugIntent);
-//        });
-         adView = binding.adView;
-
-
-//        new Thread(
-//                () -> {
-//                    // Initialize the Google Mobile Ads SDK on a background thread.
-//                    MobileAds.initialize(this, initializationStatus -> {});
-//                })
-//                .start();
-//
-//    adView = binding.adView;
-//       AdRequest adRequest = new AdRequest.Builder()
-//            .build();
-//    adView.loadAd(adRequest);
-
-//Önce kullanıcının yazma izni olup olmadığını kontrol ediyoruz
+        adView = binding.adView;
 
 
         // Check for WRITE_EXTERNAL_STORAGE permission
@@ -202,24 +227,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
-        tabs.getTabAt(0).setIcon(TAB_ICONS[0]);
-        tabs.getTabAt(1).setIcon(TAB_ICONS[1]);
-        tabs.getTabAt(2).setIcon(TAB_ICONS[2]);
+        if (tabs.getTabAt(0) != null) {
+            tabs.getTabAt(0).setIcon(TAB_ICONS[0]);
+        }
+        if (tabs.getTabAt(1) != null) {
+            tabs.getTabAt(1).setIcon(TAB_ICONS[1]);
+        }
+        if (tabs.getTabAt(2) != null) {
+            tabs.getTabAt(2).setIcon(TAB_ICONS[2]);
+        }
 
         viewPager.setOffscreenPageLimit(2);
-        
 
-        // FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        //fragmentTransaction.add(R.id.view_pager,TimerFragment.class,null);
 
-       // toolbar.setBackgroundColor(Color.parseColor("#80000000")) ;
-
-        drawer = binding.drawerLayout;// findViewById(R.id.drawer_layout);
-        toolbar = binding.toolbar;// findViewById(R.id.toolbar);
+        drawer = binding.drawerLayout;
+        Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
 
         //navigation menu aktivasyon
-        navigationView = binding.navView;// findViewById(R.id.nav_view);
+        navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);
 
         toggle = new ActionBarDrawerToggle(
@@ -228,49 +254,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 toolbar,
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
-                 toggle.setDrawerIndicatorEnabled(true);
-                drawer.addDrawerListener(toggle);
-/**
- * drawer open ve close ile açaabilrsin.
- */
-        // Now, syncState() should be called in onPostCreate()
-        //toggle.syncState(); // Remove this line from onCreate()
+        toggle.setDrawerIndicatorEnabled(true);
+        drawer.addDrawerListener(toggle);
 
-
-        ;
-/**
- * NavigationView üzerine swicth bağlamak için aşağıdaki
- * komut kümesini eklemelisin
- */
 
         navigationView.getMenu().findItem(R.id.timeUnitSec)
-                .setActionView(new Switch(this));
+                .setActionView(new androidx.appcompat.widget.SwitchCompat(this));
         navigationView.getMenu().findItem(R.id.timeUnitCmin)
-                .setActionView(new Switch(this));
+                .setActionView(new androidx.appcompat.widget.SwitchCompat(this));
         navigationView.getMenu().findItem(R.id.timeUnitDmin)
-                .setActionView(new Switch(this));
+                .setActionView(new androidx.appcompat.widget.SwitchCompat(this));
         navigationView.getMenu().findItem(R.id.screenSaver)
-                .setActionView(new Switch(this));
+                .setActionView(new androidx.appcompat.widget.SwitchCompat(this));
 
 
-        drawerSwitchSec = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitSec).getActionView());
-        drawerSwitchCmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
-        drawerSwitchDmin = ((Switch) navigationView.getMenu().findItem(R.id.timeUnitDmin).getActionView());
-        screenSaverSwitch = ((Switch) navigationView.getMenu().findItem(R.id.screenSaver).getActionView());
+        drawerSwitchSec = ((androidx.appcompat.widget.SwitchCompat) navigationView.getMenu().findItem(R.id.timeUnitSec).getActionView());
+        drawerSwitchCmin = ((androidx.appcompat.widget.SwitchCompat) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
+        drawerSwitchDmin = ((androidx.appcompat.widget.SwitchCompat) navigationView.getMenu().findItem(R.id.timeUnitDmin).getActionView());
+        screenSaverSwitch = ((androidx.appcompat.widget.SwitchCompat) navigationView.getMenu().findItem(R.id.screenSaver).getActionView());
 //menu item'a ulaşmak için menuıtem olarak çağırmalısın
         MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
-        screenSaverSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked){
+        screenSaverSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked){
 
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı açık tutma
-                    scren.setTitle(getString(R.string.screenOff));
-                }else{
-                    screenSaverSwitch.setChecked(false);
-                    scren.setTitle(getString(R.string.screenOn));
-                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı kapatma
-                }
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı açık tutma
+                scren.setTitle(getString(R.string.screenOff));
+            }else{
+                screenSaverSwitch.setChecked(false);
+                scren.setTitle(getString(R.string.screenOn));
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı kapatma
             }
         });
         //Mark:--> SWİÇLER
@@ -282,13 +294,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerSwitchDmin.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
         screenSaverSwitch.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
         screenSaverSwitch.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
-        drawerSwitchSec.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    drawerSwitchSec.setEnabled(false);
-                    drawerSwitchCmin.setChecked(false);
-                    drawerSwitchDmin.setChecked(false);
+        drawerSwitchSec.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                drawerSwitchSec.setEnabled(false);
+                drawerSwitchCmin.setChecked(false);
+                drawerSwitchDmin.setChecked(false);
+                if (viewPager.getAdapter() != null) {
                     TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                     fragment.modul = 60;
                     fragment.milis = 1000;
@@ -296,22 +307,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fragment.unit = "Sec.";
                     fragment.Timeunit = "Sec. - Second ";
                     fragment.binding.unitValue.setText(fragment.unit);
-                    drawer.close();
-                } else {
-                   // drawerSwitchCmin.setChecked(true);
-                    //drawerSwitchDmin.setChecked(true);
-                    drawerSwitchSec.setEnabled(true);
-
                 }
+                drawer.close();
+            } else {
+                drawerSwitchSec.setEnabled(true);
+
             }
         });
-        drawerSwitchCmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    drawerSwitchCmin.setEnabled(false);
-                    drawerSwitchSec.setChecked(false);
-                    drawerSwitchDmin.setChecked(false);
+        drawerSwitchCmin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                drawerSwitchCmin.setEnabled(false);
+                drawerSwitchSec.setChecked(false);
+                drawerSwitchDmin.setChecked(false);
+                if (viewPager.getAdapter() != null) {
                     TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                     fragment.modul = 100;
                     fragment.milis = 600;
@@ -319,21 +327,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fragment.unit = "Cmin.";
                     fragment.Timeunit = "Cmin. - Hundredth of Minute ";
                     fragment.binding.unitValue.setText(fragment.unit);
-                    drawer.close();
-                } else {
-                    //drawerSwitchSec.setChecked(true);
-                    //drawerSwitchDmin.setChecked(true);
-                    drawerSwitchCmin.setEnabled(true);
                 }
+                drawer.close();
+            } else {
+                drawerSwitchCmin.setEnabled(true);
             }
         });
-        drawerSwitchDmin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    drawerSwitchDmin.setEnabled(false);
-                    drawerSwitchCmin.setChecked(false);
-                    drawerSwitchSec.setChecked(false);
+        drawerSwitchDmin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                drawerSwitchDmin.setEnabled(false);
+                drawerSwitchCmin.setChecked(false);
+                drawerSwitchSec.setChecked(false);
+                if (viewPager.getAdapter() != null) {
                     TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                     fragment.modul = 166;// çalışıyor
                     fragment.milis = 360;
@@ -341,43 +346,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fragment.unit = "Dmh.";
                     fragment.Timeunit = "Dmh. - 10Thounsandth of Minute ";
                     fragment.binding.unitValue.setText(fragment.unit);
-                    drawer.close();
-                } else {
-                   // drawerSwitchCmin.setChecked(true);
-                   // drawerSwitchSec.setChecked(true);
-                    drawerSwitchDmin.setEnabled(true);
                 }
+                drawer.close();
+            } else {
+                drawerSwitchDmin.setEnabled(true);
             }
         });
 
         /**** navigation sonu ***/
 
-        // startButton = findViewById(R.id.button2);
         startButton = binding.button2;
-        lapButton = binding.button3;//findViewById(R.id.button3);
+        lapButton = binding.button3;
         lapButton.setEnabled(false);
-        resetButton = binding.button4;//findVi
-        // ewById(R.id.button4);
+        resetButton = binding.button4;
         resetButton.setEnabled(false);
-        saveButton = binding.button;//findViewById(R.id.button);
+        saveButton = binding.button;
         saveButton.setEnabled(false);
 
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                fragment.save();
-            }
+        saveButton.setOnClickListener(view -> {
+                    if (viewPager.getAdapter() != null) {
+                        showSaveDialog();
+                    }
+            /*
+            if (viewPager.getAdapter() != null) {
+
+            }*/
         });
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ;
-                // fragmenti initial et.
-                // sadece 0nci siradaki fragmeni çalıştır
+        startButton.setOnClickListener(view -> {
+            // fragmenti initial et.
+            // sadece 0nci siradaki fragmeni çalıştır
+            if (viewPager.getAdapter() != null) {
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                 isResetDone = false;
-                if (startButton.getText() != "STOP") {
+                if (!startButton.getText().equals("STOP")) {
                     if (fragment.modul == 0) {
                         drawer.open();
                         Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
@@ -392,7 +393,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         fragment.start();
                         lapButton.setEnabled(true);
-                        startButton.setText("STOP");
+                        startButton.setText(R.string.stop);
                         resetButton.setEnabled(false);
                         saveButton.setEnabled(false);
                     }
@@ -412,59 +413,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
 
                     fragment.stop();
-                    startButton.setText("START");
+                    startButton.setText(R.string.start);
                     lapButton.setEnabled(false);
                     saveButton.setEnabled(true);// save butonu açık
                     resetButton.setEnabled(true);// reset butonu açık
                 }
             }
         });
-        lapButton.setOnClickListener(new View.OnClickListener() {
-                                         @Override
-                                         public void onClick(View view) {
-                                             // lap butonuna deneme amaçlı renk değiştirme sınıfı kodu çalıştırma eklendi
-                                             int red= new Random().nextInt(255);
-                                             int green= new Random().nextInt(255);
-                                             int blue= new Random().nextInt(255);
+        lapButton.setOnClickListener(view -> {
+            // lap butonuna deneme amaçlı renk değiştirme sınıfı kodu çalıştırma eklendi
 
 
-                                             TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                                             fragment.takeLap();
-                                           //  ThemeColors.setNewThemeColor(MainActivity.this, red, green, blue);
+            if (viewPager.getAdapter() != null) {
+                TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                fragment.takeLap();
+            }
 
-                                         }
-                                     }
-        );
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-
-            public void onClick(View view) {
+        });
+        resetButton.setOnClickListener(view -> {
+            if (viewPager.getAdapter() != null);
+            showResetDialog();
+                });
+        /*resetButton.setOnClickListener(view -> {
+            if (viewPager.getAdapter() != null) {
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
                 ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AlertDialogCustom));
                 builder.setTitle("Delete All Datas");
                 builder.setMessage("Are you sure to delete all datas ?");
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton("No", (dialogInterface, i) -> System.out.println("No ya basıldı"));
+                builder.setPositiveButton("Yes", (dialogInterface, i) -> {
+                    resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
+                    startButton.setText(R.string.start);
+                    startButton.setEnabled(true);// start tuşu açılıyor
+                    lapButton.setEnabled(false);// lap tuşu kapanıyor
+                    saveButton.setEnabled(false); //save butonu kapat
 
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        System.out.println("No ya basıldı");
-                    }
-
-                } );
-               builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-                        startButton.setText("START");
-                        startButton.setEnabled(true);// start tuşu açılıyor
-                        lapButton.setEnabled(false);// lap tuşu kapanıyor
-                        saveButton.setEnabled(false); //save butonu kapat
-
-                        fragment.reset();
-                        chartFragment.ClearChart();
-                    }
+                    fragment.reset();
+                    chartFragment.ClearChart();
                 });
                 AlertDialog dialog = builder.create();
                 dialog.show();
@@ -482,34 +469,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 }
             }
+        });*/
+
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                } else {
+                    if (isEnabled()) {
+                        setEnabled(false);
+                        getOnBackPressedDispatcher().onBackPressed();
+                    }
+                }
+            }
         });
-    }
-//** ADMOB FUNCS***
-private AdSize getAdSize() {
-    // Determine the screen width (less decorations) to use for the ad width.
-    Display display = getWindowManager().getDefaultDisplay();
-    DisplayMetrics outMetrics = new DisplayMetrics();
-    display.getMetrics(outMetrics);
-
-    float density = outMetrics.density;
-
-    float adWidthPixels = adView.getWidth();
-
-    // If the ad hasn't been laid out, default to the full screen width.
-    if (adWidthPixels == 0) {
-        adWidthPixels = outMetrics.widthPixels;
-    }
-
-    int adWidth = (int) (adWidthPixels / density);
-    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
-}
-    @Override
-    public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     /*
@@ -522,30 +496,32 @@ private AdSize getAdSize() {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (action == KeyEvent.ACTION_UP) {
 
-                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    if (viewPager.getAdapter() != null) {
+                        TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
 
-                    if (startButton.getText() != "STOP") {
+                        if (!startButton.getText().equals("STOP")) {
 
-                        if (fragment.modul == 0) {
-                            drawer.open();
-                            Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
+                            if (fragment.modul == 0) {
+                                drawer.open();
+                                Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                auth = true;
+                                fragment.start();
+                                lapButton.setEnabled(true);
+                                startButton.setText(R.string.start);
+                                resetButton.setEnabled(false);
+                                saveButton.setEnabled(false);
+                            }
+
                         } else {
-                            auth = true;
-                            fragment.start();
-                            lapButton.setEnabled(true);
-                            startButton.setText("STOP");
-                            resetButton.setEnabled(false);
-                            saveButton.setEnabled(false);
+                            //stop yapılması
+                            auth = false;
+                            fragment.stop();
+                            startButton.setText(R.string.start);
+                            lapButton.setEnabled(false);
+                            saveButton.setEnabled(true);// save butonu açık
+                            resetButton.setEnabled(true);// reset butonu açık
                         }
-
-                    } else {
-                        //stop yapılması
-                        auth = false;
-                        fragment.stop();
-                        startButton.setText("START");
-                        lapButton.setEnabled(false);
-                        saveButton.setEnabled(true);// save butonu açık
-                        resetButton.setEnabled(true);// reset butonu açık
                     }
                 }
 
@@ -553,9 +529,11 @@ private AdSize getAdSize() {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 if (action == KeyEvent.ACTION_DOWN && auth) {
 
-                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    if (viewPager.getAdapter() != null) {
+                        TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
 
-                    fragment.takeLap();
+                        fragment.takeLap();
+                    }
                 }
                 return true;
             default:
@@ -564,104 +542,89 @@ private AdSize getAdSize() {
 
     }
 
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
+
 
     @SuppressLint("ResourceAsColor")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        switch (item.getItemId()) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.nav_about) {
+            Intent intent = new Intent(MainActivity.this, WebpagesActivities.class);
+            String link = "https://www.agromtek.com/industrialchronometer/about.html";
+            intent.putExtra("link", link);
+            startActivity(intent);
 
-            case (R.id.nav_about):
-                Intent intent = new Intent(MainActivity.this, WebpagesActivities.class);
-                String link = "https://www.agromtek.com/industrialchronometer/about.html";
-                intent.putExtra("link", link);
-                startActivity(intent);
-
-                break;
-            case (R.id.nav_policy):
-                Intent intent2 = new Intent(MainActivity.this, WebpagesActivities.class);
-                String link2 = "https://www.agromtek.com/indchroprivacypol.html";
-                intent2.putExtra("link", link2);
-                startActivity(intent2);
-                break;
-            case (R.id.nav_save):
-                if (!auth) {
+        } else if (itemId == R.id.nav_policy) {
+            Intent intent2 = new Intent(MainActivity.this, WebpagesActivities.class);
+            String link2 = "https://www.agromtek.com/indchroprivacypol.html";
+            intent2.putExtra("link", link2);
+            startActivity(intent2);
+        } else if (itemId == R.id.nav_save) {
+            if (!auth) {
+                if (viewPager.getAdapter() != null) {
                     TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                    fragment.save();
-
+                    //fragment.save();
                 }
-                break;
-            case (R.id.nav_share):
-                if (!auth) {
-                    //en son tab sayfasını açmak
-                   /* viewPager.setCurrentItem(viewPager.getCurrentItem() + 2, true);
-                    */
-                    //play store adresini paylaşmak
-                    String subject = "Try Industrial Chronometer ⏱️";
-                    String sharedLink = "https://play.google.com/store/apps/details?id=com.lszlp.choronometre";
-                    Intent sendIntent = new Intent();
-                    sendIntent.setAction(Intent.ACTION_SEND);
-                    sendIntent.putExtra(Intent.EXTRA_TEXT,  sharedLink);
-                    sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject );
-                    sendIntent.putExtra(Intent.EXTRA_TITLE, "Sending Industrial Chronometer");
 
-                    sendIntent.setType("text/plain");
+            }
+        } else if (itemId == R.id.nav_share) {
+            if (!auth) {
+                //play store adresini paylaşmak
+                String subject = "Try Industrial Chronometer ⏱️";
+                String sharedLink = "https://play.google.com/store/apps/details?id=com.lszlp.choronometre";
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, sharedLink);
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                sendIntent.putExtra(Intent.EXTRA_TITLE, "Sending Industrial Chronometer");
 
-                    Intent shareIntent = Intent.createChooser(sendIntent, null);
-                    startActivity(shareIntent);
-                }
-                break;
+                sendIntent.setType("text/plain");
 
-            case (R.id.rateApp):
-                if (reviewInfo != null){
-                    Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
-                    flow.addOnCompleteListener(task -> {
-                        // The flow has finished. The API does not indicate whether the user
-                        // reviewed or not, or even whether the review dialog was shown. Thus, no
-                        // matter the result, we continue our app flow.
-                        Toast.makeText(this,"Review completed",Toast.LENGTH_LONG).show();
-                        navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
-                    });
-                }else
-                {
-                    Dialog dialog = new Dialog(MainActivity.this);
+                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                startActivity(shareIntent);
+            }
+        } else if (itemId == R.id.rateApp) {
+            if (reviewInfo != null) {
+                Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
+                flow.addOnCompleteListener(task -> {
+                    // The flow has finished. The API does not indicate whether the user
+                    // reviewed or not, or even whether the review dialog was shown. Thus, no
+                    // matter the result, we continue our app flow.
+                    Toast.makeText(this, "Review completed", Toast.LENGTH_LONG).show();
+                    navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
+                });
+            } else {
+                Dialog dialog = new Dialog(MainActivity.this);
 
+                if (dialog.getWindow() != null) {
                     dialog.getWindow().setBackgroundDrawable
                             (new ColorDrawable
                                     (Color.parseColor
-                                            ("#"+Integer.toHexString
+                                            ("#" + Integer.toHexString
                                                     (ContextCompat.getColor
-                                                            (this,R.color.colorDisable)))));
-                    dialog.setContentView(R.layout.dialog);
-                    dialog.show();
-
-                    RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
-                    TextView tvRating = dialog.findViewById(R.id.tv_rating);
-                    Button bt_sbmt = dialog.findViewById(R.id.bt_submit);
-                    ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
-                                                               @Override
-                                                               public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
-                                                                   //tvRating.setText(String.format("(%s)",v));
-                                                               }
-                                                           }
-
-                    );
-
-                    bt_sbmt.setOnClickListener(new View.OnClickListener(){
-                        @Override
-                        public void onClick(View view) {
-                            //String sRating = String.valueOf(ratingBar.getRating());
-                            //gidecek değer sRaitng
-                            startReviewFlow();
-
-                            dialog.dismiss();
-                        }
-                    });
-                    //https://icons8.com/icons/set/toggle-off-on
+                                                            (this, R.color.colorDisable)))));
                 }
+                dialog.setContentView(R.layout.dialog);
+                dialog.show();
+
+                RatingBar ratingBar = dialog.findViewById(R.id.ratingBar);
+                Button bt_sbmt = dialog.findViewById(R.id.bt_submit);
+                ratingBar.setOnRatingBarChangeListener((ratingBar1, v, b) -> {
+                });
+
+                bt_sbmt.setOnClickListener(view -> {
+                    startReviewFlow();
+
+                    dialog.dismiss();
+                });
+            }
 
 
-                break;
         }
         drawer.closeDrawers();
         return true;
@@ -675,7 +638,6 @@ private AdSize getAdSize() {
                 reviewInfo = task.getResult();
             } else {
                 // There was some problem, log or handle the error code.
-//Toast.makeText(this,"Review failed to start",Toast.LENGTH_LONG).show();
                 navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
                 navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated !");
             }
@@ -698,7 +660,6 @@ private AdSize getAdSize() {
     private void loadBannerAd() {
         //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
         //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
-       // String adUnitId = "ca-app-pub-2013051048838339/8612047524"; // Replace with your actual ad unit ID
 
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
@@ -710,7 +671,7 @@ private AdSize getAdSize() {
             }
 
             @Override
-            public void onAdFailedToLoad(LoadAdError adError) {
+            public void onAdFailedToLoad(@NonNull LoadAdError adError) {
                 // Code to be executed when an ad request fails.
                 Log.e(TAG, "Ad failed to load: " + adError.getMessage());
                 Toast.makeText(MainActivity.this, "Ad failed to load", Toast.LENGTH_SHORT).show();
@@ -738,18 +699,63 @@ private AdSize getAdSize() {
         // Sync the toggle state after onRestoreInstanceState has occurred.
         toggle.syncState();
     }
-    // MainActivity veya TimerFragment'ta
-    private void showDndGuide() {
-        new AlertDialog.Builder(this)
-                .setTitle("Rahatsız Etmeyin İzni Nasıl Verilir?")
-                .setMessage("1. 'Ayarlara Git' butonuna tıklayın\n" +
-                        "2. 'Gelişmiş' veya 'Diğer ayarlar'a gidin\n" +
-                        "3. 'Rahatsız Etmeyin' bölümünü bulun\n" +
-                        "4. 'Chronometre' uygulamasına izin verin\n" +
-                        "5. Uygulamaya geri dönün")
-                .setPositiveButton("Anladım", null)
-                .show();
-    }
-}
 
-//https://www.youtube.com/watch?v=bKJeDD-tP_Y
+    private void showResetDialog() {
+        // Düzeltildi: newInstance yerine newInstanceForReset kullanıldı
+        CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForReset();
+        dialog.show(getSupportFragmentManager(), "RESET_DIALOG_TAG");
+    }
+
+    private void showSaveDialog() {
+        // Düzeltildi: newInstance yerine newInstanceForSave kullanıldı
+        CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForSave();
+        dialog.show(getSupportFragmentManager(), "SAVE_DIALOG_TAG");
+    }
+// LISTENER METOTLARI
+
+    @Override
+    public void onResetConfirmed() {
+        TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+        ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
+        resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
+        startButton.setText(R.string.start);
+        startButton.setEnabled(true);// start tuşu açılıyor
+        lapButton.setEnabled(false);// lap tuşu kapanıyor
+        saveButton.setEnabled(false); //save butonu kapat
+        fragment.reset();
+        chartFragment.ClearChart();
+        Toast.makeText(this, "All data has been deleted.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onSaveConfirmed(String fileName) {
+        TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+        // Düzeltildi: fileName değişkeni save() metoduna parametre olarak eklendi
+        fragment.save(fileName);
+    }
+
+    @Override
+    public void onCancelled() {
+        //Toast.makeText(this, "İşlem iptal edildi.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onDeleteConfirmed(int position, String fileName) {
+
+    }
+
+    @Override
+    public void onNoteSaved(int position, int lapNumber, String noteText) {
+        if (viewPager != null && viewPager.getAdapter() != null) {
+            // TimerFragment'ı bul ve notu güncellemesi için metodunu çağır
+            TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+            if (fragment != null && fragment.isAdded()) {
+                fragment.updateNoteForLap(position, noteText);
+            }
+        }
+    }
+
+
+
+
+}

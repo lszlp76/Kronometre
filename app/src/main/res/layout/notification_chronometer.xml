@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -13,7 +14,7 @@
         android:layout_height="24dp"
         android:src="@drawable/ic_baseline_timer_24"
         android:layout_marginEnd="12dp"
-        android:tint="@android:color/white" />
+        app:tint="@android:color/white" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -25,29 +26,35 @@
             android:id="@+id/notification_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Chronometer"
+            android:text="Industrial Chronometer"
             android:textColor="@android:color/white"
             android:textSize="14sp" />
-
+        <TextView
+            android:id="@+id/timeUnitText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="unit"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
         <TextView
             android:id="@+id/notification_time"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:text="00:00:00"
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <Button
+    <!--Button
         android:id="@+id/notification_stop"
         android:layout_width="wrap_content"
-        android:layout_height="32dp"
+        android:layout_height="48dp"
         android:text="Duraklat"
         android:textSize="12sp"
-        android:background="@android:color/holo_orange_dark"
+        android:background="@android:color/holo_orange_light"
         android:textColor="@android:color/white"
         android:paddingStart="8dp"
-        android:paddingEnd="8dp" />
+        android:paddingEnd="8dp" /-->
 
 </LinearLayout>

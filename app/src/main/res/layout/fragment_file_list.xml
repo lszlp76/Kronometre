@@ -6,21 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".FileList">
 
-<androidx.recyclerview.widget.RecyclerView
-    android:id="@+id/fileList"
-    android:textAppearance="?android:attr/textAppearanceLarge"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/fileList"
+        style="@style/textColorStyle"
 
-    style="@style/textColorStyle"
-    android:textSize="25sp"
-    android:fontFamily="@font/digital7"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="5dp"
 
-    android:longClickable="true"
-    android:focusable="true"
-    android:layout_margin="5dp"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+        android:focusable="true"
+        android:fontFamily="@font/digital7"
+        android:longClickable="true"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textSize="25sp">
 
-</androidx.recyclerview.widget.RecyclerView>
+    </androidx.recyclerview.widget.RecyclerView>
     <!-- TODO: Update blank fragment layout -->
 
     <!--ListView

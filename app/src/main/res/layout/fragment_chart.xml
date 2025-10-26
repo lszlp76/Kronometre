@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/fully_transparent"
+    android:alpha="0.7"
     tools:context=".ChartFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -17,13 +19,16 @@
 
         <TextView
             android:id="@+id/chartTimer"
-            style="@style/TableText"
+            style="@style/textTitleColorStyle"
+            android:layout_centerHorizontal="true"
             android:autoSizeTextType="uniform"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            android:gravity="center"
             android:text="00:00:00"
             android:textAlignment="center"
+            android:fontFeatureSettings="tnum"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -33,7 +38,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@+id/chartTimer"
-            android:background="?android:colorBackground"
+            android:background="@color/fully_transparent"
 
             />
 

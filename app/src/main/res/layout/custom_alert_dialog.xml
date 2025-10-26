@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:alpha="1"
+    android:padding="20dp"
+    android:background="@drawable/glass_panel_background"
+    >
+
+    <TextView
+        android:id="@+id/dialogTitle"
+        style="@style/textTitleColorStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="UYARI BAŞLIĞI"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textColor="#00FFFF"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"/>
+
+    <TextView
+        style="@style/TableText"
+        android:id="@+id/dialogMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lineSpacingMultiplier="2"
+        android:text="Bu, özelleştirilmiş bir uyarı metnidir."
+        android:textSize="16sp"
+
+        android:layout_marginBottom="10dp"/>
+
+    <EditText
+        style="@style/TableText"
+        android:id="@+id/dialogFileNameInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+
+        android:hint="HERE"
+        android:textColorHint="#99FFFF"
+
+        android:backgroundTint="#00FFFF"
+        android:visibility="gone" android:layout_marginBottom="20dp"/>
+
+    <EditText
+        style="@style/TableText"
+        android:id="@+id/dialogNoteInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="#99FFFF"
+
+        android:backgroundTint="#00FFFF"
+        android:visibility="gone"
+        android:layout_marginBottom="20dp"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal">
+
+        <Button
+            style="@style/TableText"
+            android:id="@+id/btnNegative"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CANCEL"
+            android:background="@drawable/glass_button_background"
+
+            android:layout_marginEnd="10dp"/>
+
+        <Button
+            style="@style/TableText"
+            android:id="@+id/btnPositive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OK"
+
+            android:background="@drawable/glass_button_background"
+            />
+
+    </LinearLayout>
+
+</LinearLayout>

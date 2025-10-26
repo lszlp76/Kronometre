@@ -5,8 +5,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
@@ -17,6 +19,7 @@ import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
 
 public class ChronometerService extends Service {
     private static final String TAG = "ChronometerService";
@@ -39,6 +42,10 @@ public class ChronometerService extends Service {
     private String timeUnit = "Sec."; // Varsayılan
     private int modul = 60; // Varsayılan saniye
     private int milis = 1000; // Varsayılan
+//notifydan app e mudahale etmek için broadCastreceiver kullanmak
+    private BroadcastReceiver pauseResumeReceiver;
+private Context context;
+
 
     @Override
     public void onCreate() {
@@ -46,8 +53,33 @@ public class ChronometerService extends Service {
         handler = new Handler();
         Log.d(TAG, "🔥 Service onCreate");
         createProperNotificationChannel();
+        // 🔥 Broadcast Receiver'ı oluştur
+        setupPauseResumeReceiver();
     }
+    // 🔥 YENİ METOD: Pause/Resume Broadcast Receiver'ı kur
+    private void setupPauseResumeReceiver() {
+        pauseResumeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                Log.d(TAG, "📡 Broadcast received in service: " + action);
 
+                if (Constants.ACTION_PAUSE.equals(action)) {
+                    pauseChronometer();
+                } else if (Constants.ACTION_RESUME.equals(action)) {
+                    resumeChronometer();
+                }
+            }
+        };
+        // Broadcast Receiver'ı kaydet
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Constants.ACTION_PAUSE);
+        filter.addAction(Constants.ACTION_RESUME);
+
+        ContextCompat.registerReceiver(this, pauseResumeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
+
+        Log.d(TAG, "✅ Pause/Resume BroadcastReceiver registered");
+    }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "🔥 onStartCommand: " + (intent != null ? intent.getAction() : "null"));
@@ -236,28 +268,19 @@ public class ChronometerService extends Service {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                .setAutoCancel(false)
-                .addAction(R.drawable.ic_baseline_timer_24, "Stop", stopPendingIntent);
+                .setAutoCancel(false);
+                //.addAction(R.drawable.ic_baseline_timer_24, "Stop", stopPendingIntent);
 
         // Custom layout için
         try {
             RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_chronometer);
             remoteViews.setTextViewText(R.id.notification_time, timeText);
+            remoteViews.setTextViewText(R.id.timeUnitText, timeUnit);
 
-            // 🔥 Buton metnini pause/resume durumuna göre ayarla
-            if (isPaused) {
-                remoteViews.setTextViewText(R.id.notification_stop, "Çalıştır"); // Resume butonu
-                remoteViews.setInt(R.id.notification_stop, "setBackgroundColor", Color.parseColor("#4CAF50")); // Yeşil
-            } else {
-                remoteViews.setTextViewText(R.id.notification_stop, "Duraklat"); // Pause butonu
-                remoteViews.setInt(R.id.notification_stop, "setBackgroundColor", Color.parseColor("#FF9800")); // Turuncu
-            }
-
-            remoteViews.setOnClickPendingIntent(R.id.notification_stop, pauseResumePendingIntent);
-
-            builder.setStyle(new NotificationCompat.DecoratedCustomViewStyle());
+           builder.setStyle(new NotificationCompat.DecoratedCustomViewStyle());
             builder.setCustomContentView(remoteViews);
             Log.d(TAG, "Custom notification layout applied - Paused: " + isPaused);
+
         } catch (Exception e) {
             Log.e(TAG, "Error creating custom notification layout: " + e.getMessage(), e);
         }
@@ -318,11 +341,11 @@ public class ChronometerService extends Service {
     private String getNotificationTitle() {
         switch (timeUnit) {
             case "Sec.":
-                return "⏱️ Chronometer (Seconds)" + (isPaused ? " ⏸️" : "");
+                return "⏱️ Time@Seconds" + (isPaused ? " ⏸️" : "");
             case "Cmin.":
-                return "⏱️ Chronometer (Centiminutes)" + (isPaused ? " ⏸️" : "");
+                return "⏱️ Time@Centiminutes" + (isPaused ? " ⏸️" : "");
             case "Dmh.":
-                return "⏱️ Chronometer (Deciminutes)" + (isPaused ? " ⏸️" : "");
+                return "⏱️ Time@Deciminutes)" + (isPaused ? " ⏸️" : "");
             default:
                 return "⏱️ Chronometer" + (isPaused ? " ⏸️" : "");
         }
@@ -382,6 +405,17 @@ public class ChronometerService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "🔥 Service destroyed");
+
+        // 🔥 Broadcast Receiver'ı temizle
+        if (pauseResumeReceiver != null) {
+            try {
+                unregisterReceiver(pauseResumeReceiver);
+                Log.d(TAG, "✅ Pause/Resume BroadcastReceiver unregistered");
+            } catch (Exception e) {
+                Log.e(TAG, "❌ Error unregistering receiver: " + e.getMessage());
+            }
+        }
+
         stopChronometer();
     }
 

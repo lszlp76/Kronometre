@@ -5,65 +5,69 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@drawable/futuristik"
     android:id="@+id/drawer_layout"
-    android:background="@drawable/blueback"
-
     tools:context=".MainActivity"
     >
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:background="@color/fully_transparent"
+            android:contentDescription=" "
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            tools:ignore="HardcodedText" />
+
+        <com.google.android.gms.ads.AdView
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/adView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop= "true"
+            ads:adUnitId="ca-app-pub-2013051048838339/4888424937"
+            ads:adSize="BANNER"
+            >
+
+        </com.google.android.gms.ads.AdView>
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
+
         android:layout_height="wrap_content"
+
         android:id="@+id/mainToolbar"
         android:background="@color/fully_transparent"
 
         >
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_height="?attr/actionBarSize"
             android:layout_width="match_parent"
+            android:background="@color/fully_transparent"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-              app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight.ActionBar">
-        </androidx.appcompat.widget.Toolbar>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.DayNight.ActionBar"/>
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabs"
-            android:background="@color/fully_transparent"
-
+            style="@style/MyTabLayoutStyle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="20dp"
             android:contentDescription="@string/lap"
+            android:background="@color/fully_transparent"
             android:fontFamily="@font/digital7" />
 
-        <com.google.android.gms.ads.AdView
-          xmlns:ads="http://schemas.android.com/apk/res-auto"
-          android:id="@+id/adView"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-
-            android:layout_alignParentBottom= "true"
-          ads:adUnitId="ca-app-pub-2013051048838339/4888424937"
-          ads:adSize="BANNER"
-          >
-
-</com.google.android.gms.ads.AdView>
 
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/view_pager"
-        android:contentDescription=" "
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        tools:ignore="HardcodedText" />
-
-    <RelativeLayout
+        <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_gravity="bottom"
@@ -114,12 +118,16 @@
 
 
 <com.google.android.material.navigation.NavigationView
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
+    android:background="@color/fully_transparent"
     android:layout_gravity="start"
+    android:alpha="0.9"
     android:id="@+id/nav_view"
-    app:itemIconTint="@color/colorPrimary"
-    android:theme="@style/menuStyle"
+    app:itemIconTint="@color/elektrikturuncu"
+    app:itemTextAppearance="@style/MyNavigationTextAppearance"
+    app:itemTextColor="@color/checked_track_color"
+    android:theme="@style/MyNavigationViewStyle"
 
     app:headerLayout="@layout/nav_drawer"
     app:menu="@menu/drawermenu">

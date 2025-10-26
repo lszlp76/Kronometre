@@ -2,78 +2,74 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-
     tools:showIn="navigation_view">
 
-    <group>
+    <group android:checkableBehavior="single"> <item android:title="General">
+        <menu>
+            <item
+                android:id="@+id/timeUnitSec"
+                android:checkable="true"
+                android:icon="@drawable/second"
+                android:title="Second"
+                app:actionLayout="@layout/togglebutton"
+                app:showAsAction="ifRoom" />
 
-        <item android:title="General">
-            <menu>
-                <item
-                    android:id="@+id/timeUnitSec"
-                    android:checkable="true"
-                    android:icon="@drawable/ic_seconds"
-                    android:title="Second"
-                    app:actionLayout="@layout/togglebutton"
-                    app:showAsAction="ifRoom" />
+            <item
+                android:id="@+id/timeUnitCmin"
+                android:checkable="true"
+                android:icon="@drawable/centiminute"
+                android:title="Centiminute"
+                app:actionLayout="@layout/togglebuttonsec"
+                app:showAsAction="always" />
 
-                <item
-                    android:id="@+id/timeUnitCmin"
-                    android:icon="@drawable/ic_cmin"
-                    android:title="Hunderths minute "
-                    app:actionLayout="@layout/togglebuttonsec"
-                    app:showAsAction="always" />
-
-                <item
-                    android:id="@+id/timeUnitDmin"
-                    android:icon="@drawable/ic_cmin"
-                    android:title="@string/ten_thousandth_of_hours"
-                    app:actionLayout="@layout/togglebuttonsec"
-                    app:showAsAction="always" />
+            <item
+                android:id="@+id/timeUnitDmin"
+                android:checkable="true"
+                android:icon="@drawable/ic_cmin"
+                android:title="@string/ten_thousandth_of_hours"
+                app:actionLayout="@layout/togglebuttonsec"
+                app:showAsAction="always" />
 
 
-                <item
-                    android:id="@+id/screenSaver"
-                    android:icon="@drawable/outline_screenshot_monitor_24"
-                    android:title="@string/screenOn"
-                    app:actionLayout="@layout/togglebuttonscreen"
-                    app:showAsAction="always" />
+            <item
+                android:id="@+id/screenSaver"
+                android:icon="@drawable/outline_screenshot_monitor_24"
+                android:title="@string/screenOn"
+                app:actionLayout="@layout/togglebuttonscreen"
+                app:showAsAction="always" />
 
-                <item
-                    android:id="@+id/nav_save"
-                    android:checkable="true"
-                    android:icon="@drawable/ic_save"
-                    android:title="Save" />
+            <item
+                android:id="@+id/nav_save"
+                android:checkable="true"
+                android:icon="@drawable/ic_save"
+                android:title="Save" />
 
-            </menu>
-        </item>
+        </menu>
+    </item>
 
     </group>
-    <item android:title="About">
 
+    <item android:title="About">
         <menu>
             <item
                 android:id="@+id/rateApp"
                 android:title="Rate Me"
-                android:icon="@android:drawable/btn_star_big_on"
-                />
+                android:icon="@android:drawable/btn_star_big_on" />
+
             <item
                 android:id="@+id/nav_about"
                 android:icon="@drawable/ic_about"
                 android:title="How to use"/>
+
             <item
                 android:id="@+id/nav_share"
                 android:icon="@android:drawable/ic_menu_share"
                 android:title="Share app with my friends" />
+
             <item
                 android:id="@+id/nav_policy"
                 android:icon="@drawable/ic_policy"
-                android:title="Policy" >
-
-
-
-            </item>
-
+                android:title="Policy" />
         </menu>
     </item>
 

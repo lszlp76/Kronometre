@@ -2,24 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-
-    tools:showIn="navigation_view">
+     tools:showIn="navigation_view">
 
     <group>
 
         <item android:title="General">
             <menu>
                 <item
+
                     android:id="@+id/timeUnitSec"
                     android:checkable="true"
-                    android:icon="@drawable/ic_seconds"
+                    android:icon="@drawable/second"
                     android:title="Second"
                     app:actionLayout="@layout/togglebutton"
                     app:showAsAction="ifRoom" />
 
                 <item
                     android:id="@+id/timeUnitCmin"
-                    android:icon="@drawable/ic_cmin"
+                    android:icon="@drawable/centiminute"
                     android:title="Hunderths minute "
                     app:actionLayout="@layout/togglebuttonsec"
                     app:showAsAction="always" />

@@ -8,6 +8,10 @@ import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -90,7 +94,10 @@ public class ChartFragment extends Fragment {
                 @Override
                 public void onChanged(String s) {
 
-                    chartTimer.setText(s);
+                    ;
+                  displayFormattedTime(chartTimer,s);
+                   // chartTimer.setText(s);
+                    System.out.println("Chart timer value :" + s );
                 }
             });;
 
@@ -123,7 +130,78 @@ public class ChartFragment extends Fragment {
 
 
     }
+    /**
+     * Verilen zaman dizesini HH:mm:ss.SS formatında biçimlendirir,
+     * son 4 rakamı (salise) daha küçük ve farklı renkte yapar.
+     *
+     * @param textView Zamanı gösterecek olan TextView.
+     * @param timeString Tam zaman dizesi (Örn: "00:01:09.948").
+     */
+    private void displayFormattedTime(TextView textView, String timeString) {
+        if (timeString == null || timeString.length() < 5) {
+            // Hata durumunu veya boş durumu yönetin
+            textView.setText(timeString);
+            return;
+        }
 
+        // Son 4 karakter (örneğin .948'den sonraki 948) veya son 5 karakter (.948)
+        // Eğer formatınız tam olarak "HH:mm:ss.SS" ise, nokta dahil son 4 karakteri alalım.
+        // Eğer süre "00:01:09.948" ise:
+        // 00:01:09. -> 9 karakter (Ana Süre)
+        // .948 -> 4 karakter (Salise)
+
+        int totalLength = timeString.length();
+        // Son 4 rakamın başlangıç indeksi (Nokta dahil 4, sadece rakamlar için 3 veya 4)
+        // Varsayım: Format "XX:XX:XX.XXX" (12 karakter) veya "XX:XX:XX.XX" (11 karakter)
+        // Eğer "00:01:09.948" (12 karakter) ise, son 4 karakter ".948"
+        int startIndexOfMillis = totalLength - 4;
+
+        // Eğer zaman formatınızın milisaniye kısmı 3 haneyse (Örn: .948), totalLength - 4 doğru olur.
+        // Eğer zaman formatınızın milisaniye kısmı 2 haneyse (Örn: .94), totalLength - 3 doğru olur.
+
+        // Varsayılan olarak milisaniyeyi ve önceki noktayı kapsayan bir aralık alalım.
+        if (timeString.contains(".")) {
+            startIndexOfMillis = timeString.lastIndexOf(".");
+        } else {
+            // Eğer formatta nokta yoksa, sadece son 4 rakamı alalım (örneğin hhmmss948 -> son 4: s948)
+            startIndexOfMillis = totalLength - 4;
+        }
+
+
+        SpannableString spannableString = new SpannableString(timeString);
+
+        // 1. Yazı Boyutu Ayarı
+        // Küçük boyutun kaç piksel (PX) olacağını belirleyin.
+        // SP değil, PX kullanmalısınız. SP'den PX'e çevirmeliyiz.
+
+        // Örnek: Orijinal boyutun %60'ı kadar küçültülmüş bir boyut ayarlayalım.
+        // Varsayalım ki ana TextView boyutu 60sp.
+        float originalTextSizeSp = 30; // XML'deki boyutunuz
+        int originalTextSizePx = (int) (originalTextSizeSp * getResources().getDisplayMetrics().scaledDensity);
+        int newSmallTextSizePx = (int) (originalTextSizePx * 0.70); // %70'ı kadar küçült
+
+        // AbsoluteSizeSpan(int size, boolean dip) -> dip=false olduğunda size PX cinsinden kabul edilir.
+        spannableString.setSpan(
+                new AbsoluteSizeSpan(newSmallTextSizePx, false),
+                startIndexOfMillis,
+                totalLength,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
+        // 2. Renk Ayarı (İsteğe Bağlı ama Okunurluk için Gerekli)
+        // Farklı bir renk vermek isterseniz:
+        int smallTextColor = ContextCompat.getColor(getContext(), R.color.colorPrimary); // R.color.red yerine istediğiniz rengi kullanın
+
+        spannableString.setSpan(
+                new ForegroundColorSpan(smallTextColor),
+                startIndexOfMillis,
+                totalLength,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        );
+
+        // TextView'a uygulanır
+        textView.setText(spannableString);
+    }
     public void ClearChart() {
 
         lineEntry.clear();
@@ -210,13 +288,14 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         /** LAPS ***/
         LineDataSet lapValueDataSet = new LineDataSet(lapValue, "Cyc.Time Value");
-        lapValueDataSet.setColor(Color.BLUE);
+        lapValueDataSet.setColor(Color.WHITE);
 
         lapValueDataSet.setValueTextSize(textSize);
-        lapValueDataSet.setValueTextColor(ContextCompat.getColor(getActivity(),R.color.chartColor )); // rakamların rengini çıkartır dark/light
+        lapValueDataSet.setValueTextColor(ContextCompat.getColor(getActivity(),R.color.colorPrimary )); // rakamların rengini çıkartır dark/light
         lapValueDataSet.setCircleColor(Color.GREEN);
         lapValueDataSet.setCircleRadius(5);
         lapValueDataSet.setValueTypeface(tf);
+        lapValueDataSet.setLineWidth(3f);
         lapValueDataSet.enableDashedLine(3, 3, 3);
         lapValueDataSet.isDashedLineEnabled();
         /* *//*T max **//*
@@ -237,7 +316,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         LimitLine tmaxLimit = new LimitLine(tmax, "Maximum Cycle Time: " + dec.format(tmax) + " cyc/unit ");
         tmaxLimit.setLineWidth(4f);
-        tmaxLimit.setTextColor(getResources().getColor(R.color.chartColor));
+        tmaxLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         tmaxLimit.enableDashedLine(10f, 10f, 0f);
         tmaxLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         tmaxLimit.setTextSize(textSize);
@@ -245,7 +324,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         LimitLine tminLimit = new LimitLine(tmin, "Minimum Cycle Time: " + dec.format(tmin) + " cyc/unit ");
         tminLimit.setLineWidth(4f);
-        tminLimit.setTextColor(getResources().getColor(R.color.chartColor));
+        tminLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         tminLimit.enableDashedLine(10f, 10f, 0f);
         tminLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
         tminLimit.setTextSize(textSize);
@@ -253,7 +332,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
         LimitLine taveLimit = new LimitLine(tave, "Mean Cycle Time: " + dec.format(tave) + " cyc/unit ");
         taveLimit.setLineWidth(4f);
-        taveLimit.setTextColor(getResources().getColor(R.color.chartColor));
+        taveLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         taveLimit.setLineColor(Color.MAGENTA);
         taveLimit.enableDashedLine(10f, 10f, 0f);
         taveLimit.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
