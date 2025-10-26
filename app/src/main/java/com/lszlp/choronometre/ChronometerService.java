@@ -43,8 +43,8 @@ public class ChronometerService extends Service {
     private String timeUnit = "Sec."; // Varsayılan
     private int modul = 60; // Varsayılan saniye
     private int milis = 1000; // Varsayılan
-
-    // --- Receiver ---
+    // Sadece bu satırı tutun:
+     // --- Receiver ---
     private BroadcastReceiver pauseResumeReceiver;
 
 
@@ -78,7 +78,17 @@ public class ChronometerService extends Service {
 
                     // 2. Zamanlayıcıyı başlat
                     startTime = SystemClock.elapsedRealtime();
-                    timeBeforePause = elapsedTime; // Kaldığı yerden devam etmeli
+                    // Eğer uygulama resetlenmediyse, elapsedTime'ı timeBeforePause'a aktarın
+                    // Ancak, Chronometer mantığında START her zaman sıfırdan başlatmayı veya
+                    // kaldığı yerden devam etmeyi tetiklemelidir.
+                    // Eğer TimerFragment'ta 'reset()' çağrılmadıysa, elapsedTime sıfır olmamalıdır.
+                    // Start tuşu reset tuşu değilse, bu mantık yanlış olabilir.
+
+                    // Şimdilik sıfırdan başlatma mantığı uygulanıyor:
+                    // startTime = SystemClock.elapsedRealtime();
+                    timeBeforePause = 0L; // Sadece sıfırdan başlıyorsa
+                    elapsedTime = 0L;     // Sadece sıfırdan başlıyorsa
+
                     startTimer();
                     isRunning = true;
                     isPaused = false;

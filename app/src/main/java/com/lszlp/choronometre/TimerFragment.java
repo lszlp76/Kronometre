@@ -212,24 +212,45 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         timeUpdateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                long elapsed = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0);
+                if (Constants.ACTION_TIME_UPDATE.equals(intent.getAction())) {
+                    // Constants.EXTRA_ELAPSED_TIME kullanın
+                    long elapsed = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0);
+                    Log.d("ChronoUpdate", "Elapsed Time Received: " + elapsed);
+                    lastKnownElapsedTime = elapsed;
 
-                // Logcat'te sürekli verinin geldiğini görüyorsunuz
-                Log.d("ChronoUpdate", "Elapsed Time Received: " + elapsed);
+                    uiHandler.post(() -> {
+                        // 1. ZAMANI GÜNCELLE
+                        updateTimeDisplay(elapsed);
 
-                lastKnownElapsedTime = elapsed;
+                        // 2. VIEWMDOEL'I GÜNCELLE (Chart Fragment için)
+                        String timeString = formatTime(elapsed);
+                        if (pageViewModel != null) {
+                            pageViewModel.setTimerValue(timeString);
+                        }
 
-                // UI Güncellemesini Handler ile zorlayın
-                uiHandler.post(() -> {
-                    // Logcat'e bu satırı ekleyin:
-                    Log.d("ChronoUpdate", "UI Thread'de updateTimeDisplay çağrıldı.");
-                    updateTimeDisplay(elapsed);
-                });
+                        // Buton durumlarını güncelle (Gerekirse)
+                        updateButtonStates();
+                    });
+                }
+                // PAUSE / RESUME durumlarını yakalamak için
+                if (Constants.ACTION_PAUSE.equals(intent.getAction())) {
+                    isServicePaused = true;
+                    updateButtonStates();
+                } else if (Constants.ACTION_RESUME.equals(intent.getAction())) {
+                    isServicePaused = false;
+                    updateButtonStates();
+                }
             }
         };
+
+        // Filtreyi hem zaman hem de durum güncellemeleri için ayarlayın
+        IntentFilter filter = new IntentFilter(Constants.ACTION_TIME_UPDATE);
+        filter.addAction(Constants.ACTION_PAUSE);
+        filter.addAction(Constants.ACTION_RESUME);
+
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
                 timeUpdateReceiver,
-                new IntentFilter(Constants.ACTION_TIME_UPDATE)
+                filter
         );
     }
     // BU METODU EKLEYİN (Binding'i temizlemek için KRİTİK!)
@@ -250,35 +271,70 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         }
     }
 
+    // TimerFragment.java (updateTimeDisplay metodu)
     @SuppressLint("SetTextI18n")
     private void updateTimeDisplay(long elapsedMillis) {
-// 1. Binding null ise hemen çık
         FragmentTimerBinding currentBinding = getBinding();
         if (currentBinding == null || getActivity() == null || !isAdded()) return;
 
-        int hours = (int) (elapsedMillis / 3600000);
-        int minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
-        int seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
-        int millis = (int) (elapsedMillis % 1000);
+        // 1. YENİ KISIM: Formatlama metodunu çağırın
+        timeString = formatTime(elapsedMillis);
 
-        // GEÇİCİ TEST İÇİN EKLEYİN
-        // Bu Toast, TextView'da yazmasa bile, metodun çalıştığını doğrular.
-//        if (elapsedMillis > 1000 && elapsedMillis < 2000) {
-//            Toast.makeText(getContext(), "UI Update Fired!", Toast.LENGTH_SHORT).show();
-//        }
-
-
-        timeString = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, millis);
-
-        spannableString = new SpannableString(timeString);
-        spannableString.setSpan(new RelativeSizeSpan(0.5f), 9, spannableString.length(), 0);
-        // 2. Güncelleme için yeni binding objesini kullanın
-        currentBinding.textView.setText(spannableString);
-// DEBUG: Eğer hala çalışmıyorsa, bu log'u ekleyin
+        // DEBUG: Eğer hala çalışmıyorsa, bu log'u ekleyin
         Log.d("UpdateCheck", "TextView güncellendi! Değer: " + timeString);
 
-    }
+        // UI'da milisaniye kısmının küçük görünmesini sağlayan SpannableString mantığı
+        spannableString = new SpannableString(timeString);
+        int dotIndex = timeString.lastIndexOf('.');
 
+        // Milisaniye/Santidakika/Desimdakika kısmını küçült
+        // Saniye formatı için son 4 karakteri (örn: .000) küçültür.
+        // Diğer formatlarda '.' olmadığı için bu kısım çalışmayacaktır, bu istenen davranıştır.
+        if (dotIndex != -1 && dotIndex < timeString.length()) {
+            spannableString.setSpan(new RelativeSizeSpan(0.5f), dotIndex, spannableString.length(), 0);
+        }
+
+        currentBinding.textView.setText(spannableString);
+    }
+    // TimerFragment.java'ya bu yeni formatlama metodunu ekleyin
+    private String formatTimeAccordingToUnit(long elapsedMillis) {
+        long totalMinutes, totalSeconds;
+        int hours, minutes, seconds, subUnit;
+        String result;
+
+        switch (unit) {
+            case "Cmin.": // Santidakika (1 dk = 100 cmin)
+                // 1 Cmin = 600ms
+                long totalCentiminutes = elapsedMillis / 600;
+                hours = (int) (totalCentiminutes / 6000); // 1 saat = 6000 Cmin
+                minutes = (int) ((totalCentiminutes % 6000) / 100);
+                subUnit = (int) (totalCentiminutes % 100); // Santidakika birimi
+                // Format: HH:MM:CMIN
+                result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
+                break;
+
+            case "Dmh.": // Desimdakika (1 dk = 10 dmh)
+                // 1 Dmh = 360ms
+                long totalDeciminutes = elapsedMillis / 360;
+                hours = (int) (totalDeciminutes / 10000); // 1 saat = 10000 Dmh
+                minutes = (int) ((totalDeciminutes % 10000) / 100);
+                subUnit = (int) (totalDeciminutes % 100); // Santidakika birimi (Dmh'deki alt birim)
+                // Format: HH:DMH:CM
+                result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
+                break;
+
+            case "Sec.": // Saniye (Standart)
+            default:
+                hours = (int) (elapsedMillis / 3600000);
+                minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
+                seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
+                subUnit = (int) (elapsedMillis % 1000); // Milisaniye
+                // Format: HH:MM:SS.MMM
+                result = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, subUnit);
+                break;
+        }
+        return result;
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         _binding = FragmentTimerBinding.inflate(getLayoutInflater()); // Atamayı buraya yapın
@@ -713,7 +769,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
      }
 
     private void startForegroundService() {
-        Intent serviceIntent = new Intent(getContext(), ChronometerService_.class);
+        Intent serviceIntent = new Intent(getContext(), ChronometerService.class);
         serviceIntent.setAction(Constants.ACTION_START);
 
         // Zaman birimi bilgilerini servise gönder
@@ -752,7 +808,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     }
 
     private void stopForegroundService() {
-        Intent serviceIntent = new Intent(getContext(), ChronometerService_.class);
+        Intent serviceIntent = new Intent(getContext(), ChronometerService.class);
         serviceIntent.setAction(Constants.ACTION_STOP);
         requireContext().startService(serviceIntent);
     }
@@ -765,6 +821,43 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 showDndPermissionDialog();
             }
         }
+    }
+    // TimerFragment.java içinde yeni eklemeniz gereken metot
+    private String formatTime(long elapsedMillis) {
+        int hours, minutes, seconds, subUnit;
+        String result;
+
+        // Fragment'taki 'unit' değişkenini kullanırız.
+        switch (unit) {
+            case "Cmin.": // Santidakika (1 dk = 100 cmin)
+                long totalCentiminutes = elapsedMillis / 600; // 1 Cmin = 600ms
+                hours = (int) (totalCentiminutes / 6000); // 1 saat = 6000 Cmin
+                minutes = (int) ((totalCentiminutes % 6000) / 100);
+                subUnit = (int) (totalCentiminutes % 100); // Santidakika birimi
+                // Format: HH:MM:CMIN (Bu formatta nokta veya milisaniye ayırıcı kullanmayız)
+                result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
+                break;
+
+            case "Dmh.": // Desimdakika (1 dk = 10 dmh)
+                long totalDeciminutes = elapsedMillis / 360; // 1 Dmh = 360ms
+                hours = (int) (totalDeciminutes / 10000); // 1 saat = 10000 Dmh
+                minutes = (int) ((totalDeciminutes % 10000) / 100);
+                subUnit = (int) (totalDeciminutes % 100); // Desimdakika'nın alt birimi
+                // Format: HH:DMH:CM
+                result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
+                break;
+
+            case "Sec.": // Saniye (Standart)
+            default:
+                hours = (int) (elapsedMillis / 3600000);
+                minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
+                seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
+                subUnit = (int) (elapsedMillis % 1000); // Milisaniye
+                // Format: HH:MM:SS.MMM
+                result = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, subUnit);
+                break;
+        }
+        return result;
     }
 
     private void showDndPermissionDialog() {
@@ -823,7 +916,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         if (notificationManager != null) {
             // Notification channel bilgisi
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = notificationManager.getNotificationChannel(ChronometerService_.CHANNEL_ID);
+                NotificationChannel channel = notificationManager.getNotificationChannel(Constants.CHANNEL_ID);
                 if (channel != null) {
                     debugInfo.append("Channel: ").append(channel.getId()).append("\n");
                     debugInfo.append("Name: ").append(channel.getName()).append("\n");
@@ -832,7 +925,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                     debugInfo.append("Can Bypass DND: ").append(channel.canBypassDnd()).append("\n");
                     debugInfo.append("Can Show Badge: ").append(channel.canShowBadge()).append("\n");
                 } else {
-                    debugInfo.append("Channel NOT FOUND: ").append(ChronometerService_.CHANNEL_ID).append("\n");
+                    debugInfo.append("Channel NOT FOUND: ").append(Constants.CHANNEL_ID).append("\n");
                 }
             }
 
@@ -865,19 +958,36 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     }
 
     // TimerFragment.java'de servisten gelen durum değişikliklerini dinle
+    // TimerFragment.java (serviceStateReceiver metodu)
     private BroadcastReceiver serviceStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ChronometerService_.ACTION_TIME_UPDATE.equals(intent.getAction())) {
-                long elapsed = intent.getLongExtra("elapsed", 0);
+            // Doğru eylem sabitini kullandığınızdan emin olun
+            if (Constants.ACTION_TIME_UPDATE.equals(intent.getAction())) {
+                // Constants.java'daki anahtar ile long değeri alın
+                long elapsed = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0);
+
+                // --- KRİTİK EKSİK KISIM BAŞLANGICI ---
+                // 1. Gelen zamanı formatlayın (Bu metot TimerFragment'ta zaten olmalı)
+                String timeString = formatTime(elapsed);
+
+                // 2. ViewModel'i güncelleyerek UI'daki TextView'i tetikleyin
+                if (pageViewModel != null) {
+                    pageViewModel.setTimerValue(timeString);
+                }
+                // --- KRİTİK EKSİK KISIM BİTİŞİ ---
+
                 // UI güncelleme işlemleri
                 updateButtonStates();
-                if (isServicePaused){
-                    onPause();
-                }else{
-                    onResume();
-                }
-
+                // Bu onPause/onResume çağrıları muhtemelen hatalı; kaldırılmalıdır.
+                // Sadece buton durumunu güncelleyin.
+            /*
+            if (isServicePaused){
+                onPause();
+            }else{
+                onResume();
+            }
+            */
             }
         }
     };

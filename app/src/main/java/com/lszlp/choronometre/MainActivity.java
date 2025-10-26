@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onDestroy() {
         super.onDestroy();
         // Uygulama tamamen kapatıldığında servisi temizle
-        stopService(new Intent(this, ChronometerService_.class));
+        stopService(new Intent(this, ChronometerService.class));
     }
 
 

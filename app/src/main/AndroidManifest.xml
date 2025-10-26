@@ -67,7 +67,7 @@
 
         <!-- Foreground service type ekleyin -->
         <service
-            android:name=".ChronometerService_"
+            android:name=".ChronometerService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="specialUse" />
