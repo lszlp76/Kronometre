@@ -66,3 +66,4 @@ FileList.java	Kaydedilen Excel/CSV dosyalarını yönetme ekranı.
 CustomAlertDialogFragment.java	Reset, Save ve Not Ekleme gibi özel diyalog pencerelerini yönetir.
 👨‍💻 Katkıda Bulunma
 Bu projeye katkıda bulunmaktan memnuniyet duyarım! Lütfen herhangi bir hata bildirimi veya özellik önerisi için bir Issue açın veya bir Pull Request gönderin.
+
