@@ -1,21 +1,16 @@
 package com.lszlp.choronometre;
 
-import static android.graphics.Color.parseColor;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
@@ -23,23 +18,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.android.material.textfield.TextInputEditText;
 import com.lszlp.choronometre.databinding.FragmentTimerBinding;
 import com.lszlp.choronometre.main.PageViewModel;
-import com.lszlp.choronometre.Constants;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -50,13 +41,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import com.lszlp.choronometre.Constants;
-import androidx.fragment.app.Fragment; // Bunu import ettiğinizden emin olun
+
 public class TimerFragment extends Fragment {
     public String Timeunit;
-    FragmentTimerBinding binding;
-    long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
-    int Hours, Seconds, Minutes, MilliSeconds;
+    private FragmentTimerBinding _binding;
+    private FragmentTimerBinding getBinding() {
+        return _binding;
+    }
     private BroadcastReceiver timeUpdateReceiver;
     SpannableString spannableString;
     TextView maxvalue, minvalue, totalObservationTime, cycPerHour, cycPerMinute;
@@ -67,8 +58,44 @@ public class TimerFragment extends Fragment {
     ArrayList<Lap> lapsArray = new ArrayList<>();
     ArrayList<Lap> ListElementsArrayList;
     LapListAdapter lapListAdapter;
+
+
+
+    public void setUnitDisplay(String unitValue) {
+        FragmentTimerBinding currentBinding = getBinding();
+
+        // Binding'in ve Fragment'ın hazır olduğunu kontrol et
+        if (currentBinding == null || !isAdded()) {
+            Log.w("TimerFragment", "Cannot set unit text, view is destroyed or fragment detached.");
+            return;
+        }
+
+        // unitValue'yu unit değişkenine kaydet (İleride kullanmak için)
+        this.unit = unitValue;
+
+        // TextView'ı güncelle
+        // Not: "unitValue" yerine "unitValue.setText" kullanılıyordu,
+        // bu nedenle buradaki TextView adının "unitValue" olduğunu varsayıyoruz.
+        currentBinding.unitValue.setText(unitValue);
+    }
+    /*Timer düzeltme için
     Runnable runnable;
     Handler handler;
+
+ String hh, mm, ss, msec;
+    long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
+     int Hours, Seconds, Minutes, MilliSeconds;
+
+long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
+
+// String hh, mm, ss, msec;
+// long elapsedTime = 0;
+// boolean running = false;
+// private long startTime = 0;
+    private long startTime = 0;
+     */
+    int Hours, Seconds, Minutes, MilliSeconds;
+
     boolean go;
     int number, micro;
     String unit, diffTime;
@@ -79,7 +106,7 @@ public class TimerFragment extends Fragment {
     int milis;
     int m;
     int h;
-    String hh, mm, ss, msec;
+
     int lapsayisi = 0;
     ArrayList<String> laps = new ArrayList<>();
     DecimalFormat dec = new DecimalFormat("#0.00");
@@ -90,10 +117,9 @@ public class TimerFragment extends Fragment {
     PageViewModel pageViewModel;
     ExcelSave excelSave = new ExcelSave();
     List<String> saveValue;
-    public long elapsedTime = 0;
-    public boolean running = false;
 
-    private long startTime = 0;
+
+
     String currentDateandTimeStop;
     String currentDateandTimeStart;
     Date timeStop, timeStart;
@@ -102,10 +128,11 @@ public class TimerFragment extends Fragment {
     private DateFormat df2 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss ", Locale.ENGLISH);
     private String m_Text = "";
     private TextView avevalue;
-
+    private long lastKnownElapsedTime = 0L; // Servisten gelen son zamanı burada tutacağız
     public static TimerFragment newInstance() {
         return new TimerFragment();
     }
+    /*
     public void resumeFromRotation() {
         if (running && handler != null) {
             handler.removeCallbacks(runnable);
@@ -114,54 +141,103 @@ public class TimerFragment extends Fragment {
 
         }
     }
+    */
+
     // State'leri kaydet
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putLong("elapsedTime", elapsedTime);
-        outState.putBoolean("running", running);
-        outState.putLong("startTime", startTime);
+
+        // Auth=false (çalışıyor), Auth=true (durmuş)
+        outState.putBoolean("Auth", Auth);
+
+        // 'elapsedTime' yerine servisten gelen son zamanı kaydediyoruz
+        outState.putLong("lastKnownElapsedTime", lastKnownElapsedTime);
+
+
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            elapsedTime = savedInstanceState.getLong("elapsedTime", 0);
-            running = savedInstanceState.getBoolean("running", false);
-            startTime = savedInstanceState.getLong("startTime", 0);
 
-            if (running) {
-                // Kronometre çalışıyorsa devam et
-                startTime = SystemClock.elapsedRealtime() - elapsedTime;
-                handler.post(runnable);
-            } else if (elapsedTime > 0) {
-                // Duraklatılmışsa display'i güncelle
-                updateDisplay();
+            // 'running' yerine 'Auth' durumunu geri yükle
+            // Varsayılan: true (durmuş)
+            Auth = savedInstanceState.getBoolean("Auth", true);
+
+            // 'elapsedTime' yerine 'lastKnownElapsedTime'ı geri yükle
+            lastKnownElapsedTime = savedInstanceState.getLong("lastKnownElapsedTime", 0L);
+
+            // Durumu UI'daki butonlara yansıt
+            updateButtonStatesBasedOnAuth();
+
+            // Eğer zaman 0'dan büyükse, ekranı son bilinen zamanla güncelle
+            // (Bu, ekran döndüğünde "00:00:00" görmeyi engeller)
+            if (lastKnownElapsedTime > 0) {
+                updateTimeDisplay(lastKnownElapsedTime);
             }
         }
 
+    }
+
+    /**
+     * Servisi başlatmadan/durdurmadan,
+     * sadece 'Auth' değişkenine göre butonların görünümünü (START/STOP) günceller.
+     * Ekran dönüşleri (rotation) için kullanılır.
+     */
+    private void updateButtonStatesBasedOnAuth() {
+        if (getActivity() == null || _binding == null) return;
+
+        if (Auth) { // Durum: Durmuş (Auth = true)
+            button2.setText("START");
+            button3.setEnabled(false);
+            button.setEnabled(true);
+            button4.setEnabled(true);
+        } else { // Durum: Çalışıyor (Auth = false)
+            button2.setText("STOP");
+            button3.setEnabled(true);
+            button.setEnabled(false);
+            button4.setEnabled(false);
+        }
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
+        // UI Thread'e geçişi sağlamak için Handler tanımla
+        final Handler uiHandler = new Handler(requireContext().getMainLooper());
 
         timeUpdateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long elapsed = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0);
-                updateTimeDisplay(elapsed);
+
+                // Logcat'te sürekli verinin geldiğini görüyorsunuz
+                Log.d("ChronoUpdate", "Elapsed Time Received: " + elapsed);
+
+                lastKnownElapsedTime = elapsed;
+
+                // UI Güncellemesini Handler ile zorlayın
+                uiHandler.post(() -> {
+                    // Logcat'e bu satırı ekleyin:
+                    Log.d("ChronoUpdate", "UI Thread'de updateTimeDisplay çağrıldı.");
+                    updateTimeDisplay(elapsed);
+                });
             }
         };
-
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
                 timeUpdateReceiver,
                 new IntentFilter(Constants.ACTION_TIME_UPDATE)
         );
     }
-
+    // BU METODU EKLEYİN (Binding'i temizlemek için KRİTİK!)
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        _binding = null; // View yok edildiğinde binding'i temizle
+    }
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -176,24 +252,37 @@ public class TimerFragment extends Fragment {
 
     @SuppressLint("SetTextI18n")
     private void updateTimeDisplay(long elapsedMillis) {
-        if (getActivity() == null || !isAdded()) return;
+// 1. Binding null ise hemen çık
+        FragmentTimerBinding currentBinding = getBinding();
+        if (currentBinding == null || getActivity() == null || !isAdded()) return;
 
         int hours = (int) (elapsedMillis / 3600000);
         int minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
         int seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
         int millis = (int) (elapsedMillis % 1000);
 
+        // GEÇİCİ TEST İÇİN EKLEYİN
+        // Bu Toast, TextView'da yazmasa bile, metodun çalıştığını doğrular.
+//        if (elapsedMillis > 1000 && elapsedMillis < 2000) {
+//            Toast.makeText(getContext(), "UI Update Fired!", Toast.LENGTH_SHORT).show();
+//        }
+
+
         timeString = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, millis);
 
         spannableString = new SpannableString(timeString);
         spannableString.setSpan(new RelativeSizeSpan(0.5f), 9, spannableString.length(), 0);
-        binding.textView.setText(spannableString);
+        // 2. Güncelleme için yeni binding objesini kullanın
+        currentBinding.textView.setText(spannableString);
+// DEBUG: Eğer hala çalışmıyorsa, bu log'u ekleyin
+        Log.d("UpdateCheck", "TextView güncellendi! Değer: " + timeString);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-       binding = FragmentTimerBinding.inflate(getLayoutInflater());
-        return binding.getRoot();
+        _binding = FragmentTimerBinding.inflate(getLayoutInflater()); // Atamayı buraya yapın
+        return _binding.getRoot();
 
     }
 
@@ -208,37 +297,42 @@ public class TimerFragment extends Fragment {
     }
 
     private void initializeViews() {
-        cycPerHour = binding.cycPerHour;
-        cycPerMinute = binding.cycPerMinute;
-        totalObservationTime = binding.totalObservationTime;
-        button2 = binding.button2;
-        button1 = binding.button;
-        button3 = binding.button3;
-        button4 = binding.button4;
-        button = binding.button;
-        maxvalue = binding.maxVal;
-        minvalue = binding.minVal;
-        avevalue = binding.aveVal;
+        cycPerHour = _binding.cycPerHour;
+        cycPerMinute = _binding.cycPerMinute;
+        totalObservationTime = _binding.totalObservationTime;
+        button2 = _binding.button2;
+        button1 = _binding.button;
+        button3 = _binding.button3;
+        button4 = _binding.button4;
+        button = _binding.button;
+        maxvalue = _binding.maxVal;
+        minvalue = _binding.minVal;
+        avevalue = _binding.aveVal;
 
         // Butonları görünür yap
         setWidgetsVisibility(false);
-
+        /*
+// GEÇİCİ TEST İÇİN EKLEYİN: Varsayılan saniye modunu zorla
+        this.modul = 60;   // 60 saniye
+        this.milis = 1000; // 1000 milisaniye (1 saniye)
+        this.unit = "sec"; // "sec" birimi
+*/
         SpannableString ssp = new SpannableString(timer);
         ssp.setSpan(new RelativeSizeSpan(0.5f), 9, ssp.length(), 0);
-        binding.textView.setText(ssp);
+        _binding.textView.setText(ssp);
 
         button3.setEnabled(false);
         button.setEnabled(false);
         button4.setEnabled(false);
-        handler = new Handler();
+       // handler = new Handler();
         Auth = true;
     }
 
     private void setupRecyclerView() {
         ListElementsArrayList = new ArrayList<>();
-        binding.lapList.setLayoutManager(new LinearLayoutManager(getContext()));
+        _binding.lapList.setLayoutManager(new LinearLayoutManager(getContext()));
         lapListAdapter = new LapListAdapter(ListElementsArrayList);
-        binding.lapList.setAdapter(lapListAdapter);
+        _binding.lapList.setAdapter(lapListAdapter);
 
         lapListAdapter.setOnItemClickListener(new LapListAdapter.OnItemClickListener() {
             @Override
@@ -249,6 +343,7 @@ public class TimerFragment extends Fragment {
     }
 
     private void setupClickListeners() {
+        Log.d("ModulCheck", "Mevcut Modul Değeri: " + modul); // YENİ SATIR
         button2.setOnClickListener(v -> {
             if (modul > 0) {
                 if (Auth) {
@@ -336,25 +431,45 @@ public class TimerFragment extends Fragment {
     @SuppressLint("NotifyDataSetChanged")
     public void takeLap() {
         if (getActivity() == null) return;
+// 1. Servisten gelen güncel zamanı al
+        long currentTimeMillis = lastKnownElapsedTime;
+        int currentHours = (int) (currentTimeMillis / 3600000);
+        int currentMinutes = (int) (currentTimeMillis - currentHours * 3600000) / 60000;
+        int currentSeconds = (int) (currentTimeMillis - currentHours * 3600000 - currentMinutes * 60000) / 1000;
+        // 2. Zamanı string'e çevir
+        String hh_lap = (currentHours < 10) ? "0" + currentHours : String.valueOf(currentHours);
+        String mm_lap = (currentMinutes < 10) ? "0" + currentMinutes : String.valueOf(currentMinutes);
+        String ss_lap = (currentSeconds < 10) ? "0" + currentSeconds : String.valueOf(currentSeconds);
 
-        String lap = hh + ":" + mm + ":" + ss;
+        String lap = hh_lap + ":" + mm_lap + ":" + ss_lap;
         laps.add(lap);
+
 
         double delta;
         if (lapsayisi > 0) {
-            second = laps.get(lapsayisi - 1).substring(6, 8);
-            minute = laps.get(lapsayisi - 1).substring(3, 5);
-            hour = laps.get(lapsayisi - 1).substring(0, 2);
-
-            double delta1 = (Integer.parseInt(hh) / 60.0 + Integer.parseInt(mm) + Double.parseDouble(ss) / modul);
-            double delta0 = (Integer.parseInt(hour) / 60.0 + Integer.parseInt(minute) + Double.parseDouble(second) / modul);
+            // Önceki lap zamanını listeden al
+            String previousLapString = laps.get(lapsayisi - 1);
+            String[] parts = previousLapString.split(":");
+            int prevHour = Integer.parseInt(parts[0]);
+            int prevMin = Integer.parseInt(parts[1]);
+            int prevSec = Integer.parseInt(parts[2]);
+// Eski kodunuzdaki 'modul'ü kullanarak dakika cinsinden hesaplama
+            double delta1 = (currentHours / 60.0 + currentMinutes + (double)currentSeconds / modul);
+            double delta0 = (prevHour / 60.0 + prevMin + (double)prevSec / modul);
             delta = Math.abs(delta1 - delta0);
         } else {
-            second = laps.get(lapsayisi).substring(6, 8);
-            minute = laps.get(lapsayisi).substring(3, 5);
-            hour = laps.get(lapsayisi).substring(0, 2);
-            delta = (Integer.parseInt(hour) / 60.0 + Integer.parseInt(minute) + Double.parseDouble(second) / modul);
+            // İlk lap
+            delta = (currentHours / 60.0 + currentMinutes + (double)currentSeconds / modul);
         }
+//            double delta1 = (Integer.parseInt(hh) / 60.0 + Integer.parseInt(mm) + Double.parseDouble(ss) / modul);
+//            double delta0 = (Integer.parseInt(hour) / 60.0 + Integer.parseInt(minute) + Double.parseDouble(second) / modul);
+//            delta = Math.abs(delta1 - delta0);
+//        } else {
+//            second = laps.get(lapsayisi).substring(6, 8);
+//            minute = laps.get(lapsayisi).substring(3, 5);
+//            hour = laps.get(lapsayisi).substring(0, 2);
+//            delta = (Integer.parseInt(hour) / 60.0 + Integer.parseInt(minute) + Double.parseDouble(second) / modul);
+//        }
 
         lapsval.add(delta);
         updateStatistics();
@@ -427,7 +542,7 @@ public class TimerFragment extends Fragment {
 
         startForegroundService();
         getStartTime();
-        startLocalTimer();
+        //startLocalTimer();
     }
 
 
@@ -435,7 +550,7 @@ public class TimerFragment extends Fragment {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStart = sdf.format(new Date());
         timeStart = new Date();
-        StartTime = SystemClock.uptimeMillis();
+        //StartTime = SystemClock.uptimeMillis();
     }
 
     public void stop() {
@@ -451,10 +566,10 @@ public class TimerFragment extends Fragment {
         stopForegroundService();
 
         // Lokal timer'ı durdur
-        stopLocalTimer();
+       // stopLocalTimer();
         getStopTime();
     }
-
+/*
     private void startLocalTimer() {
         if (runnable != null) {
             handler.removeCallbacks(runnable);
@@ -503,11 +618,11 @@ public class TimerFragment extends Fragment {
         }
         TimeBuff += MillisecondTime;
     }
-
+*/
     private void getStopTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStop = sdf.format(new Date());
-        StopTime = SystemClock.uptimeMillis();
+        //StopTime = SystemClock.uptimeMillis();
 
         try {
             Date date1 = sdf.parse(currentDateandTimeStart);
@@ -533,7 +648,7 @@ public class TimerFragment extends Fragment {
     @SuppressLint("NotifyDataSetChanged")
     public void reset() {
         // Hem lokal timer'ı hem servisi resetle
-        stopLocalTimer();
+        // stopLocalTimer();
         stopForegroundService();
 
         Auth = true;
@@ -544,19 +659,16 @@ public class TimerFragment extends Fragment {
         m = 0;
         h = 0;
         number = 0;
-        MillisecondTime = 0L;
-        StartTime = 0L;
-        StopTime = 0L;
-        TimeBuff = 0L;
-        UpdateTime = 0L;
+        // Sıfırlanan değişkenleri temizle (handler/runnable ile ilgili olanlar zaten silindi)
         Seconds = 0;
         Minutes = 0;
         MilliSeconds = 0;
+        lastKnownElapsedTime = 0L; // Yeni eklenen değişkeni sıfırla
 
         // UI'ı sıfırla
         SpannableString ssp = new SpannableString(timer);
         ssp.setSpan(new RelativeSizeSpan(0.5f), 9, ssp.length(), 0);
-        binding.textView.setText(ssp);
+        _binding.textView.setText(ssp);
 
         cycPerHour.setText("");
         cycPerMinute.setText("");
@@ -601,7 +713,7 @@ public class TimerFragment extends Fragment {
      }
 
     private void startForegroundService() {
-        Intent serviceIntent = new Intent(getContext(), ChronometerService.class);
+        Intent serviceIntent = new Intent(getContext(), ChronometerService_.class);
         serviceIntent.setAction(Constants.ACTION_START);
 
         // Zaman birimi bilgilerini servise gönder
@@ -609,12 +721,16 @@ public class TimerFragment extends Fragment {
         serviceIntent.putExtra(Constants.EXTRA_MODUL, modul);
         serviceIntent.putExtra(Constants.EXTRA_MILIS, milis);
 
+
         Log.d("TimerFragment", "🔥 Sending to service - Unit: " + unit + ", Modul: " + modul + ", Milis: " + milis);
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             requireContext().startForegroundService(serviceIntent);
+            Log.d("ServiceStart", "startForegroundService (Oreo+) çağrıldı."); // YENİ LOG
         } else {
             requireContext().startService(serviceIntent);
+            Log.d("ServiceStart", "startService (Pre-Oreo) çağrıldı."); // YENİ LOG
         }
     }
 
@@ -636,7 +752,7 @@ public class TimerFragment extends Fragment {
     }
 
     private void stopForegroundService() {
-        Intent serviceIntent = new Intent(getContext(), ChronometerService.class);
+        Intent serviceIntent = new Intent(getContext(), ChronometerService_.class);
         serviceIntent.setAction(Constants.ACTION_STOP);
         requireContext().startService(serviceIntent);
     }
@@ -707,7 +823,7 @@ public class TimerFragment extends Fragment {
         if (notificationManager != null) {
             // Notification channel bilgisi
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = notificationManager.getNotificationChannel(ChronometerService.CHANNEL_ID);
+                NotificationChannel channel = notificationManager.getNotificationChannel(ChronometerService_.CHANNEL_ID);
                 if (channel != null) {
                     debugInfo.append("Channel: ").append(channel.getId()).append("\n");
                     debugInfo.append("Name: ").append(channel.getName()).append("\n");
@@ -716,7 +832,7 @@ public class TimerFragment extends Fragment {
                     debugInfo.append("Can Bypass DND: ").append(channel.canBypassDnd()).append("\n");
                     debugInfo.append("Can Show Badge: ").append(channel.canShowBadge()).append("\n");
                 } else {
-                    debugInfo.append("Channel NOT FOUND: ").append(ChronometerService.CHANNEL_ID).append("\n");
+                    debugInfo.append("Channel NOT FOUND: ").append(ChronometerService_.CHANNEL_ID).append("\n");
                 }
             }
 
@@ -752,7 +868,7 @@ public class TimerFragment extends Fragment {
     private BroadcastReceiver serviceStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (ChronometerService.ACTION_TIME_UPDATE.equals(intent.getAction())) {
+            if (ChronometerService_.ACTION_TIME_UPDATE.equals(intent.getAction())) {
                 long elapsed = intent.getLongExtra("elapsed", 0);
                 // UI güncelleme işlemleri
                 updateButtonStates();

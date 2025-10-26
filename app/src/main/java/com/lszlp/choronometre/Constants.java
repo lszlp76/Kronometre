@@ -4,6 +4,8 @@ public class Constants {
     public static final String ACTION_TIME_UPDATE = "com.lszlp.choronometre.ACTION_TIME_UPDATE";
     public static final String ACTION_START = "START";
     public static final String ACTION_STOP = "STOP";
+    public static final String ACTION_RESET = "RESET";
+
     public static final String EXTRA_ELAPSED_TIME = "elapsed";
     public static final int REQUEST_DND_ACCESS = 1001;
     public static final String ACTION_PAUSE = "PAUSE";

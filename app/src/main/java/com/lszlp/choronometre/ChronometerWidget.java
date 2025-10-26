@@ -17,9 +17,9 @@ public class ChronometerWidget extends AppWidgetProvider {
             @SuppressLint("RemoteViewLayout") RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_chronometer);
 
             // --- START Intent: Make it unique for this widget instance ---
-            Intent startIntent = new Intent(context, ChronometerService.class);
+            Intent startIntent = new Intent(context, ChronometerService_.class);
             // Use a constant for the action to avoid typos
-            startIntent.setAction(ChronometerService.ACTION_START);
+            startIntent.setAction(ChronometerService_.ACTION_START);
             // Add the widget ID as an extra so the service knows which widget to update
             startIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             // Use the appWidgetId as the request code to ensure the PendingIntent is unique
@@ -31,9 +31,9 @@ public class ChronometerWidget extends AppWidgetProvider {
             );
 
             // --- STOP Intent: Also make it unique ---
-            Intent stopIntent = new Intent(context, ChronometerService.class);
+            Intent stopIntent = new Intent(context, ChronometerService_.class);
             // Use a constant for the action
-            stopIntent.setAction(ChronometerService.ACTION_STOP);
+            stopIntent.setAction(ChronometerService_.ACTION_STOP);
             stopIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             // Use a different unique request code for the stop action
             PendingIntent stopPendingIntent = PendingIntent.getService(

@@ -17,3 +17,18 @@ TODO
 * dependcy lere göre bu versiyon
 * uygun /!\
 *******************************
+
+  Kategori,Değişken Adı,Durum/Kullanım,Eksik/Hatalı Noktalar & Düzeltmeler
+  Zamanlayıcı,handler,Tanımlı ve onCreate içinde başlatılmış.,OK.
+  ,updateRunnable,"Tanımlı, startTimer içinde kullanılıyor.",OK.
+  ,startTime,onStartCommand içinde SystemClock.elapsedRealtime() ile başlatılıyor.,OK.
+  ,elapsedTime,"Toplam geçen süreyi tutuyor, Fragment'a gönderilen ana değer.",OK.
+  ,timeBeforePause,Duraklatma anındaki elapsedTime değerini tutuyor.,OK.
+  Durum,isRunning,Kronometrenin çalışıp çalışmadığını tutar.,OK.
+  ,isPaused,Kronometrenin duraklatılıp duraklatılmadığını tutar.,OK.
+  Ayarlar,timeUnit,Fragment'tan gelen birim bilgisi.,OK.
+  ,modul,Fragment'tan gelen saniye/dakika modülü.,OK.
+  ,milis,Fragment'tan gelen milisaniye karşılığı.,OK.
+  Bildirim/Receiver,pauseResumeReceiver,Bildirimdeki Pause/Resume aksiyonlarını yakalıyor.,OK.
+  ,NOTIFICATION_ID,Constants.NOTIFICATION_ID'den alıyor.,OK.
+  ,CHANNEL_ID,Constants.CHANNEL_ID'den alıyor.,OK.

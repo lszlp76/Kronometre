@@ -10,8 +10,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -28,7 +26,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.splashscreen.SplashScreen;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
@@ -119,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onDestroy() {
         super.onDestroy();
         // Uygulama tamamen kapatıldığında servisi temizle
-        stopService(new Intent(this, ChronometerService.class));
+        stopService(new Intent(this, ChronometerService_.class));
     }
 
 
@@ -306,7 +303,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     fragment.unit = "Sec.";
                     fragment.Timeunit = "Sec. - Second ";
-                    fragment.binding.unitValue.setText(fragment.unit);
+                    if (fragment != null) {
+                        // Fragment'ın unit değişkenini alıp, yeni metoda parametre olarak gönderin.
+                        // unit değişkeni, TimerFragment'ta hala public veya erişilebilir olmalıdır.
+                        fragment.setUnitDisplay(fragment.unit);
+                    }
+
+
+
                 }
                 drawer.close();
             } else {
@@ -326,7 +330,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     fragment.unit = "Cmin.";
                     fragment.Timeunit = "Cmin. - Hundredth of Minute ";
-                    fragment.binding.unitValue.setText(fragment.unit);
+                    if (fragment != null) {
+                        // Fragment'ın unit değişkenini alıp, yeni metoda parametre olarak gönderin.
+                        // unit değişkeni, TimerFragment'ta hala public veya erişilebilir olmalıdır.
+                        fragment.setUnitDisplay(fragment.unit);
+                    }
                 }
                 drawer.close();
             } else {
@@ -345,7 +353,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     fragment.unit = "Dmh.";
                     fragment.Timeunit = "Dmh. - 10Thounsandth of Minute ";
-                    fragment.binding.unitValue.setText(fragment.unit);
+                    if (fragment != null) {
+                        // Fragment'ın unit değişkenini alıp, yeni metoda parametre olarak gönderin.
+                        // unit değişkeni, TimerFragment'ta hala public veya erişilebilir olmalıdır.
+                        fragment.setUnitDisplay(fragment.unit);
+                    }
                 }
                 drawer.close();
             } else {
