@@ -5,7 +5,8 @@
     android:id="@+id/lapline"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-
+    android:layout_gravity="center_vertical"
+android:weightSum="4"
     android:orientation="horizontal">
 
     <TextView
@@ -17,7 +18,7 @@
 android:fontFamily="@font/digital7"
         android:layout_weight="1"
         android:textAlignment="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:text="Deneme" />
@@ -32,7 +33,8 @@ android:fontFamily="@font/digital7"
         android:fontFamily="@font/digital7"
 
         android:textAlignment="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Deneme"
@@ -49,7 +51,7 @@ android:fontFamily="@font/digital7"
         android:layout_weight="1"
         android:text="Deneme"
         android:textAlignment="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
        />
 
@@ -57,7 +59,7 @@ android:fontFamily="@font/digital7"
         android:id="@+id/addnote"
         style="@style/textColorStyle"
         android:textAlignment="center"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:src="@drawable/notes"

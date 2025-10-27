@@ -245,13 +245,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/dashboard"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="5dp"
         app:layout_constraintTop_toBottomOf="@id/dashboard"
-        android:layout_margin="10dp"
-        android:gravity="center_vertical"
+       android:gravity="center_vertical"
         android:weightSum="4">
 
         <TextView
-            style="@style/TableText"
+            style="@style/textTitleColorStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -261,7 +263,7 @@
              />
 
         <TextView
-            style="@style/TableText"
+            style="@style/textTitleColorStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -270,7 +272,7 @@
             />
 
         <TextView
-            style="@style/TableText"
+            style="@style/textTitleColorStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -279,7 +281,7 @@
              />
 
         <TextView
-            style="@style/TableText"
+            style="@style/textTitleColorStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -293,9 +295,9 @@
         style="@style/textColorStyle"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="0dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="20dp"
+
         android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@+id/buttons"
         app:layout_constraintEnd_toEndOf="parent"

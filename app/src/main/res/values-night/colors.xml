@@ -7,4 +7,5 @@
     <color name="colorPrimaryDark">#586FE4</color>
     <color name="colorDisableq">#7AACE4</color>
     <color name="chartColor">#FFFFFFFF</color>
+    <color name="checked_track_color">#FFFF</color> <!-- Light Purple -->
 </resources>

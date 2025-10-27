@@ -6,8 +6,10 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
     style="@style/textTitleColorStyle"
+
     android:id="@+id/drawer_layout"
     android:background="@drawable/futuristik"
+
     tools:context=".MainActivity"
     >
 

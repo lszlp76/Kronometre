@@ -15,7 +15,7 @@
     <application
         android:allowBackup="true"
         android:label=""
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/splash"
         android:supportsRtl="true"
         android:theme="@style/Theme.Kronometre.NoActionBar"
         android:exported="true">
@@ -30,10 +30,7 @@
 
             android:theme="@style/Theme.Kronometre.NoActionBar"
             >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
 
         <meta-data
@@ -42,15 +39,17 @@
         <!-- Splash Activity -->
         <activity
             android:name=".SplashActivity"
+            android:theme="@style/Theme.App.Launcher"
             android:exported="true">
-            <!--intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter-->
+            </intent-filter>
         </activity>
         <activity
-            android:name="com.lszlp.choronometre.WebpagesActivities"
+            android:name=".WebpagesActivities"
             android:exported="false"
+            android:theme="@style/WebPageTheme"
             android:parentActivityName="com.lszlp.choronometre.MainActivity" />
         <!-- AndroidManifest.xml'e bu aktiviteyi ekleyin -->
         <activity

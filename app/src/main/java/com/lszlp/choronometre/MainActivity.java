@@ -224,27 +224,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        // Splash screen özelleştirme
-//        splashScreen.setKeepOnScreenCondition(new SplashScreen.KeepOnScreenCondition() {
-//            @Override
-//            public boolean shouldKeepOnScreen() {
-//                return keepSplashOnScreen;
-//            }
-//        });
-        // Uygulama hazır olduğunda splash screen'i kapat
+
         initializeApp();
     }
 
     private void initializeApp() {
         setupAppContent();
-//        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                keepSplashOnScreen = false;
-//                // Ana uygulama içeriğini yükle
-//                setupAppContent();
-//            }
-//        }, 2000); // 2 saniye
     }
 
 
@@ -526,42 +511,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (viewPager.getAdapter() != null);
             showResetDialog();
         });
-        /*resetButton.setOnClickListener(view -> {
-            if (viewPager.getAdapter() != null) {
-                TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(MainActivity.this, R.style.AlertDialogCustom));
-                builder.setTitle("Delete All Datas");
-                builder.setMessage("Are you sure to delete all datas ?");
-                builder.setNegativeButton("No", (dialogInterface, i) -> System.out.println("No ya basıldı"));
-                builder.setPositiveButton("Yes", (dialogInterface, i) -> {
-                    resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-                    startButton.setText(R.string.start_text);
-                    startButton.setEnabled(true);// start tuşu açılıyor
-                    lapButton.setEnabled(false);// lap tuşu kapanıyor
-                    saveButton.setEnabled(false); //save butonu kapat
-
-                    fragment.reset();
-                    chartFragment.ClearChart();
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
-                // Get the positive button and set its text color
-                Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                if (positiveButton != null) {
-                    positiveButton.setTextColor(Color.parseColor("#FFFFFFFF"));
-                    positiveButton.setTextSize(20);
-
-                }
-                Button negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-                if (negativeButton != null) {
-                    negativeButton.setTextColor(Color.parseColor("#FFFFFFFF"));
-                    negativeButton.setTextSize(20);
-
-                }
-            }
-        });*/
 
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
@@ -825,12 +774,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showResetDialog() {
         // Düzeltildi: newInstance yerine newInstanceForReset kullanıldı
         CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForReset();
+        drawer.setAlpha(0.4f);//setScrimColor(Color.argb(100, 0, 0, 0));
         dialog.show(getSupportFragmentManager(), "RESET_DIALOG_TAG");
+
     }
 
     private void showSaveDialog() {
         // Düzeltildi: newInstance yerine newInstanceForSave kullanıldı
         CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForSave();
+        drawer.setAlpha(0.4f);
         dialog.show(getSupportFragmentManager(), "SAVE_DIALOG_TAG");
     }
 // LISTENER METOTLARI
@@ -852,7 +804,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Durum makinesini sıfırla
         currentState = ChronoState.STOPPED;
         auth = false;
-
+        drawer.setAlpha(1f);
         // İSTEK: Switch'leri tekrar etkinleştir
         drawerSwitchCmin.setEnabled(true);
         drawerSwitchSec.setEnabled(true);
@@ -868,10 +820,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
         // Düzeltildi: fileName değişkeni save() metoduna parametre olarak eklendi
         fragment.save(fileName);
+        drawer.setAlpha(1f);
     }
 
     @Override
     public void onCancelled() {
+        drawer.setAlpha(1f);
         //Toast.makeText(this, "İşlem iptal edildi.", Toast.LENGTH_SHORT).show();
     }
 

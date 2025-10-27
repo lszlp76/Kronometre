@@ -109,7 +109,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
     int lapsayisi = 0;
     ArrayList<String> laps = new ArrayList<>();
-    DecimalFormat dec = new DecimalFormat("#0.00");
+    DecimalFormat dec = new DecimalFormat("#0.0");
     boolean Auth;
     ArrayList<Double> lapsval = new ArrayList<>();
     int lapnomax = 0, lapnomin = 0;
@@ -517,15 +517,6 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             // İlk lap
             delta = (currentHours / 60.0 + currentMinutes + (double)currentSeconds / modul);
         }
-//            double delta1 = (Integer.parseInt(hh) / 60.0 + Integer.parseInt(mm) + Double.parseDouble(ss) / modul);
-//            double delta0 = (Integer.parseInt(hour) / 60.0 + Integer.parseInt(minute) + Double.parseDouble(second) / modul);
-//            delta = Math.abs(delta1 - delta0);
-//        } else {
-//            second = laps.get(lapsayisi).substring(6, 8);
-//            minute = laps.get(lapsayisi).substring(3, 5);
-//            hour = laps.get(lapsayisi).substring(0, 2);
-//            delta = (Integer.parseInt(hour) / 60.0 + Integer.parseInt(minute) + Double.parseDouble(second) / modul);
-//        }
 
         lapsval.add(delta);
         updateStatistics();
@@ -625,56 +616,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         // stopLocalTimer();
         getStopTime();
     }
-    /*
-        private void startLocalTimer() {
-            if (runnable != null) {
-                handler.removeCallbacks(runnable);
-            }
 
-            runnable = new Runnable() {
-                @RequiresApi(api = Build.VERSION_CODES.N)
-                @Override
-                public void run() {
-                    if (!Auth && getActivity() != null) { // Sadece çalışıyorsa ve activity varsa
-                        MillisecondTime = SystemClock.uptimeMillis() - StartTime;
-                        UpdateTime = TimeBuff + MillisecondTime;
-
-                        Seconds = (int) (UpdateTime / milis);
-                        Minutes = Seconds / modul;
-                        Seconds = Seconds % modul;
-                        Hours = Minutes / 60;
-                        Minutes = Minutes % 60;
-                        Hours = Hours % 24;
-                        MilliSeconds = (int) (UpdateTime % 1000);
-
-                        hh = Hours < 10 ? "0" + Hours : String.valueOf(Hours);
-                        mm = Minutes < 10 ? "0" + Minutes : String.valueOf(Minutes);
-                        ss = Seconds < 10 ? "0" + Math.floorMod(Seconds, modul) : String.valueOf(Math.floorMod(Seconds, modul));
-
-                        String string = String.format("%02d:%02d:%02d.%03d", Hours, Minutes, Seconds, MilliSeconds);
-
-                        SpannableString spannableString = new SpannableString(string);
-                        spannableString.setSpan(new RelativeSizeSpan(0.5f), 9, spannableString.length(), 0);
-                        binding.textView.setText(spannableString);
-
-                        if (pageViewModel != null) {
-                            pageViewModel.setTimerValue(binding.textView.getText().toString());
-                        }
-
-                        handler.postDelayed(this, 10); // 10ms'de bir güncelle
-                    }
-                }
-            };
-            handler.post(runnable);
-        }
-
-        private void stopLocalTimer() {
-            if (handler != null && runnable != null) {
-                handler.removeCallbacks(runnable);
-            }
-            TimeBuff += MillisecondTime;
-        }
-    */
     private void getStopTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStop = sdf.format(new Date());
