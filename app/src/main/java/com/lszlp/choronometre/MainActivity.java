@@ -63,7 +63,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         CustomAlertDialogFragment.CustomDialogListener {
 
     private boolean keepSplashOnScreen = true;
-
+    private enum ChronoState { STOPPED, RUNNING, PAUSED }
+    private ChronoState currentState = ChronoState.STOPPED;
 
 
 
@@ -75,8 +76,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (viewPager != null) {
             outState.putInt("currentTab", viewPager.getCurrentItem());
         }
-        outState.putBoolean("isRunning", auth);
-
+        // "auth" yerine yeni durumu (state) kaydedin
+        outState.putSerializable("currentState", currentState);
+        // outState.putBoolean("isRunning", auth); // BU SATIRI SİLİN VEYA YORUM SATIRI YAPIN
     }
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
@@ -86,7 +88,61 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             int currentTab = savedInstanceState.getInt("currentTab", 0);
             viewPager.setCurrentItem(currentTab);
         }
-        auth = savedInstanceState.getBoolean("isRunning", false);
+
+        // auth = savedInstanceState.getBoolean("isRunning", false); // BU SATIRI SİLİN VEYA YORUM SATIRI YAPIN
+
+        // Yeni durumu (state) geri yükle
+        currentState = (ChronoState) savedInstanceState.getSerializable("currentState");
+        if (currentState == null) {
+            currentState = ChronoState.STOPPED;
+        }
+
+        // Geri yüklenen duruma göre UI'ı güncelle
+        switch (currentState) {
+            case STOPPED:
+                auth = false;
+                startButton.setText(R.string.start_text);
+                lapButton.setEnabled(false);
+                saveButton.setEnabled(false);
+                resetButton.setEnabled(false);
+                // Switch'leri etkinleştir
+                drawerSwitchCmin.setEnabled(true);
+                drawerSwitchSec.setEnabled(true);
+                drawerSwitchDmin.setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
+                break;
+            case RUNNING:
+                auth = true;
+                startButton.setText("PAUSE");
+                lapButton.setEnabled(true);
+                saveButton.setEnabled(false);
+                resetButton.setEnabled(false);
+                // Switch'leri devre dışı bırak
+                drawerSwitchCmin.setEnabled(false);
+                drawerSwitchSec.setEnabled(false);
+                drawerSwitchDmin.setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
+                break;
+            case PAUSED:
+                auth = false;
+                startButton.setText("RESUME");
+                lapButton.setEnabled(false);
+                saveButton.setEnabled(true);
+                resetButton.setEnabled(true);
+                // Switch'leri devre dışı bırak
+                drawerSwitchCmin.setEnabled(false);
+                drawerSwitchSec.setEnabled(false);
+                drawerSwitchDmin.setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
+                break;
+        }
+
         // Ekran açık/kapalı durumunu geri yükle
         boolean isScreenOn = savedInstanceState.getBoolean("isScreenOn", false);
         if (isScreenOn) {
@@ -159,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Splash screen'i yükle
-       // SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
+        // SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
 
         super.onCreate(savedInstanceState);
         // ActionBar'ı gizle
@@ -376,9 +432,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         saveButton.setEnabled(false);
 
         saveButton.setOnClickListener(view -> {
-                    if (viewPager.getAdapter() != null) {
-                        showSaveDialog();
-                    }
+            if (viewPager.getAdapter() != null) {
+                showSaveDialog();
+            }
             /*
             if (viewPager.getAdapter() != null) {
 
@@ -389,46 +445,70 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // sadece 0nci siradaki fragmeni çalıştır
             if (viewPager.getAdapter() != null) {
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                isResetDone = false;
-                if (!startButton.getText().equals("STOP")) {
-                    if (fragment.modul == 0) {
-                        drawer.open();
-                        Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        auth = true;
-                        drawerSwitchCmin.setEnabled(false);
-                        drawerSwitchSec.setEnabled(false);
-                        drawerSwitchDmin.setEnabled(false);
-                        navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
-                        navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
-                        navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
+                isResetDone = false; // Bu değişkenin kullanımda olup olmadığını kontrol edin, kaldırılabilir.
 
-                        fragment.start();
+                switch (currentState) {
+                    case STOPPED:
+                        // Bu ilk "START" tıklamasıdır
+                        if (fragment.modul == 0) {
+                            drawer.open();
+                            Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // --- DURUM DEĞİŞİMİ: STOPPED -> RUNNING ---
+                            currentState = ChronoState.RUNNING;
+                            auth = true; // 'auth' u diğer özellikler (örn. ses tuşu) için koru
+
+                            // İSTEK: Switch'leri devre dışı bırak
+                            drawerSwitchCmin.setEnabled(false);
+                            drawerSwitchSec.setEnabled(false);
+                            drawerSwitchDmin.setEnabled(false);
+                            navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
+                            navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+                            navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
+
+                            fragment.start(); // Servisi başlatır
+
+                            // İSTEK: UI Güncellemesi
+                            lapButton.setEnabled(true);
+                            startButton.setText("PAUSE"); // Metni "PAUSE" yap
+                            resetButton.setEnabled(false);
+                            saveButton.setEnabled(false);
+                        }
+                        break;
+
+                    case RUNNING:
+                        // Bu "PAUSE" tıklamasıdır
+                        // --- DURUM DEĞİŞİMİ: RUNNING -> PAUSED ---
+                        currentState = ChronoState.PAUSED;
+                        auth = false; // Durumu "durmuş" olarak ayarla
+
+                        fragment.pause(); // Yeni pause metodunu çağır
+
+                        // İSTEK: UI Güncellemesi
+                        startButton.setText("RESUME"); // Metni "RESUME" yap
+                        lapButton.setEnabled(false);
+                        saveButton.setEnabled(true);
+                        resetButton.setEnabled(true);
+
+                        // Switch'ler devre dışı kalmaya devam eder
+                        break;
+
+                    case PAUSED:
+                        // Bu "RESUME" tıklamasıdır
+                        // --- DURUM DEĞİŞİMİ: PAUSED -> RUNNING ---
+                        currentState = ChronoState.RUNNING;
+                        auth = true; // Durumu "çalışıyor" olarak ayarla
+
+                        fragment.resume(); // Yeni resume metodunu çağır
+
+                        // İSTEK: UI Güncellemesi
+                        startButton.setText("PAUSE"); // Metni "PAUSE" yap
                         lapButton.setEnabled(true);
-                        startButton.setText(R.string.stop);
-                        resetButton.setEnabled(false);
                         saveButton.setEnabled(false);
-                    }
+                        resetButton.setEnabled(false);
 
-                } else {
-                    //stop yapılması
-                    auth = false;
-                    if (isResetDone) {
-                        drawerSwitchCmin.setEnabled(true);
-                        drawerSwitchSec.setEnabled(true);
-                        drawerSwitchDmin.setEnabled(true);
-
-                    }
-
-                    navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
-                    navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
-                    navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
-
-                    fragment.stop();
-                    startButton.setText(R.string.start);
-                    lapButton.setEnabled(false);
-                    saveButton.setEnabled(true);// save butonu açık
-                    resetButton.setEnabled(true);// reset butonu açık
+                        // Switch'ler devre dışı kalmaya devam eder
+                        break;
                 }
             }
         });
@@ -445,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         resetButton.setOnClickListener(view -> {
             if (viewPager.getAdapter() != null);
             showResetDialog();
-                });
+        });
         /*resetButton.setOnClickListener(view -> {
             if (viewPager.getAdapter() != null) {
                 TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
@@ -457,7 +537,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 builder.setNegativeButton("No", (dialogInterface, i) -> System.out.println("No ya basıldı"));
                 builder.setPositiveButton("Yes", (dialogInterface, i) -> {
                     resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-                    startButton.setText(R.string.start);
+                    startButton.setText(R.string.start_text);
                     startButton.setEnabled(true);// start tuşu açılıyor
                     lapButton.setEnabled(false);// lap tuşu kapanıyor
                     saveButton.setEnabled(false); //save butonu kapat
@@ -499,8 +579,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     /*
-    VOLUME tuşlarını start /stop / lap özelliği koyma.
-     */
+     VOLUME tuşlarını start /stop / lap özelliği koyma.
+      */
     public boolean dispatchKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
@@ -511,34 +591,64 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (viewPager.getAdapter() != null) {
                         TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
 
-                        if (!startButton.getText().equals("STOP")) {
+                        // --- YENİ STATE MACHINE MANTIĞI ---
+                        switch (currentState) {
+                            case STOPPED:
+                                if (fragment.modul == 0) {
+                                    drawer.open();
+                                    Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    // STOPPED -> RUNNING
+                                    currentState = ChronoState.RUNNING;
+                                    auth = true;
+                                    // Switch'leri devre dışı bırak
+                                    drawerSwitchCmin.setEnabled(false);
+                                    drawerSwitchSec.setEnabled(false);
+                                    drawerSwitchDmin.setEnabled(false);
+                                    navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
+                                    navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+                                    navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
 
-                            if (fragment.modul == 0) {
-                                drawer.open();
-                                Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
-                            } else {
+                                    fragment.start();
+
+                                    // UI Update
+                                    lapButton.setEnabled(true);
+                                    startButton.setText("PAUSE");
+                                    resetButton.setEnabled(false);
+                                    saveButton.setEnabled(false);
+                                }
+                                break;
+                            case RUNNING:
+                                // RUNNING -> PAUSED
+                                currentState = ChronoState.PAUSED;
+                                auth = false;
+                                fragment.pause();
+                                // UI Update
+                                startButton.setText("RESUME");
+                                lapButton.setEnabled(false);
+                                saveButton.setEnabled(true);
+                                resetButton.setEnabled(true);
+                                break;
+                            case PAUSED:
+                                // PAUSED -> RUNNING
+                                currentState = ChronoState.RUNNING;
                                 auth = true;
-                                fragment.start();
+                                fragment.resume();
+                                // UI Update
+                                startButton.setText("PAUSE");
                                 lapButton.setEnabled(true);
-                                startButton.setText(R.string.start);
-                                resetButton.setEnabled(false);
                                 saveButton.setEnabled(false);
-                            }
-
-                        } else {
-                            //stop yapılması
-                            auth = false;
-                            fragment.stop();
-                            startButton.setText(R.string.start);
-                            lapButton.setEnabled(false);
-                            saveButton.setEnabled(true);// save butonu açık
-                            resetButton.setEnabled(true);// reset butonu açık
+                                resetButton.setEnabled(false);
+                                break;
                         }
+                        // --- ESKİ KODU SİLİN ---
                     }
                 }
 
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
+                // Bu kısım doğru çalışır, 'auth' değişkeni
+                // RUNNING durumunda 'true' olarak ayarlandığı için
                 if (action == KeyEvent.ACTION_DOWN && auth) {
 
                     if (viewPager.getAdapter() != null) {
@@ -729,14 +839,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onResetConfirmed() {
         TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
         ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
-        resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat v1.nci releasedeki hatadan dolayı
-        startButton.setText(R.string.start);
+        resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat
+        startButton.setText(R.string.start_text);
         startButton.setEnabled(true);// start tuşu açılıyor
         lapButton.setEnabled(false);// lap tuşu kapanıyor
         saveButton.setEnabled(false); //save butonu kapat
         fragment.reset();
         chartFragment.ClearChart();
         Toast.makeText(this, "All data has been deleted.", Toast.LENGTH_SHORT).show();
+
+        // --- YENİ EKLENEN KISIM ---
+        // Durum makinesini sıfırla
+        currentState = ChronoState.STOPPED;
+        auth = false;
+
+        // İSTEK: Switch'leri tekrar etkinleştir
+        drawerSwitchCmin.setEnabled(true);
+        drawerSwitchSec.setEnabled(true);
+        drawerSwitchDmin.setEnabled(true);
+        navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
+        navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
+        navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
+        // --- YENİ EKLENEN KISIM SONU ---
     }
 
     @Override

@@ -29,11 +29,14 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
     <string name="your_laps_will_be_here">Your laps will be here</string>
     <string name="_00_00_00_000_deneme">00:00:00:000.deneme</string>
     <string name="_00_00_00">00:00:00.</string>
-    <string name="start">START</string>
-    <string name="stop">STOP</string>
+    <string name="start_text">START</string>
+    <string name="stop_text">STOP</string>
+    <string name="pause_text">PAUSE</string>
+    <string name="continue_text">RESUME</string>
+
     <string name="lap">LAP</string>
-    <string name="reset">RESET</string>
-    <string name="save">SAVE</string>
+    <string name="reset_text">RESET</string>
+    <string name="save_text">SAVE</string>
     <string name="ratetext">How much did you like Industrial Chronometer?</string>
     <string name="ten_thousandth_of_hours">Ten thousandth of hours</string>
 
@@ -59,7 +62,7 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
         <item name="android:layout_marginRight">3dp</item>
         <item name="android:textColor">@color/purple_700</item>
         <item name="android:fontFamily">@font/digital7</item>
-        <item name="android:textSize">20dp</item>
+        <item name="android:textSize">18dp</item>
 
 
     </style>

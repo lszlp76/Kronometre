@@ -380,7 +380,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         button3.setEnabled(false);
         button.setEnabled(false);
         button4.setEnabled(false);
-       // handler = new Handler();
+        // handler = new Handler();
         Auth = true;
     }
 
@@ -622,59 +622,59 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         stopForegroundService();
 
         // Lokal timer'ı durdur
-       // stopLocalTimer();
+        // stopLocalTimer();
         getStopTime();
     }
-/*
-    private void startLocalTimer() {
-        if (runnable != null) {
-            handler.removeCallbacks(runnable);
-        }
-
-        runnable = new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void run() {
-                if (!Auth && getActivity() != null) { // Sadece çalışıyorsa ve activity varsa
-                    MillisecondTime = SystemClock.uptimeMillis() - StartTime;
-                    UpdateTime = TimeBuff + MillisecondTime;
-
-                    Seconds = (int) (UpdateTime / milis);
-                    Minutes = Seconds / modul;
-                    Seconds = Seconds % modul;
-                    Hours = Minutes / 60;
-                    Minutes = Minutes % 60;
-                    Hours = Hours % 24;
-                    MilliSeconds = (int) (UpdateTime % 1000);
-
-                    hh = Hours < 10 ? "0" + Hours : String.valueOf(Hours);
-                    mm = Minutes < 10 ? "0" + Minutes : String.valueOf(Minutes);
-                    ss = Seconds < 10 ? "0" + Math.floorMod(Seconds, modul) : String.valueOf(Math.floorMod(Seconds, modul));
-
-                    String string = String.format("%02d:%02d:%02d.%03d", Hours, Minutes, Seconds, MilliSeconds);
-
-                    SpannableString spannableString = new SpannableString(string);
-                    spannableString.setSpan(new RelativeSizeSpan(0.5f), 9, spannableString.length(), 0);
-                    binding.textView.setText(spannableString);
-
-                    if (pageViewModel != null) {
-                        pageViewModel.setTimerValue(binding.textView.getText().toString());
-                    }
-
-                    handler.postDelayed(this, 10); // 10ms'de bir güncelle
-                }
+    /*
+        private void startLocalTimer() {
+            if (runnable != null) {
+                handler.removeCallbacks(runnable);
             }
-        };
-        handler.post(runnable);
-    }
 
-    private void stopLocalTimer() {
-        if (handler != null && runnable != null) {
-            handler.removeCallbacks(runnable);
+            runnable = new Runnable() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
+                @Override
+                public void run() {
+                    if (!Auth && getActivity() != null) { // Sadece çalışıyorsa ve activity varsa
+                        MillisecondTime = SystemClock.uptimeMillis() - StartTime;
+                        UpdateTime = TimeBuff + MillisecondTime;
+
+                        Seconds = (int) (UpdateTime / milis);
+                        Minutes = Seconds / modul;
+                        Seconds = Seconds % modul;
+                        Hours = Minutes / 60;
+                        Minutes = Minutes % 60;
+                        Hours = Hours % 24;
+                        MilliSeconds = (int) (UpdateTime % 1000);
+
+                        hh = Hours < 10 ? "0" + Hours : String.valueOf(Hours);
+                        mm = Minutes < 10 ? "0" + Minutes : String.valueOf(Minutes);
+                        ss = Seconds < 10 ? "0" + Math.floorMod(Seconds, modul) : String.valueOf(Math.floorMod(Seconds, modul));
+
+                        String string = String.format("%02d:%02d:%02d.%03d", Hours, Minutes, Seconds, MilliSeconds);
+
+                        SpannableString spannableString = new SpannableString(string);
+                        spannableString.setSpan(new RelativeSizeSpan(0.5f), 9, spannableString.length(), 0);
+                        binding.textView.setText(spannableString);
+
+                        if (pageViewModel != null) {
+                            pageViewModel.setTimerValue(binding.textView.getText().toString());
+                        }
+
+                        handler.postDelayed(this, 10); // 10ms'de bir güncelle
+                    }
+                }
+            };
+            handler.post(runnable);
         }
-        TimeBuff += MillisecondTime;
-    }
-*/
+
+        private void stopLocalTimer() {
+            if (handler != null && runnable != null) {
+                handler.removeCallbacks(runnable);
+            }
+            TimeBuff += MillisecondTime;
+        }
+    */
     private void getStopTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStop = sdf.format(new Date());
@@ -766,7 +766,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         if (button4 != null) button4.setVisibility(visibility);
         if (button != null) button.setVisibility(visibility);
 
-     }
+    }
 
     private void startForegroundService() {
         Intent serviceIntent = new Intent(getContext(), ChronometerService.class);
@@ -1011,5 +1011,28 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             });
 
         }
+    }
+    // YENİ METOT: Servisi duraklatmak için kullanılır
+    public void pause() {
+        Auth = true; // Durumu "çalışmıyor" (duraklatıldı) olarak ayarla
+
+        // Servise duraklatma eylemini bildirmek için LocalBroadcast gönder
+        Intent pauseIntent = new Intent(Constants.ACTION_PAUSE);
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(pauseIntent);
+
+        // Gözlem süresini hesaplamak için (mevcut kodda vardı)
+        getStopTime();
+    }
+
+    // YENİ METOT: Servisi devam ettirmek için kullanılır
+    public void resume() {
+        Auth = false; // Durumu "çalışıyor" olarak ayarla
+
+        // Servise devam etme eylemini bildirmek için LocalBroadcast gönder
+        Intent resumeIntent = new Intent(Constants.ACTION_RESUME);
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(resumeIntent);
+
+        // Not: getStartTime() burada çağrılmaz, çünkü gözlem süresi
+        // ilk başta başladı. Servis kendi zamanını tutuyor.
     }
 }

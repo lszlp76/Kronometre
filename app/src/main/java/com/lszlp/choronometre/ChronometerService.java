@@ -44,7 +44,7 @@ public class ChronometerService extends Service {
     private int modul = 60; // Varsayılan saniye
     private int milis = 1000; // Varsayılan
     // Sadece bu satırı tutun:
-     // --- Receiver ---
+    // --- Receiver ---
     private BroadcastReceiver pauseResumeReceiver;
 
 
@@ -276,16 +276,21 @@ public class ChronometerService extends Service {
                 }
             }
         };
-        // Local Broadcast Manager ile değil, ContextCompat ile kaydet
+        // Local Broadcast Manager ile kaydet
         IntentFilter filter = new IntentFilter();
         filter.addAction(Constants.ACTION_PAUSE);
         filter.addAction(Constants.ACTION_RESUME);
 
-        ContextCompat.registerReceiver(this, pauseResumeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
+        // --- DEĞİŞİKLİK BURADA ---
+        // ContextCompat.registerReceiver yerine LocalBroadcastManager kullan
+        LocalBroadcastManager.getInstance(this).registerReceiver(pauseResumeReceiver, filter);
+        // Eski satırı silin:
+        // ContextCompat.registerReceiver(this, pauseResumeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
     // --- TEMİZLEME ---
 
+    // onDestroy metodunu GÜNCELLEYİN
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -295,7 +300,11 @@ public class ChronometerService extends Service {
         }
         if (pauseResumeReceiver != null) {
             try {
-                unregisterReceiver(pauseResumeReceiver);
+                // --- DEĞİŞİKLİK BURADA ---
+                // unregisterReceiver yerine LocalBroadcastManager kullan
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(pauseResumeReceiver);
+                // Eski satırı silin:
+                // unregisterReceiver(pauseResumeReceiver);
             } catch (Exception e) {
                 Log.e(TAG, "❌ Receiver kaldırılamadı: " + e.getMessage());
             }

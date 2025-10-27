@@ -21,25 +21,20 @@
         android:background="@color/fully_transparent"
         android:id="@+id/mainToolbar" >
 
-
-        <!-- buraya android:background="@color/fully_transparent" eklersen appbar transparan olur-->
-
-
-
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             style="@style/textTitleColorStyle"
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:background="@color/fully_transparent"
-            app:theme="@style/Theme.Kronometre.NoActionBar"
-            app:popupTheme="@style/Theme.Kronometre.NoActionBar">
+            app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
             <com.google.android.gms.ads.AdView
                 xmlns:ads="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/adView"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom= "true"
+                android:layout_gravity="end"
                 ads:adUnitId="ca-app-pub-2013051048838339/4888424937"
                 ads:adSize="BANNER"
                 >
@@ -51,7 +46,7 @@
             android:id="@+id/tabs"
            style="@style/MyTabLayoutStyle"
             android:layout_width="match_parent"
-            android:layout_height="25dp"
+            android:layout_height="20dp"
             android:contentDescription="@string/lap"
             android:background="@color/fully_transparent"
             android:fontFamily="@font/digital7" />
@@ -60,19 +55,11 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-        <!--ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:adjustViewBounds="true"
-            android:fitsSystemWindows="true"
-            android:src="@drawable/backgroundcam" /-->
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:background="@color/fully_transparent"
         android:contentDescription=" "
-
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -89,42 +76,45 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:weightSum="5"
-            android:layout_weight="1"
+            android:weightSum="4"
             android:gravity="center_vertical"
             >
 
             <Button
                 android:id="@id/button2"
                 style="@style/ButtonAdjustmentStyle"
-                android:layout_width="wrap_content"
-
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:maxLines="1"
 
 
                 android:text="Start" />
 
             <Button
                 android:id="@+id/button3"
-
+                android:layout_weight="1"
                 style="@style/ButtonAdjustmentStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:maxLines="1"
 
                 android:text="LAP" />
 
             <Button
                 android:id="@+id/button4"
-
+                android:layout_weight="1"
                 style="@style/ButtonAdjustmentStyle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
+                android:maxLines="1"
 
                 android:text="Reset" />
 
             <Button
                 android:id="@+id/button"
-                android:layout_width="wrap_content"
-
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 style="@style/ButtonAdjustmentStyle"
                 android:text="Save"
+                android:maxLines="1"
 
                 />
         </LinearLayout>
@@ -146,15 +136,8 @@
     app:itemTextAppearance="@style/MyNavigationTextAppearance"
     app:itemTextColor="@color/checked_track_color"
     android:theme="@style/MyNavigationViewStyle"
-
     app:headerLayout="@layout/nav_drawer"
     app:menu="@menu/drawermenu">
-    <!--Button
-        android:id="@+id/footer_item_1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="Footer Button 1" /-->
 
 </com.google.android.material.navigation.NavigationView>
 
