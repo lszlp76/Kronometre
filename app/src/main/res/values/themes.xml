@@ -102,5 +102,13 @@
         <item name="android:windowFullscreen">true</item>
 
     </style>
+    <style name="SliderTheme" parent="Theme.AppCompat.Light.NoActionBar">
+
+        <item name="android:fontFamily">@font/digital7</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:tint">@color/elektrikturuncu</item>
+
+    </style>
 
   </resources>

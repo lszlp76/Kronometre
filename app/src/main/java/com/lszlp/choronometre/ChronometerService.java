@@ -23,13 +23,17 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import java.util.Locale;
+import android.appwidget.AppWidgetManager; // YENİ İMPORT
+import android.content.ComponentName; // YENİ İMPORT
+import com.lszlp.choronometre.ChronometerWidget; // YENİ İMPORT
 // DİKKAT: Constants sınıfınızın doğru değerleri içerdiğinden emin olun!
 // Örn: Constants.NOTIFICATION_ID, Constants.CHANNEL_ID vb.
 
 public class ChronometerService extends Service {
     private static final String TAG = "ChronoService";
-
-    // --- Zamanlayıcı Değişkenleri ---
+    // --- YENİ/KONTROL: Zaman Birimi Değişkeni ---
+   // --- Zamanlayıcı Değişkenleri ---
     private Handler handler;
     private Runnable updateRunnable; // UI ve Bildirim güncelleme görevimiz
     private long startTime = 0L;
@@ -81,20 +85,17 @@ public class ChronometerService extends Service {
 
                     // 2. Zamanlayıcıyı başlat
                     startTime = SystemClock.elapsedRealtime();
-                    // Eğer uygulama resetlenmediyse, elapsedTime'ı timeBeforePause'a aktarın
-                    // Ancak, Chronometer mantığında START her zaman sıfırdan başlatmayı veya
-                    // kaldığı yerden devam etmeyi tetiklemelidir.
-                    // Eğer TimerFragment'ta 'reset()' çağrılmadıysa, elapsedTime sıfır olmamalıdır.
-                    // Start tuşu reset tuşu değilse, bu mantık yanlış olabilir.
 
-                    // Şimdilik sıfırdan başlatma mantığı uygulanıyor:
-                    // startTime = SystemClock.elapsedRealtime();
                     timeBeforePause = 0L; // Sadece sıfırdan başlıyorsa
                     elapsedTime = 0L;     // Sadece sıfırdan başlıyorsa
 
                     startTimer();
                     isRunning = true;
                     isPaused = false;
+                }else if (Constants.ACTION_PAUSE.equals(action)) {
+                   pauseChronometer();
+                }else if (Constants.ACTION_RESUME.equals(action)) {
+                 resumeChronometer();
                 }
             } else if (Constants.ACTION_STOP.equals(action)) {
                 stopChronometer();
@@ -123,7 +124,8 @@ public class ChronometerService extends Service {
 
                     // 2. Fragment'a yayını gönder
                     sendTimeUpdate(elapsedTime);
-
+                    // YENİ: Widget'ı güncelle
+                    updateWidget(elapsedTime);
                     // 3. Bildirimi güncelle
                     updateNotification();
 
@@ -199,6 +201,17 @@ public class ChronometerService extends Service {
         isPaused = false;
 
         sendTimeUpdate(0L); // Fragment'a 0 gönder
+        // --- KRİTİK DÜZELTME: SERVİSİ VE BİLDİRİMİ KALDIR ---
+        isRunning = false;
+        isPaused = false;
+        handler.removeCallbacks(updateRunnable); // Güncellemeyi durdur
+
+        // 1. Servisi Ön Plan durumundan çıkar (Bildirimi kaldırır)
+        stopForeground(true); // true: bildirimi tamamen kaldır
+
+        // 2. Servisi durdur (Service nesnesini sonlandırır)
+        stopSelf();
+        // ------------
         Log.d(TAG, "🔄 Chronometer reset.");
     }
 
@@ -259,6 +272,7 @@ public class ChronometerService extends Service {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE);
 
         // Custom RemoteViews mantığını kullanın
+        //bunu kullandığın için yukardakiler yok
         try {
             RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_chronometer);
             remoteViews.setTextViewText(R.id.notification_time, timeDisplay);
@@ -396,6 +410,66 @@ public class ChronometerService extends Service {
                 return "⏱️ Time@Deciminutes)" + (isPaused ? " ⏸️" : "");
             default:
                 return "⏱️ Chronometer" + (isPaused ? " ⏸️" : "");
+        }
+    }
+    /**
+     * Widget için zamanı seçili birime göre formatlar.
+     * @param millis Toplam geçen milisaniye.
+     * @return Formatlanmış zaman dizesi.
+     */
+    private String formatTimeForWidget(long millis) {
+        switch (timeUnit) {
+            case Constants.TIME_UNIT_CMINUTES:
+                // Centiminutes (Santidaki) formatını çağırır
+                return formatCentiminutes(millis);
+
+            case Constants.TIME_UNIT_DMINUTES:
+                // Deciminutes (Desidaki) formatını çağırır
+                return formatDeciminutes(millis);
+
+            case Constants.TIME_UNIT_SECONDS:
+            default:
+                // Varsayılan Saniye (Milisaniye detaylı) formatını çağırır
+                return formatSecondsWithDecimals(millis);
+        }
+    }
+
+
+    /**
+     * Saniye (Seconds) birimi için HH:mm:ss.S formatını döndürür.
+     * Bu, standart formatın bir türevidir ve widget için milisaniye detayını gösterir.
+     */
+    private String formatSecondsWithDecimals(long millis) {
+        long hours = (millis / 3600000);
+        long remaining = millis % 3600000;
+        long minutes = remaining / 60000;
+        remaining %= 60000;
+        long seconds = remaining / 1000;
+        long centiSeconds = (remaining % 1000) / 100; // Yüzde bir saniye hassasiyeti (tek basamak)
+
+        // Örn: 01:23:45.6
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d.%d", hours, minutes, seconds, centiSeconds);
+    }
+    // --- YENİ METOT: Widget'ı Güncelle ---
+    private void updateWidget(long elapsedMillis) {
+        // AppWidgetManager örneğini al
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+
+        // ChronometerWidget sınıfının tüm aktif instance'larını al
+        ComponentName thisWidget = new ComponentName(this, ChronometerWidget.class);
+        int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
+
+        // Her widget instance'ı için RemoteViews'ı güncelle
+        for (int widgetId : allWidgetIds) {
+            // Kronometre zamanını formatla (Serviste zaten format metotları var)
+            String formattedTime = formatTimeForWidget(elapsedMillis);
+
+            // RemoteViews oluştur ve güncel zamanı TextView'e set et
+            RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_chronometer);
+            views.setTextViewText(R.id.txtTime, formattedTime);
+
+            // Widget'ı güncelle
+            appWidgetManager.updateAppWidget(widgetId, views);
         }
     }
 }

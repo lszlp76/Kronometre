@@ -42,6 +42,8 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
 
 
     <string name="action_back">Back</string>
+    <string name="ondal_k_basamak_se_imi">Ondalık Basamak Seçimi</string>
+
     <style name="AlertDialogCustom2" parent="@style/AlertDialogCustom">
         <item name="android:textColor">#FF3700B3</item>
 

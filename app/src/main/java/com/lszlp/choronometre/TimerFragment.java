@@ -41,7 +41,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 public class TimerFragment extends Fragment {
     public String Timeunit;
     private FragmentTimerBinding _binding;
@@ -149,7 +150,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
     int lapsayisi = 0;
     ArrayList<String> laps = new ArrayList<>();
-    DecimalFormat dec = new DecimalFormat("#0.00");
+    DecimalFormat dec = new DecimalFormat("#0.0");
     boolean Auth;
     ArrayList<Double> lapsval = new ArrayList<>();
     int lapnomax = 0, lapnomin = 0;
@@ -172,16 +173,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     public static TimerFragment newInstance() {
         return new TimerFragment();
     }
-    /*
-    public void resumeFromRotation() {
-        if (running && handler != null) {
-            handler.removeCallbacks(runnable);
-            startTime = SystemClock.elapsedRealtime() - elapsedTime;
-            handler.postDelayed(runnable, 0);
-
-        }
-    }
-    */
+    private String currentDecimalFormatPattern = "#0.0"; // Varsayılan: 1 ondalık
 
     // State'leri kaydet
     @Override
@@ -200,7 +192,8 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     @Override
     public void onResume() {
         super.onResume();
-
+//      Kullanıcı ayarları değiştirip geri gelirse format desenini güncelle
+        currentDecimalFormatPattern = getDecimalFormatPattern();
         // KRİTİK 1: Durum Yanıtı alıcısını kaydet
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(statusResponseReceiver,
                 new IntentFilter(Constants.ACTION_STATUS_RESPONSE));
@@ -260,6 +253,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         pageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
         // UI Thread'e geçişi sağlamak için Handler tanımla
         final Handler uiHandler = new Handler(requireContext().getMainLooper());
@@ -392,6 +386,13 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        // Başlangıçta format desenini yükle
+        currentDecimalFormatPattern = getDecimalFormatPattern();
+        dec = new DecimalFormat(currentDecimalFormatPattern);
+        Log.d("TimerFragmet", "dec value :"+dec);
+
+
         _binding = FragmentTimerBinding.inflate(getLayoutInflater()); // Atamayı buraya yapın
         return _binding.getRoot();
 
@@ -568,6 +569,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         updateStatistics();
 
         m_Text = "";
+        ;
         lapValue = new Lap(dec.format(delta) + " ", lap, lapsayisi + 1, m_Text);
         lapsArray.add(lapsayisi, lapValue);
         ListElementsArrayList.add(0, lapValue);
@@ -863,7 +865,8 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     }
     // TimerFragment.java içinde yeni eklemeniz gereken metot
     private String formatTime(long elapsedMillis) {
-
+// Zaman biriminin saniye (Constants.TIME_UNIT_SECONDS) olduğundan emin olun
+        // Cmin ve Dmin için farklı formatlar kullanılıyorsa, o mantık korunmalıdır.
         //Timer sayacı uygun birime göre düzenliyor
         int hours, minutes, seconds, subUnit;
         String result;
@@ -1080,9 +1083,37 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     @Override
     public void onPause() {
         super.onPause();
-        // KRİTİK 3: Durum Yanıtı alıcısını kayıttan sil
-        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
 
-        // Not: Mevcut zaman güncelleme alıcınızın da burada kayıttan silindiğinden emin olun!
+
+        if (isAdded()) {
+            // Tüm alıcıları burada kayıttan silin
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timeUpdateReceiver);
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
+            // ... varsa diğer alıcılar
+        } //cut zaman güncelleme alıcınızın da burada kayıttan silindiğinden emin olun!
+    }
+    private String getDecimalFormatPattern() {
+        // SharedPreferences'ı oku
+        // Fragment'ın bir Context'e bağlı olup olmadığını kontrol et
+        if (!isAdded()) {
+            // Bağlı değilse varsayılan değeri döndür ve devam et
+            return "#0.0";
+        }
+        // Eğer bağlıysa, requireContext()'i güvenle kullan
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+
+        // Constants'tan tanımladığımız anahtar ve varsayılan değeri kullan
+        int decimalCount = prefs.getInt(Constants.PREF_DECIMAL_PLACES, Constants.DEFAULT_DECIMAL_PLACES);
+        // DecimalFormat desenini oluştur
+        switch (decimalCount) {
+            case 0:
+                return "#0.0";   // Slider 0: 1 ondalık
+            case 1:
+                return "#0.00";  // Slider 1: 2 ondalık
+            case 2:
+                return "#0.000"; // Slider 2: 3 ondalık
+            default:
+                return "#0.0"; // Güvenlik
+        }
     }
 }

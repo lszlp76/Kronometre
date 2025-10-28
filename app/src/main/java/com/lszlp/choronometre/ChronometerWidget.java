@@ -14,37 +14,37 @@ public class ChronometerWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
+            // Layout dosyanızı kullanın (R.layout.widget_chronometer mevcut olmalı)
             @SuppressLint("RemoteViewLayout") RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_chronometer);
 
-            // --- START Intent: Make it unique for this widget instance ---
-            Intent startIntent = new Intent(context, ChronometerService.class);
-            // Use a constant for the action to avoid typos
-            startIntent.setAction(Constants.ACTION_START);
-            // Add the widget ID as an extra so the service knows which widget to update
-            startIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            // Use the appWidgetId as the request code to ensure the PendingIntent is unique
-            PendingIntent startPendingIntent = PendingIntent.getService(
+            // --- START/PAUSE/RESUME Intent ---
+            Intent toggleIntent = new Intent(context, ChronometerService.class);
+            // Servis içinde bu eylemi kontrol etmek için yeni bir aksiyon tanımlayabilirsiniz
+            // Ancak mevcut kodunuz ACTION_START/ACTION_PAUSE/ACTION_RESUME kullanıyor.
+
+            // Basitlik için, butonu her zaman uygulamayı açacak şekilde ayarlayalım (En güvenilir yöntem)
+            Intent launchAppIntent = new Intent(context, MainActivity.class);
+            PendingIntent launchPendingIntent = PendingIntent.getActivity(
                     context,
-                    appWidgetId, // Unique request code
-                    startIntent,
+                    appWidgetId,
+                    launchAppIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
             );
 
-            // --- STOP Intent: Also make it unique ---
-            Intent stopIntent = new Intent(context, ChronometerService.class);
-            // Use a constant for the action
-            stopIntent.setAction(Constants.ACTION_STOP);
-            stopIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            // Use a different unique request code for the stop action
-            PendingIntent stopPendingIntent = PendingIntent.getService(
-                    context,
-                    appWidgetId + 1, // A simple way to ensure the request code is different from start
-                    stopIntent,
-                    PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
-            );
+            // Widget'ın ana gövdesine tıklama işlevi atama (Uygulamayı açar)
+            views.setOnClickPendingIntent(R.id.widget_container, launchPendingIntent);
 
-            views.setOnClickPendingIntent(R.id.btnStart, startPendingIntent);
-            views.setOnClickPendingIntent(R.id.btnStop, stopPendingIntent);
+            // Eğer widget'ın içinde START/STOP butonu varsa, onun intent'ini ayarlayın
+            // Varsayalım ki layout'ta R.id.btnToggle adında tek bir buton var.
+
+            // --- Toggle Butonu (START/PAUSE/RESUME) ---
+            Intent toggleServiceIntent = new Intent(context, ChronometerService.class);
+            // Toggle butonuna basıldığında servise yeni bir sinyal gönderilebilir: ACTION_TOGGLE_CHRONO
+            // Ya da START/PAUSE/RESUME mantığını butonun durumuna göre widget içinde yönetmelisiniz (daha karmaşık).
+            // En basiti: Uygulamayı aç ve Fragment'ta buton durumunu göster.
+
+            // İlk çalıştırmada gösterilecek zaman
+            views.setTextViewText(R.id.txtTime, "00:00:00.0");
 
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }

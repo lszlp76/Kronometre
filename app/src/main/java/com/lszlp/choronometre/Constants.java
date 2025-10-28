@@ -23,12 +23,20 @@ public class Constants {
     public static final String EXTRA_MILIS = "milis";
 
     // Zaman birimi tipleri
-    public static final int TIME_UNIT_SECONDS = 1;
-    public static final int TIME_UNIT_CMINUTES = 2;
-    public static final int TIME_UNIT_DMINUTES = 3;
+    public static final String TIME_UNIT_SECONDS = "Sec.";
+    public static final String TIME_UNIT_CMINUTES = "Cmin.";
+    public static final String TIME_UNIT_DMINUTES = "Dmh.";
 
    public static final String EXTRA_IS_RUNNING = "isRunning";
     public static final String EXTRA_IS_PAUSED = "isPaused";
     public static final int REQUEST_STORAGE_PERMISSION = 200;
     public static final int REQUEST_ALL_PERMISSIONS = 201; // Yeni: Tüm izinler için tek bir kod
+
+    // --- YENİ ONDALIK HASSASİYET SABİTLERİ ---
+    // SharedPreferences anahtarı
+    public static final String PREF_DECIMAL_PLACES = "pref_decimal_places";
+    // Varsayılan değer (0 -> 1 ondalık basamak, yani 0.0)
+    public static final int DEFAULT_DECIMAL_PLACES = 0;
+    public static final String ACTION_DECIMAL_UPDATE = "com.lszlp.choronometre.ACTION_DECIMAL_UPDATE";
+
 }

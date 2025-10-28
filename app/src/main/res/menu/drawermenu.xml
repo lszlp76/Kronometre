@@ -38,9 +38,17 @@
                     android:title="@string/screenOn"
                     app:actionLayout="@layout/togglebuttonscreen"
                     app:showAsAction="always" />
+                <item
+                    android:id="@+id/precision"
+                    android:checkable="true"
+                    android:icon="@drawable/ic_save"
+                    app:actionLayout="@layout/precisionslider"
 
+                    android:title="Precision" />
                 <item
                     android:id="@+id/nav_save"
+
+                    android:visible="false"
                     android:checkable="true"
                     android:icon="@drawable/ic_save"
                     android:title="Save" />

@@ -4,38 +4,41 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RatingBar;
+import android.widget.Switch;
 import android.widget.Toast;
-
+import com.google.android.gms.ads.AdView;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
-
-
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.material.navigation.NavigationView;
@@ -47,7 +50,7 @@ import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.gms.tasks.*;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
-
+import com.google.android.material.slider.Slider; // Bu importu eklediğinizden emin olun!
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,118 +73,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private boolean keepSplashOnScreen = true;
     private enum ChronoState { STOPPED, RUNNING, PAUSED }
     private ChronoState currentState = ChronoState.STOPPED;
-
-
-
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-
-        super.onSaveInstanceState(outState);
-        // Gerekli state'leri kaydet
-        if (viewPager != null) {
-            outState.putInt("currentTab", viewPager.getCurrentItem());
-        }
-        // "auth" yerine yeni durumu (state) kaydedin
-        outState.putSerializable("currentState", currentState);
-        // outState.putBoolean("isRunning", auth); // BU SATIRI SİLİN VEYA YORUM SATIRI YAPIN
-    }
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        // State'leri geri yükle
-        if (viewPager != null) {
-            int currentTab = savedInstanceState.getInt("currentTab", 0);
-            viewPager.setCurrentItem(currentTab);
-        }
-
-        // auth = savedInstanceState.getBoolean("isRunning", false); // BU SATIRI SİLİN VEYA YORUM SATIRI YAPIN
-
-        // Yeni durumu (state) geri yükle
-        currentState = (ChronoState) savedInstanceState.getSerializable("currentState");
-        if (currentState == null) {
-            currentState = ChronoState.STOPPED;
-        }
-
-        // Geri yüklenen duruma göre UI'ı güncelle
-        switch (currentState) {
-            case STOPPED:
-                auth = false;
-                startButton.setText(R.string.start_text);
-                lapButton.setEnabled(false);
-                saveButton.setEnabled(false);
-                resetButton.setEnabled(false);
-                // Switch'leri etkinleştir
-                drawerSwitchCmin.setEnabled(true);
-                drawerSwitchSec.setEnabled(true);
-                drawerSwitchDmin.setEnabled(true);
-                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
-                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
-                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
-                break;
-            case RUNNING:
-                auth = true;
-                startButton.setText("PAUSE");
-                lapButton.setEnabled(true);
-                saveButton.setEnabled(false);
-                resetButton.setEnabled(false);
-                // Switch'leri devre dışı bırak
-                drawerSwitchCmin.setEnabled(false);
-                drawerSwitchSec.setEnabled(false);
-                drawerSwitchDmin.setEnabled(false);
-                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
-                break;
-            case PAUSED:
-                auth = false;
-                startButton.setText("RESUME");
-                lapButton.setEnabled(false);
-                saveButton.setEnabled(true);
-                resetButton.setEnabled(true);
-                // Switch'leri devre dışı bırak
-                drawerSwitchCmin.setEnabled(false);
-                drawerSwitchSec.setEnabled(false);
-                drawerSwitchDmin.setEnabled(false);
-                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
-                break;
-        }
-
-        // Ekran açık/kapalı durumunu geri yükle
-        boolean isScreenOn = savedInstanceState.getBoolean("isScreenOn", false);
-        if (isScreenOn) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            screenSaverSwitch.setChecked(true);
-        }
-    }
-
-
-
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // Uygulama arka plana geçtiğinde servisin çalışmaya devam etmesi için
-        // Burada özel bir şey yapmıyoruz, servis zaten foreground'da çalışıyor
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Uygulama ön plana geldiğinde servis durdurulmaz
-        // Sadece UI güncellemesi yapılır
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Uygulama tamamen kapatıldığında servisi temizle
-        stopService(new Intent(this, ChronometerService.class));
-    }
-
-
-
     public DrawerLayout drawer;
     public Boolean isResetDone;
     private ReviewInfo reviewInfo;
@@ -193,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     androidx.appcompat.widget.SwitchCompat drawerSwitchCmin;
     androidx.appcompat.widget.SwitchCompat drawerSwitchDmin;
     androidx.appcompat.widget.SwitchCompat screenSaverSwitch;
+   Slider drawerSlider;
     ViewPager viewPager;
     private AdView adView ;
     Button startButton, lapButton, resetButton, saveButton;
@@ -205,16 +97,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             R.drawable.ic_baseline_stacked_line_chart_24,
             R.drawable.ic_baseline_save
     };
-
-
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        // Drawer toggle'ı yeniden sync et
-        toggle.syncState();
-    }
-
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -233,90 +115,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         checkAndRequestAllPermissions();
         initializeApp();
     }
-    /**
-     * İzin listesini oluşturur ve gerekli olanları ister.
-     */
-    private void checkAndRequestAllPermissions() {
-        List<String> permissionsToRequest = new ArrayList<>();
-
-        // 1. Depolama İzni (API 32 ve altı için)
-        // Manifest'te maxSdkVersion=32 olduğu için burayı ona göre ayarlıyoruz.
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) { // Android 12L / API 32
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            }
-        }
-
-        // 2. Bildirim İzni (API 33 ve üstü için)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        }
-
-        // Diğer İzinler (FOREGROUND_SERVICE, WAKE_LOCK, vb. koruma seviyesi normal olduğu için Runtimeda istenmezler)
-        // Internet, FOREGROUND_SERVICE gibi izinler "normal" koruma seviyesindedir ve kurulurken otomatik verilir.
-        // Bu yüzden sadece kullanıcı izni gerektirenleri (Depolama ve Bildirim) istiyoruz.
-
-        if (!permissionsToRequest.isEmpty()) {
-            ActivityCompat.requestPermissions(this,
-                    permissionsToRequest.toArray(new String[0]),
-                    Constants.REQUEST_ALL_PERMISSIONS);
-        }
-        // Eğer tüm izinler verilmişse, herhangi bir şey yapmaya gerek kalmaz.
-    }
-
-    /**
-     * İzin isteği sonuçlarını ele alır.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == Constants.REQUEST_ALL_PERMISSIONS) {
-            boolean allGranted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-
-            if (!allGranted) {
-                // Herhangi bir izin reddedildiyse kullanıcıyı bilgilendir
-                Toast.makeText(this, "Some permission are missing and needed", Toast.LENGTH_LONG).show();
-
-                // Özellikle Bildirim izni reddedildiyse, kullanıcıyı ayarlara yönlendir
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                        !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) &&
-                        ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-
-                    showNotificationSettingsDialog();
-                }
-            }
-        }
-    }
-    /**
-     * Bildirim izni reddedildiğinde, kullanıcıyı Ayarlar ekranına yönlendiren dialog gösterir.
-     */
-    private void showNotificationSettingsDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("Notification Permission Required")
-                .setMessage("Notification permission is needed for the chronometer to run in the background and show notifications. You are being redirected to settings.")
-                .setPositiveButton("Go to Settings", (dialog, which) -> {
-                    Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
-                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-                    startActivity(intent);
-                })
-                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
-                .create()
-                .show();
-    }
     private void initializeApp() {
         setupAppContent();
     }
-
-
     private void setupAppContent() {
         // Ana uygulama içeriğini hazırla
 
@@ -328,21 +129,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
         //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
-
+        adView = binding.adView;
         // / Initialize the Google Mobile Ads SDK on the main thread.
         MobileAds.initialize(this, initializationStatus -> {
             // SDK is initialized, now load the ad.
             loadBannerAd();
         });
-
         adView = binding.adView;
-
 
         // Check for WRITE_EXTERNAL_STORAGE permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         }
-
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         viewPager = binding.viewPager;
@@ -379,7 +177,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.setDrawerIndicatorEnabled(true);
         drawer.addDrawerListener(toggle);
 
-
         navigationView.getMenu().findItem(R.id.timeUnitSec)
                 .setActionView(new androidx.appcompat.widget.SwitchCompat(this));
         navigationView.getMenu().findItem(R.id.timeUnitCmin)
@@ -394,7 +191,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerSwitchCmin = ((androidx.appcompat.widget.SwitchCompat) navigationView.getMenu().findItem(R.id.timeUnitCmin).getActionView());
         drawerSwitchDmin = ((androidx.appcompat.widget.SwitchCompat) navigationView.getMenu().findItem(R.id.timeUnitDmin).getActionView());
         screenSaverSwitch = ((androidx.appcompat.widget.SwitchCompat) navigationView.getMenu().findItem(R.id.screenSaver).getActionView());
-//menu item'a ulaşmak için menuıtem olarak çağırmalısın
+
+        MenuItem precisionItem = navigationView.getMenu().findItem(R.id.precision);
+
+        if (precisionItem != null) {
+            // 1. Layout'u inflate et (Özel XML görünümünü oluştur)
+            // Bu View, Slider'ı ve muhtemelen bir kapsayıcıyı içerir.
+            LayoutInflater inflater = LayoutInflater.from(this);
+            View sliderContainer = inflater.inflate(R.layout.precisionslider, navigationView, false);
+
+            // 2. Slider'ı ActionView olarak ata
+            precisionItem.setActionView(sliderContainer);
+
+            // 3. Inflate edilen View içinden Slider bileşenini ID ile bul
+            // Buradaki ID, drawer_slider_action_view.xml içindeki Slider'ın ID'si olmalıdır!
+            drawerSlider = sliderContainer.findViewById(R.id.slider);
+
+            if (drawerSlider != null) {
+                initializeDrawerSlider(drawerSlider);
+//                // Slider artık XML'deki görünümle oluştu ve sınıf değişkenine atandı.
+//                // Başlatma ve dinleyici atama işlemleri
+//                drawerSlider.addOnChangeListener(new Slider.OnChangeListener() {
+//
+//
+//                    @Override
+//                    public void onValueChange(@NonNull Slider slider, float value, boolean fromUser) {
+//                        Log.d(TAG, "Slider value: " + value);
+//
+//                    }
+//                });
+            }
+            else {
+                Log.e(TAG, "HATA: Inflate edilen View içinde Slider bulunamadı!");
+            }
+        }
+        //menu item'a ulaşmak için menuıtem olarak çağırmalısın
         MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
         screenSaverSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked){
@@ -534,6 +365,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
                             navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
                             navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
+                            drawerSlider.setEnabled(false);
 
                             fragment.start(); // Servisi başlatır
 
@@ -610,6 +442,208 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+
+        super.onSaveInstanceState(outState);
+        // Gerekli state'leri kaydet
+        if (viewPager != null) {
+            outState.putInt("currentTab", viewPager.getCurrentItem());
+        }
+        // "auth" yerine yeni durumu (state) kaydedin
+        outState.putSerializable("currentState", currentState);
+        // outState.putBoolean("isRunning", auth); // BU SATIRI SİLİN VEYA YORUM SATIRI YAPIN
+    }
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // State'leri geri yükle
+        if (viewPager != null) {
+            int currentTab = savedInstanceState.getInt("currentTab", 0);
+            viewPager.setCurrentItem(currentTab);
+        }
+
+        // auth = savedInstanceState.getBoolean("isRunning", false); // BU SATIRI SİLİN VEYA YORUM SATIRI YAPIN
+
+        // Yeni durumu (state) geri yükle
+        currentState = (ChronoState) savedInstanceState.getSerializable("currentState");
+        if (currentState == null) {
+            currentState = ChronoState.STOPPED;
+        }
+
+        // Geri yüklenen duruma göre UI'ı güncelle
+        switch (currentState) {
+            case STOPPED:
+                auth = false;
+                startButton.setText(R.string.start_text);
+                lapButton.setEnabled(false);
+                saveButton.setEnabled(false);
+                resetButton.setEnabled(false);
+                // Switch'leri etkinleştir
+                drawerSwitchCmin.setEnabled(true);
+                drawerSwitchSec.setEnabled(true);
+                drawerSwitchDmin.setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
+                break;
+            case RUNNING:
+                auth = true;
+                startButton.setText("PAUSE");
+                lapButton.setEnabled(true);
+                saveButton.setEnabled(false);
+                resetButton.setEnabled(false);
+                // Switch'leri devre dışı bırak
+                drawerSwitchCmin.setEnabled(false);
+                drawerSwitchSec.setEnabled(false);
+                drawerSwitchDmin.setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
+                break;
+            case PAUSED:
+                auth = false;
+                startButton.setText("RESUME");
+                lapButton.setEnabled(false);
+                saveButton.setEnabled(true);
+                resetButton.setEnabled(true);
+                // Switch'leri devre dışı bırak
+                drawerSwitchCmin.setEnabled(false);
+                drawerSwitchSec.setEnabled(false);
+                drawerSwitchDmin.setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(false);
+                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(false);
+                break;
+        }
+
+        // Ekran açık/kapalı durumunu geri yükle
+        boolean isScreenOn = savedInstanceState.getBoolean("isScreenOn", false);
+        if (isScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            screenSaverSwitch.setChecked(true);
+        }
+    }
+
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Uygulama arka plana geçtiğinde servisin çalışmaya devam etmesi için
+        // Burada özel bir şey yapmıyoruz, servis zaten foreground'da çalışıyor
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Uygulama ön plana geldiğinde servis durdurulmaz
+        // Sadece UI güncellemesi yapılır
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Uygulama tamamen kapatıldığında servisi temizle
+        stopService(new Intent(this, ChronometerService.class));
+    }
+
+
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Drawer toggle'ı yeniden sync et
+        toggle.syncState();
+    }
+
+
+
+    /**
+     * İzin listesini oluşturur ve gerekli olanları ister.
+     */
+    private void checkAndRequestAllPermissions() {
+        List<String> permissionsToRequest = new ArrayList<>();
+
+        // 1. Depolama İzni (API 32 ve altı için)
+        // Manifest'te maxSdkVersion=32 olduğu için burayı ona göre ayarlıyoruz.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) { // Android 12L / API 32
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+        }
+
+        // 2. Bildirim İzni (API 33 ve üstü için)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+
+        // Diğer İzinler (FOREGROUND_SERVICE, WAKE_LOCK, vb. koruma seviyesi normal olduğu için Runtimeda istenmezler)
+        // Internet, FOREGROUND_SERVICE gibi izinler "normal" koruma seviyesindedir ve kurulurken otomatik verilir.
+        // Bu yüzden sadece kullanıcı izni gerektirenleri (Depolama ve Bildirim) istiyoruz.
+
+        if (!permissionsToRequest.isEmpty()) {
+            ActivityCompat.requestPermissions(this,
+                    permissionsToRequest.toArray(new String[0]),
+                    Constants.REQUEST_ALL_PERMISSIONS);
+        }
+        // Eğer tüm izinler verilmişse, herhangi bir şey yapmaya gerek kalmaz.
+    }
+
+    /**
+     * İzin isteği sonuçlarını ele alır.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Constants.REQUEST_ALL_PERMISSIONS) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (!allGranted) {
+                // Herhangi bir izin reddedildiyse kullanıcıyı bilgilendir
+                Toast.makeText(this, "Some permission are missing and needed", Toast.LENGTH_LONG).show();
+
+                // Özellikle Bildirim izni reddedildiyse, kullanıcıyı ayarlara yönlendir
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) &&
+                        ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+
+                    showNotificationSettingsDialog();
+                }
+            }
+        }
+    }
+    /**
+     * Bildirim izni reddedildiğinde, kullanıcıyı Ayarlar ekranına yönlendiren dialog gösterir.
+     */
+    private void showNotificationSettingsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Notification Permission Required")
+                .setMessage("Notification permission is needed for the chronometer to run in the background and show notifications. You are being redirected to settings.")
+                .setPositiveButton("Go to Settings", (dialog, which) -> {
+                    Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
+    }
+
+
+
+
 
     /*
      VOLUME tuşlarını start /stop / lap özelliği koyma.
@@ -719,14 +753,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String link2 = "https://www.agromtek.com/indchroprivacypol.html";
             intent2.putExtra("link", link2);
             startActivity(intent2);
-        } else if (itemId == R.id.nav_save) {
-            if (!auth) {
-                if (viewPager.getAdapter() != null) {
-                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                    //fragment.save();
-                }
+            /**
+             *
+             * Precision Seçimi
+             */
+        } else if (itemId == R.id.precision) {
 
-            }
+//            if (!auth) {
+//
+//                if (drawerSlider != null) {
+//                    int selectedValue = (int) drawerSlider.getValue();
+//                    // prefs.edit().putInt(Constants.EXTRA_DECIMAL_PLACES, selectedValue).apply();
+//                    Log.d(TAG, "Ondalık Basamak Slider değeri kaydedildi: " + selectedValue);
+//                    Log.d(TAG, "Slider value: " + drawerSlider.getValue());
+//
+//                }
+//                if (viewPager.getAdapter() != null) {
+//                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+//                    //fragment.save();
+//                }
+
+
         } else if (itemId == R.id.nav_share) {
             if (!auth) {
                 //play store adresini paylaşmak
@@ -893,6 +940,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerSwitchCmin.setEnabled(true);
         drawerSwitchSec.setEnabled(true);
         drawerSwitchDmin.setEnabled(true);
+        drawerSlider.setEnabled(false);
         navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
         navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
         navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
@@ -929,7 +977,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    private void initializeDrawerSlider(Slider slider) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
+        // 1. Kaydedilmiş değeri yükle (Varsayılan: 0)
+        int savedDecimalPlaces = prefs.getInt(Constants.PREF_DECIMAL_PLACES, Constants.DEFAULT_DECIMAL_PLACES);
+
+        // 2. Slider aralığını ayarla (0'dan 2'ye, 1'er artacak)
+        slider.setValueFrom(0f);
+        slider.setValueTo(2f); // 0, 1, 2 değerleri için
+        slider.setStepSize(1f);
+
+        // 3. Kaydedilmiş değeri Slider'a ata
+        slider.setValue((float) savedDecimalPlaces);
+
+        // 4. Dinleyiciyi ata (Değer değiştiğinde Shared Preferences'a kaydet)
+        slider.addOnChangeListener(new Slider.OnChangeListener() {
+            @Override
+            public void onValueChange(@NonNull Slider s, float value, boolean fromUser) {
+                int selectedValue = (int) value;
+
+                // Yeni değeri SharedPreferences'a kaydet
+                prefs.edit().putInt(Constants.PREF_DECIMAL_PLACES, selectedValue).apply();
+
+                Log.d("MainActivity", "Ondalık Basamak Slider değeri kaydedildi: " + selectedValue);
+
+                // KRİTİK: TimerFragment'ın yeni ayarı okumasını sağlamak için
+                // Servisi veya Fragment'ı yeniden başlatmak/güncellemek gerekebilir.
+                // En basit çözüm, Fragment'ın onResume() veya onStart() metotlarında SharedPref'i okumasıdır.
+                // Bu, Adım 3'te yapılacaktır.
+            }
+        });
+    }
 
 
 }
