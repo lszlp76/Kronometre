@@ -55,6 +55,9 @@ public class ChronometerService extends Service {
         Log.d(TAG, "🔥 Service onCreate");
         createNotificationChannel(); // Kanalı oluştur
         setupPauseResumeReceiver();  // Receiver'ı kur
+        // YENİ: Durum isteği alıcısını kaydet
+        LocalBroadcastManager.getInstance(this).registerReceiver(statusRequestReceiver,
+                new IntentFilter(Constants.ACTION_REQUEST_STATUS));
     }
 
     @Override
@@ -134,7 +137,29 @@ public class ChronometerService extends Service {
         handler.post(updateRunnable);
         Log.d(TAG, "✅ Update timer started.");
     }
+    // --- YENİ: Durum İsteklerini Dinleyen Alıcı ---
+    private BroadcastReceiver statusRequestReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Constants.ACTION_REQUEST_STATUS)) {
+                sendCurrentStatus();
+            }
+        }
+    };
+    // YENİ METOT: Fragment'a mevcut durumu gönderir
+    private void sendCurrentStatus() {
+        Intent statusIntent = new Intent(Constants.ACTION_STATUS_RESPONSE);
 
+        // Çalışma ve duraklatma durumunu gönder
+        statusIntent.putExtra(Constants.EXTRA_IS_RUNNING, isRunning);
+        statusIntent.putExtra(Constants.EXTRA_IS_PAUSED, isPaused);
+
+        // Fragment'a gösterilmesi gereken geçen süreyi gönder.
+        // Duraklatmadan önceki toplam süre (timeBeforePause) en güvenli değerdir.
+        statusIntent.putExtra(Constants.EXTRA_ELAPSED_TIME, timeBeforePause);
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
+    }
     private void sendTimeUpdate(long time) {
         Intent intent = new Intent(Constants.ACTION_TIME_UPDATE);
         intent.putExtra(Constants.EXTRA_ELAPSED_TIME, time);
@@ -294,21 +319,23 @@ public class ChronometerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "🔥 Service destroyed");
-        if (handler != null && updateRunnable != null) {
-            handler.removeCallbacks(updateRunnable);
-        }
-        if (pauseResumeReceiver != null) {
-            try {
-                // --- DEĞİŞİKLİK BURADA ---
-                // unregisterReceiver yerine LocalBroadcastManager kullan
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(pauseResumeReceiver);
-                // Eski satırı silin:
-                // unregisterReceiver(pauseResumeReceiver);
-            } catch (Exception e) {
-                Log.e(TAG, "❌ Receiver kaldırılamadı: " + e.getMessage());
-            }
-        }
+//        Log.d(TAG, "🔥 Service destroyed");
+//        if (handler != null && updateRunnable != null) {
+//            handler.removeCallbacks(updateRunnable);
+//        }
+//        if (pauseResumeReceiver != null) {
+//            try {
+//                // --- DEĞİŞİKLİK BURADA ---
+//                // unregisterReceiver yerine LocalBroadcastManager kullan
+//                LocalBroadcastManager.getInstance(this).unregisterReceiver(pauseResumeReceiver);
+//                // Eski satırı silin:
+//                // unregisterReceiver(pauseResumeReceiver);
+//            } catch (Exception e) {
+//                Log.e(TAG, "❌ Receiver kaldırılamadı: " + e.getMessage());
+//            }
+//        }
+        // YENİ: Alıcıyı sil
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(statusRequestReceiver);
     }
 
     @Nullable

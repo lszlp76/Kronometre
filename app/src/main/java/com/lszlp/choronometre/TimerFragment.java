@@ -20,13 +20,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager; // Bu import kontrol edilmeli
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.lszlp.choronometre.databinding.FragmentTimerBinding;
@@ -58,6 +58,46 @@ public class TimerFragment extends Fragment {
     ArrayList<Lap> lapsArray = new ArrayList<>();
     ArrayList<Lap> ListElementsArrayList;
     LapListAdapter lapListAdapter;
+
+    // YENİ: Servisten gelen durum (zaman ve çalışma/duraklatma) yanıtlarını dinler
+    private BroadcastReceiver statusResponseReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Constants.ACTION_STATUS_RESPONSE)) {
+
+                boolean isRunning = intent.getBooleanExtra(Constants.EXTRA_IS_RUNNING, false);
+                boolean isPausedFromService = intent.getBooleanExtra(Constants.EXTRA_IS_PAUSED, false);
+                long elapsed = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0L);
+
+                // Fragment'ın kendi durum değişkenini servisten gelen değere göre ayarla
+                isServicePaused = isPausedFromService;
+
+                // Eğer servis çalışıyorsa (ÇALIŞIYOR veya DURAKLATILMIŞ)
+                if (isRunning || isPausedFromService) {
+                    // Fragment'a gelen son zaman değerini UI'da göster
+                    // Fragment'ta tanımlı formatTime(long millis) metodunu kullanın
+                    String timeString = formatTime(elapsed);
+                    pageViewModel.setTimerValue(timeString);
+                } else {
+                    // Servis tamamen durmuş (RESET)
+                    resetTimerUI(); // UI'ı sıfırlayan bir metot çağırın
+                }
+
+                // Buton durumlarını güncelle
+                updateButtonStates();
+            }
+        }
+    };
+    // YENİ METOT: UI'ı sıfırlama işlevini gruplandır
+    private void resetTimerUI() {
+        // ViewModel'i ve UI'ı sıfırla
+        if (pageViewModel != null) {
+            // "00:00:00.000" sizin formatınıza göre ayarlanmalıdır.
+            pageViewModel.setTimerValue("00:00:00.000");
+        }
+        // Diğer sıfırlama işlemleri (örneğin lap listesi) burada yapılır.
+    }
+
 
 
 
@@ -109,7 +149,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
     int lapsayisi = 0;
     ArrayList<String> laps = new ArrayList<>();
-    DecimalFormat dec = new DecimalFormat("#0.0");
+    DecimalFormat dec = new DecimalFormat("#0.00");
     boolean Auth;
     ArrayList<Double> lapsval = new ArrayList<>();
     int lapnomax = 0, lapnomin = 0;
@@ -156,7 +196,22 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
 
     }
+    // Fragment ön plana geldiğinde (arka plandan geri dönme dahil)
+    @Override
+    public void onResume() {
+        super.onResume();
 
+        // KRİTİK 1: Durum Yanıtı alıcısını kaydet
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(statusResponseReceiver,
+                new IntentFilter(Constants.ACTION_STATUS_RESPONSE));
+
+        // KRİTİK 2: Servisten mevcut durumu iste
+        // Bu, Fragment'ın arka planda kaldığı süre boyunca geçen süreyi doğru bir şekilde almasını sağlar.
+        Intent statusIntent = new Intent(Constants.ACTION_REQUEST_STATUS);
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(statusIntent);
+
+        // Not: Mevcut zaman güncelleme alıcınızın (timeUpdateReceiver) da burada kaydedildiğinden emin olun!
+    }
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
@@ -328,9 +383,9 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 hours = (int) (elapsedMillis / 3600000);
                 minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
                 seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
-                subUnit = (int) (elapsedMillis % 1000); // Milisaniye
+                //subUnit = (int) (elapsedMillis % 1000); // Milisaniye
                 // Format: HH:MM:SS.MMM
-                result = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, subUnit);
+                result = String.format("%02d:%02d:%02d", hours, minutes, seconds);
                 break;
         }
         return result;
@@ -487,42 +542,33 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     @SuppressLint("NotifyDataSetChanged")
     public void takeLap() {
         if (getActivity() == null) return;
-// 1. Servisten gelen güncel zamanı al
+        // 1. Servisten gelen güncel zamanı al
         long currentTimeMillis = lastKnownElapsedTime;
-        int currentHours = (int) (currentTimeMillis / 3600000);
-        int currentMinutes = (int) (currentTimeMillis - currentHours * 3600000) / 60000;
-        int currentSeconds = (int) (currentTimeMillis - currentHours * 3600000 - currentMinutes * 60000) / 1000;
-        // 2. Zamanı string'e çevir
-        String hh_lap = (currentHours < 10) ? "0" + currentHours : String.valueOf(currentHours);
-        String mm_lap = (currentMinutes < 10) ? "0" + currentMinutes : String.valueOf(currentMinutes);
-        String ss_lap = (currentSeconds < 10) ? "0" + currentSeconds : String.valueOf(currentSeconds);
 
-        String lap = hh_lap + ":" + mm_lap + ":" + ss_lap;
+        // 2. Zamanı string'e çevir (sadece görüntüleme için)
+        String lap = formatTimeAccordingToUnit(lastKnownElapsedTime);
         laps.add(lap);
 
-
         double delta;
+
         if (lapsayisi > 0) {
-            // Önceki lap zamanını listeden al
-            String previousLapString = laps.get(lapsayisi - 1);
-            String[] parts = previousLapString.split(":");
-            int prevHour = Integer.parseInt(parts[0]);
-            int prevMin = Integer.parseInt(parts[1]);
-            int prevSec = Integer.parseInt(parts[2]);
-// Eski kodunuzdaki 'modul'ü kullanarak dakika cinsinden hesaplama
-            double delta1 = (currentHours / 60.0 + currentMinutes + (double)currentSeconds / modul);
-            double delta0 = (prevHour / 60.0 + prevMin + (double)prevSec / modul);
-            delta = Math.abs(delta1 - delta0);
+            // Önceki lap zamanını hesapla (milisaniye cinsinden)
+            long previousLapTime = calculatePreviousLapTime();
+
+            // Mevcut ve önceki lap arasındaki farkı unit'e göre hesapla
+            long timeDifference = currentTimeMillis - previousLapTime;
+            delta = convertMillisToUnit(timeDifference);
+
         } else {
-            // İlk lap
-            delta = (currentHours / 60.0 + currentMinutes + (double)currentSeconds / modul);
+            // İlk lap - başlangıçtan bu yana geçen süreyi unit'e göre hesapla
+            delta = convertMillisToUnit(currentTimeMillis);
         }
 
         lapsval.add(delta);
         updateStatistics();
 
         m_Text = "";
-        lapValue = new Lap(dec.format(delta * modul) + " ", lap, lapsayisi + 1, m_Text);
+        lapValue = new Lap(dec.format(delta) + " ", lap, lapsayisi + 1, m_Text);
         lapsArray.add(lapsayisi, lapValue);
         ListElementsArrayList.add(0, lapValue);
 
@@ -530,10 +576,10 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         lapsayisi++;
 
         if (pageViewModel != null) {
-            pageViewModel.setTimeValue((float) (lapsval.get(lapsayisi - 1) * modul));
-            pageViewModel.setMaxTimeValue((float) (max * modul));
-            pageViewModel.setMinTimeValue((float) (min * modul));
-            pageViewModel.setAvgTimeValue((float) (ave * modul));
+            pageViewModel.setTimeValue((float) (lapsval.get(lapsayisi - 1) * 1));
+            pageViewModel.setMaxTimeValue((float) (max));
+            pageViewModel.setMinTimeValue((float) (min));
+            pageViewModel.setAvgTimeValue((float) (ave));
             pageViewModel.setIndex(lapsayisi);
             pageViewModel.setTimeUnit(unit);
         }
@@ -541,6 +587,56 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         lapListAdapter.notifyDataSetChanged();
     }
 
+
+    /**
+     * Önceki lap'ın milisaniye cinsinden zamanını hesaplar
+     */
+    private long calculatePreviousLapTime() {
+        if (lapsayisi <= 0) return 0;
+
+        // Tüm lap'ların toplam zamanını hesapla
+        long totalTime = 0;
+        for (int i = 0; i < lapsayisi; i++) {
+            double lapValue = lapsval.get(i);
+            totalTime += convertUnitToMillis(lapValue);
+        }
+
+        return totalTime;
+    }
+
+    /**
+     * Milisaniyeyi seçilen time unit'e çevirir
+     */
+    private double convertMillisToUnit(long millis) {
+        switch (unit) {
+            case "Cmin.": // Santidakika (1 dk = 100 cmin, 1 cmin = 600ms)
+                return millis / 600.0;
+
+            case "Dmh.": // Desimdakika (1 dk = 10 dmh, 1 dmh = 360ms)
+                return millis / 360.0;
+
+            case "Sec.": // Saniye (1 sn = 1000ms)
+            default:
+                return millis / 1000.0;
+        }
+    }
+
+    /**
+     * Time unit'i milisaniyeye çevirir
+     */
+    private long convertUnitToMillis(double unitValue) {
+        switch (unit) {
+            case "Cmin.": // Santidakika (1 cmin = 600ms)
+                return (long) (unitValue * 600);
+
+            case "Dmh.": // Desimdakika (1 dmh = 360ms)
+                return (long) (unitValue * 360);
+
+            case "Sec.": // Saniye (1 sn = 1000ms)
+            default:
+                return (long) (unitValue * 1000);
+        }
+    }
     private void updateStatistics() {
         if (lapsval.isEmpty()) return;
 
@@ -553,17 +649,25 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         lapnomin = lapsval.indexOf(min) + 1;
         max = Collections.max(lapsval);
         lapnomax = lapsval.indexOf(max) + 1;
-        ave = sum / lapsval.size();
+        ave = (sum / lapsval.size());
     }
 
     private void updateDisplay() {
-        maxvalue.setText(dec.format(max * modul));
-        minvalue.setText(dec.format(min * modul));
-        avevalue.setText(dec.format(ave * modul));
+        // Değerleri modul ile çarparak doğru birimde göster
+        maxvalue.setText(dec.format(max));
+        minvalue.setText(dec.format(min));
+        avevalue.setText(dec.format(ave));
         cycPerMinute.setText(dec.format(calculateCycPerMinute(ave)));
         cycPerHour.setText(dec.format(calculateCycPerHour(ave)));
     }
 
+    private double calculateCycPerMinute(double ave) {
+        return (1 / ave)*modul;
+    }
+
+    private double calculateCycPerHour(double ave) {
+        return (60 / ave)*modul;
+    }
     public void save(String fileName) {
         if (getActivity() == null) return;
 
@@ -693,13 +797,6 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         lapListAdapter.notifyDataSetChanged();
     }
 
-    private double calculateCycPerMinute(double ave) {
-        return (1 / ave);
-    }
-
-    private double calculateCycPerHour(double ave) {
-        return (60 / ave);
-    }
 
     private void setWidgetsVisibility(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
@@ -766,6 +863,8 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     }
     // TimerFragment.java içinde yeni eklemeniz gereken metot
     private String formatTime(long elapsedMillis) {
+
+        //Timer sayacı uygun birime göre düzenliyor
         int hours, minutes, seconds, subUnit;
         String result;
 
@@ -806,14 +905,14 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         if (getActivity() == null) return;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Rahatsız Etmeyin Erişimi Gerekli");
-        builder.setMessage("Kilit ekranında kronometreyi gösterebilmek için 'Rahatsız Etmeyin' ayarlarına erişim izni vermeniz gerekiyor.");
+        builder.setTitle("Do Not Distrub Notification Access");
+        builder.setMessage("On the lock screen, you need to grant access to the \"Do Not Disturb\" settings to display the stopwatch.");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            builder.setPositiveButton("Ayarlara Git", (dialog, which) -> requestDndPermission());
+            builder.setPositiveButton("Go to Settings", (dialog, which) -> requestDndPermission());
         }
-        builder.setNegativeButton("İptal", (dialog, which) -> {
-            Toast.makeText(requireContext(), "Kilit ekranı özelliği devre dışı", Toast.LENGTH_SHORT).show();
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+            Toast.makeText(requireContext(), "Lock screen is out of service", Toast.LENGTH_SHORT).show();
         });
 
         builder.setCancelable(false);
@@ -826,7 +925,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
             startActivityForResult(intent, Constants.REQUEST_DND_ACCESS);
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "Ayarlara manuel olarak gidin", Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), "Go manually to the Settings", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -838,9 +937,9 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 NotificationManager notificationManager = (NotificationManager) requireContext().getSystemService(Context.NOTIFICATION_SERVICE);
                 if (notificationManager != null && notificationManager.isNotificationPolicyAccessGranted()) {
-                    Toast.makeText(requireContext(), "İzin verildi! Kilit ekranı özelliği aktif.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Permission granted! The lock screen feature is active", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(requireContext(), "İzin verilmedi. Kilit ekranı özelliği devre dışı.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Permission denied. The lock screen feature is disabled.", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -976,5 +1075,14 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
         // Not: getStartTime() burada çağrılmaz, çünkü gözlem süresi
         // ilk başta başladı. Servis kendi zamanını tutuyor.
+    }
+    // Fragment arka plana gittiğinde (başka bir aktiviteye geçiş veya HOME tuşu)
+    @Override
+    public void onPause() {
+        super.onPause();
+        // KRİTİK 3: Durum Yanıtı alıcısını kayıttan sil
+        LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
+
+        // Not: Mevcut zaman güncelleme alıcınızın da burada kayıttan silindiğinden emin olun!
     }
 }

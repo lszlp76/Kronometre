@@ -1,11 +1,15 @@
 package com.lszlp.choronometre;
 
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Typeface;
+import java.text.SimpleDateFormat;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -17,8 +21,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.Date; // <-- Bu satır 'new Date()' hatasını çözer
+import java.util.Locale;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -37,9 +46,11 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.lszlp.choronometre.main.PageViewModel;
 
+import java.util.Date;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
 
 
 public class ChartFragment extends Fragment {
@@ -50,6 +61,7 @@ public class ChartFragment extends Fragment {
     PageViewModel pageViewModel;
     Typeface tf;
     Float textSize;
+    String timeUnit;
 
     public static ChartFragment newInstance() {
         return new ChartFragment();
@@ -69,8 +81,18 @@ public class ChartFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_chart, container, false);
+        ImageView takePhoto = view.findViewById(R.id.takePhoto);
 
-        return inflater.inflate(R.layout.fragment_chart, container, false);
+        takePhoto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+             saveChartToGallery();
+                 }
+              }
+        );
+
+        return view;
 
     }
 
@@ -83,6 +105,7 @@ public class ChartFragment extends Fragment {
         lineChart = view.findViewById(R.id.chart);
         lineChart.setNoDataTextTypeface(tf);
         lineChart.setNoDataTextColor(R.color.chartColor);
+
         lineEntry = new ArrayList<>();
         lapValue = new ArrayList<>();
         chartTimer = view.findViewById(R.id.chartTimer);
@@ -229,13 +252,13 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         Float tmax = pageViewModel.getMaxTimeValue().getValue();
         Float tmin = pageViewModel.getMinTimeValue().getValue();
         Float tave = pageViewModel.getAvgTimeValue().getValue();
-
+        timeUnit = pageViewModel.getTimeUnit();
         System.out.println("zaman değeri -->" + pageViewModel.getTimeValue().getValue());
         System.out.println("lap değeri-->" + pageViewModel.getIndex().getValue());
 
         //lineEntry.add(new Entry(i, j));// burası aslında drawchart içinde olmalı.
         lapValue.add(new Entry(i, j)); //cycle time value
-        textSize = 16f;
+        textSize = 20f;
         //limitline koyunca gerek kalmadı alttakilere
      /*   tMaxValue.add(new Entry(i, tmax));
 //sabit değer göstermek iiçin
@@ -314,7 +337,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         tMinValueDataSet.setValueTextSize(12);
         tMinValueDataSet.setLineWidth(2f);*/
 
-        LimitLine tmaxLimit = new LimitLine(tmax, "Maximum Cycle Time: " + dec.format(tmax) + " cyc/unit ");
+        LimitLine tmaxLimit = new LimitLine(tmax, "Maximum Cycle Time: " + dec.format(tmax) + " "+timeUnit);
         tmaxLimit.setLineWidth(4f);
         tmaxLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         tmaxLimit.enableDashedLine(10f, 10f, 0f);
@@ -322,7 +345,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         tmaxLimit.setTextSize(textSize);
         tmaxLimit.setTypeface(tf);
 
-        LimitLine tminLimit = new LimitLine(tmin, "Minimum Cycle Time: " + dec.format(tmin) + " cyc/unit ");
+        LimitLine tminLimit = new LimitLine(tmin, "Minimum Cycle Time: " + dec.format(tmin) + " "+timeUnit);
         tminLimit.setLineWidth(4f);
         tminLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         tminLimit.enableDashedLine(10f, 10f, 0f);
@@ -330,7 +353,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
         tminLimit.setTextSize(textSize);
         tminLimit.setTypeface(tf);
 
-        LimitLine taveLimit = new LimitLine(tave, "Mean Cycle Time: " + dec.format(tave) + " cyc/unit ");
+        LimitLine taveLimit = new LimitLine(tave, "Mean Cycle Time: " + dec.format(tave) + " "+timeUnit);
         taveLimit.setLineWidth(4f);
         taveLimit.setTextColor(getResources().getColor(R.color.colorPrimary));
         taveLimit.setLineColor(Color.MAGENTA);
@@ -406,5 +429,79 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
 
 
+    }
+
+    public void saveChartToGallery() {
+        // Android 10 (API 29) ve öncesi için depolama izni kontrolü KRİTİKTİR.
+        // Android 11 (API 30) ve sonrası için MikePhil kütüphanesi MediaStore kullanır ve genelde
+        // ek bir runtime iznine gerek kalmaz, ancak bu kontrolü yapmak güvenlidir.
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q &&
+                ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            // İzin verilmediyse, izin iste
+            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.REQUEST_STORAGE_PERMISSION);
+            return; // İzin isteyip geri dön
+        }
+
+        // --- İzin Verilmiş veya Android 11+ ise Kayıt İşlemine Geç ---
+        performSaveChart();
+    }
+
+    /**
+     * İzin verilme sonucunu ele alır.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Constants.REQUEST_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // İzin verildi, şimdi kaydetme işlemini başlat
+                performSaveChart();
+            } else {
+                // İzin reddedildi, kullanıcıya bilgi ver
+                Toast.makeText(getContext(), "Grafiği kaydetmek için depolama izni gereklidir.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+    /**
+     * Gerçek kaydetme mantığını içerir. İzin kontrolünden sonra çağrılır.
+     */
+    private void performSaveChart() {
+        if (lineChart == null) {
+            Toast.makeText(getContext(), "Grafik bileşeni henüz kullanıma hazır değil.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+// Kontrol 2: Grafikte gerçekten veri var mı? (Çizim yapılabilir mi?)
+        if (lineChart.getData() == null || lineChart.getData().getEntryCount() == 0) {
+            Toast.makeText(getContext(), "Grafikte kaydedilecek veri bulunmuyor.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // MikePhil Chart Kaydetme Kodu
+        String albumName = "IndustrialChronometer";
+
+        // Hata düzeltmesi: Doğru importlar ile bu çalışacaktır.
+        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String fileName = "CHART_" + timestamp;
+
+        try {
+            // saveToGallery, PNG formatında kaydeder.
+            boolean success = lineChart.saveToGallery(fileName, albumName, "", Bitmap.CompressFormat.PNG, 90);
+
+            if (success) {
+                Toast.makeText(getContext(),
+                        "Grafik başarıyla kaydedildi.",
+                        Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getContext(),
+                        "Grafiği kaydederken bir hata oluştu.",
+                        Toast.LENGTH_LONG).show();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Kayıt işlemi başarısız oldu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -23,7 +23,7 @@ public class PageViewModel extends ViewModel {
     public void setTimeUnit (String mTimeUnit){
         this.mTimeUnit = mTimeUnit;
     }
-    public String getmTimeUnit(){
+    public String getTimeUnit(){
         return mTimeUnit;
     }
     public void setMaxTimeValue (float timeValue){

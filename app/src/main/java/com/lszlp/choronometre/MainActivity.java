@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
@@ -22,6 +23,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -45,6 +47,9 @@ import com.google.android.play.core.review.ReviewManagerFactory;
 import com.google.android.gms.tasks.*;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 //rate app teset internal
 
@@ -224,10 +229,89 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+// Uygulama açılır açılmaz gerekli tüm izinleri kontrol et ve iste
+        checkAndRequestAllPermissions();
         initializeApp();
     }
+    /**
+     * İzin listesini oluşturur ve gerekli olanları ister.
+     */
+    private void checkAndRequestAllPermissions() {
+        List<String> permissionsToRequest = new ArrayList<>();
 
+        // 1. Depolama İzni (API 32 ve altı için)
+        // Manifest'te maxSdkVersion=32 olduğu için burayı ona göre ayarlıyoruz.
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.S_V2) { // Android 12L / API 32
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+        }
+
+        // 2. Bildirim İzni (API 33 ve üstü için)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
+
+        // Diğer İzinler (FOREGROUND_SERVICE, WAKE_LOCK, vb. koruma seviyesi normal olduğu için Runtimeda istenmezler)
+        // Internet, FOREGROUND_SERVICE gibi izinler "normal" koruma seviyesindedir ve kurulurken otomatik verilir.
+        // Bu yüzden sadece kullanıcı izni gerektirenleri (Depolama ve Bildirim) istiyoruz.
+
+        if (!permissionsToRequest.isEmpty()) {
+            ActivityCompat.requestPermissions(this,
+                    permissionsToRequest.toArray(new String[0]),
+                    Constants.REQUEST_ALL_PERMISSIONS);
+        }
+        // Eğer tüm izinler verilmişse, herhangi bir şey yapmaya gerek kalmaz.
+    }
+
+    /**
+     * İzin isteği sonuçlarını ele alır.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == Constants.REQUEST_ALL_PERMISSIONS) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (!allGranted) {
+                // Herhangi bir izin reddedildiyse kullanıcıyı bilgilendir
+                Toast.makeText(this, "Some permission are missing and needed", Toast.LENGTH_LONG).show();
+
+                // Özellikle Bildirim izni reddedildiyse, kullanıcıyı ayarlara yönlendir
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        !shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) &&
+                        ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+
+                    showNotificationSettingsDialog();
+                }
+            }
+        }
+    }
+    /**
+     * Bildirim izni reddedildiğinde, kullanıcıyı Ayarlar ekranına yönlendiren dialog gösterir.
+     */
+    private void showNotificationSettingsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("Notification Permission Required")
+                .setMessage("Notification permission is needed for the chronometer to run in the background and show notifications. You are being redirected to settings.")
+                .setPositiveButton("Go to Settings", (dialog, which) -> {
+                    Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
+    }
     private void initializeApp() {
         setupAppContent();
     }

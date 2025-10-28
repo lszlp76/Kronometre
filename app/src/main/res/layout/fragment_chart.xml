@@ -10,34 +10,55 @@
 
     <!-- TODO: Update blank fragment layout -->
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/guide"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/chartTimer"
-            style="@style/textTitleColorStyle"
-            android:layout_centerHorizontal="true"
-            android:autoSizeTextType="uniform"
+        <LinearLayout
+            android:id="@+id/tool"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:text="00:00:00"
-            android:textAlignment="center"
-            android:fontFeatureSettings="tnum"
+            android:layout_centerHorizontal="true"
+            android:orientation="horizontal"
+            android:weightSum="2"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                style="@style/textColorStyle"
+                android:id="@+id/takePhoto"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:layout_marginRight="50dp"
+                android:src="@drawable/ic_photo"></ImageView>
+
+            <TextView
+                android:id="@+id/chartTimer"
+                style="@style/textTitleColorStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_weight="1"
+                android:layout_marginRight="50dp"
+                android:autoSizeTextType="uniform"
+                android:fontFeatureSettings="tnum"
+                android:gravity="center"
+                android:text="00:00:00"
+                android:textAlignment="center" />
+        </LinearLayout>
+
 
         <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/chart"
             style="@style/TableText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/chartTimer"
+            android:layout_below="@+id/tool"
             android:background="@color/fully_transparent"
 
             />

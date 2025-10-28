@@ -15,7 +15,8 @@ public class Constants {
     public static final String TEST_CHANNEL_ID = "test_channel";
     public static final int TEST_NOTIFICATION_ID = 9999;
 
-
+    public static final String ACTION_REQUEST_STATUS = "com.lszlp.choronometre.REQUEST_STATUS"; // Durum isteme eylemi
+    public static final String ACTION_STATUS_RESPONSE = "com.lszlp.choronometre.STATUS_RESPONSE"; // Durum yanıtı eylemi
     // Zaman birimi sabitleri
     public static final String EXTRA_TIME_UNIT = "time_unit";
     public static final String EXTRA_MODUL = "modul";
@@ -26,7 +27,8 @@ public class Constants {
     public static final int TIME_UNIT_CMINUTES = 2;
     public static final int TIME_UNIT_DMINUTES = 3;
 
-    public static final String ACTION_REQUEST_STATUS = "com.lszlp.choronometre.REQUEST_STATUS"; // Durum isteme
-    public static final String EXTRA_IS_RUNNING = "isRunning";
+   public static final String EXTRA_IS_RUNNING = "isRunning";
     public static final String EXTRA_IS_PAUSED = "isPaused";
+    public static final int REQUEST_STORAGE_PERMISSION = 200;
+    public static final int REQUEST_ALL_PERMISSIONS = 201; // Yeni: Tüm izinler için tek bir kod
 }
