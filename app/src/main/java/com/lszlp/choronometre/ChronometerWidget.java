@@ -24,6 +24,9 @@ public class ChronometerWidget extends AppWidgetProvider {
 
             // Basitlik için, butonu her zaman uygulamayı açacak şekilde ayarlayalım (En güvenilir yöntem)
             Intent launchAppIntent = new Intent(context, MainActivity.class);
+
+            // KRİTİK DEĞİŞİKLİK: Uygulamanın zaten çalışıp çalışmadığını kontrol etmek ve
+            // mevcut görevi kullanmak için bayrakları ekle.
             PendingIntent launchPendingIntent = PendingIntent.getActivity(
                     context,
                     appWidgetId,
@@ -37,14 +40,7 @@ public class ChronometerWidget extends AppWidgetProvider {
             // Eğer widget'ın içinde START/STOP butonu varsa, onun intent'ini ayarlayın
             // Varsayalım ki layout'ta R.id.btnToggle adında tek bir buton var.
 
-            // --- Toggle Butonu (START/PAUSE/RESUME) ---
-            Intent toggleServiceIntent = new Intent(context, ChronometerService.class);
-            // Toggle butonuna basıldığında servise yeni bir sinyal gönderilebilir: ACTION_TOGGLE_CHRONO
-            // Ya da START/PAUSE/RESUME mantığını butonun durumuna göre widget içinde yönetmelisiniz (daha karmaşık).
-            // En basiti: Uygulamayı aç ve Fragment'ta buton durumunu göster.
-
-            // İlk çalıştırmada gösterilecek zaman
-            views.setTextViewText(R.id.txtTime, "00:00:00.0");
+            views.setTextViewText(R.id.txtTime, "00:00:00");
 
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }

@@ -28,7 +28,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
-
+import android.os.Handler;
+import android.os.Looper;
 import com.lszlp.choronometre.databinding.FragmentTimerBinding;
 import com.lszlp.choronometre.main.PageViewModel;
 
@@ -45,6 +46,9 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 public class TimerFragment extends Fragment {
     public String Timeunit;
+
+    private final Handler uiHandler = new Handler(Looper.getMainLooper()); // UI Thread Handler'ı
+    private static final long REQUEST_DELAY_MS = 100; // 100 milisaniye gecikme
     private FragmentTimerBinding _binding;
     private FragmentTimerBinding getBinding() {
         return _binding;
@@ -59,36 +63,77 @@ public class TimerFragment extends Fragment {
     ArrayList<Lap> lapsArray = new ArrayList<>();
     ArrayList<Lap> ListElementsArrayList;
     LapListAdapter lapListAdapter;
-
+// TimerFragment.java (Sınıf değişkenleri arasına ekleyin)
+    private BroadcastReceiver precisionUpdateReceiver;
+    private boolean isServicePaused = false; // statusResponseReceiver içinde kullanıldığı için eklenmeli/kontrol edilmeli
     // YENİ: Servisten gelen durum (zaman ve çalışma/duraklatma) yanıtlarını dinler
-    private BroadcastReceiver statusResponseReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver statusResponseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constants.ACTION_STATUS_RESPONSE)) {
+            if (Constants.ACTION_STATUS_RESPONSE.equals(intent.getAction())) {
 
-                boolean isRunning = intent.getBooleanExtra(Constants.EXTRA_IS_RUNNING, false);
-                boolean isPausedFromService = intent.getBooleanExtra(Constants.EXTRA_IS_PAUSED, false);
-                long elapsed = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0L);
+                // 1. Servis'ten gelen değerleri al
+                long serviceElapsedTime = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0);
+                boolean serviceIsRunning = intent.getBooleanExtra(Constants.EXTRA_IS_RUNNING, false);
+                boolean serviceIsPaused = intent.getBooleanExtra(Constants.EXTRA_IS_PAUSED, false);
 
-                // Fragment'ın kendi durum değişkenini servisten gelen değere göre ayarla
-                isServicePaused = isPausedFromService;
+                Log.d("TimerFragment", "STATUS_RESPONSE alındı. Elapsed: " + serviceElapsedTime);
 
-                // Eğer servis çalışıyorsa (ÇALIŞIYOR veya DURAKLATILMIŞ)
-                if (isRunning || isPausedFromService) {
-                    // Fragment'a gelen son zaman değerini UI'da göster
-                    // Fragment'ta tanımlı formatTime(long millis) metodunu kullanın
-                    String timeString = formatTime(elapsed);
-                    pageViewModel.setTimerValue(timeString);
-                } else {
-                    // Servis tamamen durmuş (RESET)
-                    resetTimerUI(); // UI'ı sıfırlayan bir metot çağırın
+                // 2. Fragment'ın kendi değişkenlerini güncelle
+                lastKnownElapsedTime = serviceElapsedTime; // Fragment'ın kendi değişkeni olmalı
+                Boolean isRunning = serviceIsRunning;
+                Boolean isPaused = serviceIsPaused;
+
+                // 3. UI'ı GÜNCELLE
+                updateTimeDisplay(lastKnownElapsedTime); // Bu metot, TextView'i güncelleyen metottur.
+                updateButtonStates();; // Bu metot, butonu başlat/duraklat durumuna göre günceller.
+
+                // 4. KRİTİK: Eğer Servis ÇALIŞIYOR ise, Fragment da zaman güncellemelerini almaya devam etmeli.
+                if (isRunning) {
+                    // Zaman güncelleme döngüsünü Fragment'ta başlatmak yerine,
+                    // Servis zaten zaman güncelleme yayınları (ACTION_TIME_UPDATE) gönderiyorsa
+                    // Fragment bu yayınları beklemelidir.
+                    // Eğer Servis, ACTION_TIME_UPDATE göndermeyi bıraktıysa, UI güncellenmez.
+
+                    // Eğer zaman anında güncellenmiyorsa:
+                    // updateTimeDisplay(lastKnownElapsedTime); çağrısının hemen ardından
+                    // Zaman güncelleme yayınlarını (ACTION_TIME_UPDATE) beklemeye başlanır.
+                    // Bu yüzden 3. adımdaki UI güncellemesi HAYATİDİR.
                 }
-
-                // Buton durumlarını güncelle
-                updateButtonStates();
             }
         }
     };
+
+    //BUNU tekrar kullan
+
+//    private BroadcastReceiver statusResponseReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            if (intent.getAction().equals(Constants.ACTION_STATUS_RESPONSE)) {
+//
+//                boolean isRunning = intent.getBooleanExtra(Constants.EXTRA_IS_RUNNING, false);
+//                boolean isPausedFromService = intent.getBooleanExtra(Constants.EXTRA_IS_PAUSED, false);
+//                long elapsed = intent.getLongExtra(Constants.EXTRA_ELAPSED_TIME, 0L);
+//
+//                // Fragment'ın kendi durum değişkenini servisten gelen değere göre ayarla
+//                isServicePaused = isPausedFromService;
+//
+//                // Eğer servis çalışıyorsa (ÇALIŞIYOR veya DURAKLATILMIŞ)
+//                if (isRunning || isPausedFromService) {
+//                    // Fragment'a gelen son zaman değerini UI'da göster
+//                    // Fragment'ta tanımlı formatTime(long millis) metodunu kullanın
+//                    String timeString = formatTime(elapsed);
+//                    pageViewModel.setTimerValue(timeString);
+//                } else {
+//                    // Servis tamamen durmuş (RESET)
+//                    resetTimerUI(); // UI'ı sıfırlayan bir metot çağırın
+//                }
+//
+//                // Buton durumlarını güncelle
+//                updateButtonStates();
+//            }
+//        }
+//    };
     // YENİ METOT: UI'ı sıfırlama işlevini gruplandır
     private void resetTimerUI() {
         // ViewModel'i ve UI'ı sıfırla
@@ -150,7 +195,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
     int lapsayisi = 0;
     ArrayList<String> laps = new ArrayList<>();
-    DecimalFormat dec = new DecimalFormat("#0.0");
+    DecimalFormat dec = new DecimalFormat();
     boolean Auth;
     ArrayList<Double> lapsval = new ArrayList<>();
     int lapnomax = 0, lapnomin = 0;
@@ -194,16 +239,49 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         super.onResume();
 //      Kullanıcı ayarları değiştirip geri gelirse format desenini güncelle
         currentDecimalFormatPattern = getDecimalFormatPattern();
-        // KRİTİK 1: Durum Yanıtı alıcısını kaydet
-        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(statusResponseReceiver,
-                new IntentFilter(Constants.ACTION_STATUS_RESPONSE));
+        // 1. Alıcıları KAYDET (Çok önemli, her zaman burada yapılmalı)
+        // Zaman Güncelleme Alıcısı
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+                timeUpdateReceiver,
+                new IntentFilter(Constants.ACTION_TIME_UPDATE)
+        );
+        // Durum Yanıtı Alıcısı
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+                statusResponseReceiver,
+                new IntentFilter(Constants.ACTION_STATUS_RESPONSE)
+        );
+        //IntentFilter timeUpdateFilter = new IntentFilter(Constants.ACTION_TIME_UPDATE);
+        //LocalBroadcastManager.getInstance(requireContext()).registerReceiver(timeUpdateReceiver, timeUpdateFilter);
 
-        // KRİTİK 2: Servisten mevcut durumu iste
-        // Bu, Fragment'ın arka planda kaldığı süre boyunca geçen süreyi doğru bir şekilde almasını sağlar.
-        Intent statusIntent = new Intent(Constants.ACTION_REQUEST_STATUS);
-        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(statusIntent);
+        //IntentFilter statusResponseFilter = new IntentFilter(Constants.ACTION_STATUS_RESPONSE);
+        //LocalBroadcastManager.getInstance(requireContext()).registerReceiver(statusResponseReceiver, statusResponseFilter);
 
+        // ... (Varsa diğer alıcıları da buraya ekleyin)
+
+        // 2. KRİTİK: Servisten mevcut durumu ve zamanı talep et
+        // Bu, uygulamanın ön plana geldiğinde zamanın hemen güncellenmesini sağlar.
+        requestCurrentStatus();
+        Log.d("TimerFragment","onResume çalıştı");
+// KRİTİK DÜZELTME: Durum isteğini küçük bir gecikmeyle gönder.
+        // Bu, alıcıların tamamen kaydedildiğinden emin olmak için bir yarış koşulu düzeltmesidir.
+        uiHandler.postDelayed(this::requestCurrentStatus, REQUEST_DELAY_MS);
+
+        Log.d("TimerFragment", "onResume: Alıcılar kaydedildi, durum isteği " + REQUEST_DELAY_MS + "ms sonra gönderilecek.");
         // Not: Mevcut zaman güncelleme alıcınızın (timeUpdateReceiver) da burada kaydedildiğinden emin olun!
+    }
+    // requestCurrentStatus() metodunuzun da var ve doğru çalıştığından emin olun.
+// Eğer yoksa, bu metodu ekleyin:
+    private void requestCurrentStatus() {
+        if (!isAdded()) {
+            return; // Fragment View'a bağlı değilse işlemi yapma
+        }
+
+
+        if (isAdded()) { // Fragment'ın bir Context'e bağlı olduğunu kontrol et
+            Intent statusIntent = new Intent(Constants.ACTION_REQUEST_STATUS);
+            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(statusIntent);
+            Log.d("TimerFragment", "requestCurrentStatus: Durum isteği Servise gönderildi.");
+        }
     }
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
@@ -291,7 +369,31 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 }
             }
         };
+// YENİ: PRECİSİON Güncelleme Alıcısı Tanımı ve Kaydı
+        precisionUpdateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (Constants.ACTION_PRECISION_UPDATE.equals(intent.getAction())) {
+                    // 1. Yeni format desenini SharedPreferences'tan oku
+                    currentDecimalFormatPattern = getDecimalFormatPattern();
 
+                    // 2. UI'daki zamanı hemen yeni formatla güncelle
+                    // lastKnownElapsedTime: Servisten gelen son zaman değeri
+                    uiHandler.post(() -> {
+                        // updateTimeDisplay metodu, zamanı yeni hassasiyetle formatlar.
+                        updateTimeDisplay(lastKnownElapsedTime);
+                    });
+
+                    Log.d("TimerFragment", "Precision güncellendi. Yeni format: " + currentDecimalFormatPattern);
+                }
+            }
+        };
+
+        // Precision alıcısını kaydet
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+                precisionUpdateReceiver,
+                new IntentFilter(Constants.ACTION_PRECISION_UPDATE)
+        );
         // Filtreyi hem zaman hem de durum güncellemeleri için ayarlayın
         IntentFilter filter = new IntentFilter(Constants.ACTION_TIME_UPDATE);
         filter.addAction(Constants.ACTION_PAUSE);
@@ -314,6 +416,13 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         if (timeUpdateReceiver != null) {
             try {
                 LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timeUpdateReceiver);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (precisionUpdateReceiver != null) { // YENİ EKLEME
+            try {
+                LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(precisionUpdateReceiver);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -389,8 +498,9 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
         // Başlangıçta format desenini yükle
         currentDecimalFormatPattern = getDecimalFormatPattern();
+
         dec = new DecimalFormat(currentDecimalFormatPattern);
-        Log.d("TimerFragmet", "dec value :"+dec);
+        Log.d("TimerFragmet", "dec value :"+ dec.toString());
 
 
         _binding = FragmentTimerBinding.inflate(getLayoutInflater()); // Atamayı buraya yapın
@@ -536,7 +646,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 lapListAdapter.notifyItemChanged(position);
             }
 
-            Toast.makeText(getContext(), "Note for Lap " + lapNumberToFind + " saved.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getContext(), "Note for Lap " + lapNumberToFind + " saved.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -545,7 +655,8 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         if (getActivity() == null) return;
         // 1. Servisten gelen güncel zamanı al
         long currentTimeMillis = lastKnownElapsedTime;
-
+        currentDecimalFormatPattern = getDecimalFormatPattern();
+        DecimalFormat newDec = new DecimalFormat(currentDecimalFormatPattern);
         // 2. Zamanı string'e çevir (sadece görüntüleme için)
         String lap = formatTimeAccordingToUnit(lastKnownElapsedTime);
         laps.add(lap);
@@ -564,15 +675,18 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             // İlk lap - başlangıçtan bu yana geçen süreyi unit'e göre hesapla
             delta = convertMillisToUnit(currentTimeMillis);
         }
-
+//        DecimalFormat dec = new DecimalFormat();
+//        dec = new DecimalFormat(currentDecimalFormatPattern);
+//        delta = dec.format(delta);
         lapsval.add(delta);
         updateStatistics();
 
         m_Text = "";
         ;
-        lapValue = new Lap(dec.format(delta) + " ", lap, lapsayisi + 1, m_Text);
+        lapValue = new Lap(newDec.format(delta) + " ", lap, lapsayisi + 1, m_Text);
         lapsArray.add(lapsayisi, lapValue);
         ListElementsArrayList.add(0, lapValue);
+        Log.d("TimerFragment","Decimal format "+dec.format(delta));
 
         updateDisplay();
         lapsayisi++;
@@ -868,40 +982,46 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 // Zaman biriminin saniye (Constants.TIME_UNIT_SECONDS) olduğundan emin olun
         // Cmin ve Dmin için farklı formatlar kullanılıyorsa, o mantık korunmalıdır.
         //Timer sayacı uygun birime göre düzenliyor
-        int hours, minutes, seconds, subUnit;
-        String result;
+        if (unit != null){
+            int hours, minutes, seconds, subUnit;
+            String result;
 
-        // Fragment'taki 'unit' değişkenini kullanırız.
-        switch (unit) {
-            case "Cmin.": // Santidakika (1 dk = 100 cmin)
-                long totalCentiminutes = elapsedMillis / 600; // 1 Cmin = 600ms
-                hours = (int) (totalCentiminutes / 6000); // 1 saat = 6000 Cmin
-                minutes = (int) ((totalCentiminutes % 6000) / 100);
-                subUnit = (int) (totalCentiminutes % 100); // Santidakika birimi
-                // Format: HH:MM:CMIN (Bu formatta nokta veya milisaniye ayırıcı kullanmayız)
-                result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
-                break;
+            // Fragment'taki 'unit' değişkenini kullanırız.
 
-            case "Dmh.": // Desimdakika (1 dk = 10 dmh)
-                long totalDeciminutes = elapsedMillis / 360; // 1 Dmh = 360ms
-                hours = (int) (totalDeciminutes / 10000); // 1 saat = 10000 Dmh
-                minutes = (int) ((totalDeciminutes % 10000) / 100);
-                subUnit = (int) (totalDeciminutes % 100); // Desimdakika'nın alt birimi
-                // Format: HH:DMH:CM
-                result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
-                break;
+            switch (unit) {
+                case "Cmin.": // Santidakika (1 dk = 100 cmin)
+                    long totalCentiminutes = elapsedMillis / 600; // 1 Cmin = 600ms
+                    hours = (int) (totalCentiminutes / 6000); // 1 saat = 6000 Cmin
+                    minutes = (int) ((totalCentiminutes % 6000) / 100);
+                    subUnit = (int) (totalCentiminutes % 100); // Santidakika birimi
+                    // Format: HH:MM:CMIN (Bu formatta nokta veya milisaniye ayırıcı kullanmayız)
+                    result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
+                    break;
 
-            case "Sec.": // Saniye (Standart)
-            default:
-                hours = (int) (elapsedMillis / 3600000);
-                minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
-                seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
-                subUnit = (int) (elapsedMillis % 1000); // Milisaniye
-                // Format: HH:MM:SS.MMM
-                result = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, subUnit);
-                break;
+                case "Dmh.": // Desimdakika (1 dk = 10 dmh)
+                    long totalDeciminutes = elapsedMillis / 360; // 1 Dmh = 360ms
+                    hours = (int) (totalDeciminutes / 10000); // 1 saat = 10000 Dmh
+                    minutes = (int) ((totalDeciminutes % 10000) / 100);
+                    subUnit = (int) (totalDeciminutes % 100); // Desimdakika'nın alt birimi
+                    // Format: HH:DMH:CM
+                    result = String.format("%02d:%02d:%02d", hours, minutes, subUnit);
+                    break;
+
+                case "Sec.": // Saniye (Standart)
+                default:
+                    hours = (int) (elapsedMillis / 3600000);
+                    minutes = (int) (elapsedMillis - hours * 3600000) / 60000;
+                    seconds = (int) (elapsedMillis - hours * 3600000 - minutes * 60000) / 1000;
+                    subUnit = (int) (elapsedMillis % 1000); // Milisaniye
+                    // Format: HH:MM:SS.MMM
+                    result = String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, subUnit);
+                    break;
+            }
+            return result;
         }
-        return result;
+        else {
+            return "00:00:00.000";
+        }
     }
 
     private void showDndPermissionDialog() {
@@ -1035,8 +1155,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             }
         }
     };
-    // Fragment'ta pause/resume durumunu takip etmek için
-    private boolean isServicePaused = false;
+
 
     // Buton metnini güncelle
     private void updateButtonStates() {
@@ -1083,13 +1202,13 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     @Override
     public void onPause() {
         super.onPause();
-
+// Gecikmeli gönderimi iptal et
+        uiHandler.removeCallbacks(this::requestCurrentStatus);
 
         if (isAdded()) {
-            // Tüm alıcıları burada kayıttan silin
-            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timeUpdateReceiver);
-            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
-            // ... varsa diğer alıcılar
+            // 1. Alıcıları KAYITTAN SİL (Çok önemli, her zaman burada yapılmalı)
+                LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timeUpdateReceiver);
+                LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
         } //cut zaman güncelleme alıcınızın da burada kayıttan silindiğinden emin olun!
     }
     private String getDecimalFormatPattern() {
@@ -1105,13 +1224,16 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         // Constants'tan tanımladığımız anahtar ve varsayılan değeri kullan
         int decimalCount = prefs.getInt(Constants.PREF_DECIMAL_PLACES, Constants.DEFAULT_DECIMAL_PLACES);
         // DecimalFormat desenini oluştur
+        Log.d("TimerFragment","Shared Prefdeki değer "+ decimalCount);
         switch (decimalCount) {
             case 0:
-                return "#0.0";   // Slider 0: 1 ondalık
+                return "#0";   // Slider 0: 0 ondalık
             case 1:
-                return "#0.00";  // Slider 1: 2 ondalık
+                return "#0.0";  // Slider 1: 1 ondalık
             case 2:
-                return "#0.000"; // Slider 2: 3 ondalık
+                return "#0.00"; // Slider 2: 2 ondalık
+            case 3:
+                return "#0.000"; // Slider 3: 3 ondalık
             default:
                 return "#0.0"; // Güvenlik
         }

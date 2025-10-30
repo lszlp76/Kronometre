@@ -55,6 +55,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     @NonNull
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         // Üst sınıfın orijinal Fragment'ı oluşturma/geri yükleme işlemini yapmasını sağlayın
+
         Fragment fragment = (Fragment) super.instantiateItem(container, position);
 
         // Oluşturulan/Geri yüklenen Fragment'ı kaydedin

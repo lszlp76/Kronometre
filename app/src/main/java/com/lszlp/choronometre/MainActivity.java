@@ -46,9 +46,10 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
-
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.android.gms.tasks.*;
 import com.lszlp.choronometre.databinding.ActivityMainBinding;
+import com.lszlp.choronometre.main.PageViewModel;
 import com.lszlp.choronometre.main.SectionsPagerAdapter;
 import com.google.android.material.slider.Slider; // Bu importu eklediğinizden emin olun!
 import java.util.ArrayList;
@@ -56,16 +57,7 @@ import java.util.List;
 
 //rate app teset internal
 
-/**
- * TODO
- * ekran koruyucu kapatma
- * menu ekranı
- * paylaşım
- * about sayfası
- * <p>
- * <p>
- * salise ekleme
- **/
+
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         CustomAlertDialogFragment.CustomDialogListener {
@@ -91,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = "MainActivity";
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
-
+    PageViewModel pageViewModel;
     private final int[] TAB_ICONS = {
             R.drawable.ic_baseline_timer_24,
             R.drawable.ic_baseline_stacked_line_chart_24,
@@ -101,19 +93,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Splash screen'i yükle
-        // SplashScreen splashScreen = SplashScreen.installSplashScreen(this);
 
         super.onCreate(savedInstanceState);
         // ActionBar'ı gizle
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+        if (savedInstanceState == null)
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 // Uygulama açılır açılmaz gerekli tüm izinleri kontrol et ve iste
         checkAndRequestAllPermissions();
         initializeApp();
+        // KRİTİK EKLEME: BACK tuşuna basıldığında uygulamayı arka plana at./!\
+        // KRİTİK EKLEME: BACK tuşuna basıldığında uygulamayı arka plana at.
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Çekmecenin açık olup olmadığını kontrol et
+                DrawerLayout drawer = findViewById(R.id.drawer_layout); // Drawer ID'nizi kullanın
+                if (drawer != null && drawer.isDrawerOpen(GravityCompat.START)) {
+                    drawer.closeDrawer(GravityCompat.START);
+                } else {
+                    // Uygulamayı HOME tuşu gibi arka plana atar (Activity'yi öldürmez)
+                    moveTaskToBack(true);
+                }
+            }
+        });
     }
     private void initializeApp() {
         setupAppContent();
@@ -486,6 +492,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
                 navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
                 navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
+                drawerSlider.setEnabled(true);
                 break;
             case RUNNING:
                 auth = true;
@@ -494,6 +501,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 saveButton.setEnabled(false);
                 resetButton.setEnabled(false);
                 // Switch'leri devre dışı bırak
+                drawerSlider.setEnabled(false);
                 drawerSwitchCmin.setEnabled(false);
                 drawerSwitchSec.setEnabled(false);
                 drawerSwitchDmin.setEnabled(false);
@@ -508,6 +516,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 saveButton.setEnabled(true);
                 resetButton.setEnabled(true);
                 // Switch'leri devre dışı bırak
+                drawerSlider.setEnabled(false);
                 drawerSwitchCmin.setEnabled(false);
                 drawerSwitchSec.setEnabled(false);
                 drawerSwitchDmin.setEnabled(false);
@@ -940,7 +949,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerSwitchCmin.setEnabled(true);
         drawerSwitchSec.setEnabled(true);
         drawerSwitchDmin.setEnabled(true);
-        drawerSlider.setEnabled(false);
+        drawerSlider.setEnabled(true);
         navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
         navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
         navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
@@ -984,9 +993,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int savedDecimalPlaces = prefs.getInt(Constants.PREF_DECIMAL_PLACES, Constants.DEFAULT_DECIMAL_PLACES);
 
         // 2. Slider aralığını ayarla (0'dan 2'ye, 1'er artacak)
-        slider.setValueFrom(0f);
-        slider.setValueTo(2f); // 0, 1, 2 değerleri için
-        slider.setStepSize(1f);
+//        slider.setValueFrom(0f);
+////        slider.setValueTo(3f); // 0, 1, 2 değerleri için
+////        slider.setStepSize(1f);
 
         // 3. Kaydedilmiş değeri Slider'a ata
         slider.setValue((float) savedDecimalPlaces);
@@ -996,8 +1005,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onValueChange(@NonNull Slider s, float value, boolean fromUser) {
                 int selectedValue = (int) value;
-
-                // Yeni değeri SharedPreferences'a kaydet
+   // Yeni değeri SharedPreferences'a kaydet
                 prefs.edit().putInt(Constants.PREF_DECIMAL_PLACES, selectedValue).apply();
 
                 Log.d("MainActivity", "Ondalık Basamak Slider değeri kaydedildi: " + selectedValue);
@@ -1006,6 +1014,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Servisi veya Fragment'ı yeniden başlatmak/güncellemek gerekebilir.
                 // En basit çözüm, Fragment'ın onResume() veya onStart() metotlarında SharedPref'i okumasıdır.
                 // Bu, Adım 3'te yapılacaktır.
+                // KRİTİK: Precision ayarı değiştiğinde TimerFragment'a hemen haber ver (YENİ EKLEME)
+                Intent precisionUpdateIntent = new Intent(Constants.ACTION_PRECISION_UPDATE);
+                LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(precisionUpdateIntent);
+
             }
         });
     }

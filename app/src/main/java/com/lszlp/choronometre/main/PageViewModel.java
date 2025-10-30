@@ -12,6 +12,7 @@ public class PageViewModel extends ViewModel {
     private MutableLiveData<Float> mMinTimeValue = new MutableLiveData<>();//mincycletime
     private MutableLiveData<Float> mAvgTimeValue = new MutableLiveData<>();//avgcycletime
     private String mTimeUnit = new String();
+    private int mPrecisionValue  ;
     private MutableLiveData<String> mTimerValue = new MutableLiveData<>();
     public void setAvgTimeValue (float timeValue){
         mAvgTimeValue.setValue(timeValue);
@@ -19,7 +20,22 @@ public class PageViewModel extends ViewModel {
     public LiveData<Float> getAvgTimeValue() {
         return mAvgTimeValue;
     }
+   public String getmPrecisionValue  () {
 
+        switch (mPrecisionValue) {
+            case 0:
+                return "0.0";
+            case 1:
+                return "0.00";
+            case 2:
+                return "0.000";
+            default:
+                return "#0.0";
+        }
+    }
+    public void setmPrecisionValue (int mPrecisionValue){
+        this.mPrecisionValue = mPrecisionValue;
+    }
     public void setTimeUnit (String mTimeUnit){
         this.mTimeUnit = mTimeUnit;
     }

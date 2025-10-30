@@ -57,7 +57,7 @@ public class ChartFragment extends Fragment {
 
     LineChart lineChart;
     ArrayList<Entry> lineEntry, lapValue;
-    TextView chartTimer;
+   // TextView chartTimer;
     PageViewModel pageViewModel;
     Typeface tf;
     Float textSize;
@@ -108,7 +108,7 @@ public class ChartFragment extends Fragment {
 
         lineEntry = new ArrayList<>();
         lapValue = new ArrayList<>();
-        chartTimer = view.findViewById(R.id.chartTimer);
+      //  chartTimer = view.findViewById(R.id.chartTimer);
         /*tAvgValue = new ArrayList<>();
         tMinValue = new ArrayList<>();
         tMaxValue = new ArrayList<>();*/
@@ -118,9 +118,9 @@ public class ChartFragment extends Fragment {
                 public void onChanged(String s) {
 
                     ;
-                  displayFormattedTime(chartTimer,s);
+                 // displayFormattedTime(chartTimer,s);
                    // chartTimer.setText(s);
-                    System.out.println("Chart timer value :" + s );
+                  //  System.out.println("Chart timer value :" + s );
                 }
             });;
 
@@ -234,7 +234,7 @@ public class ChartFragment extends Fragment {
         lapValue.clear();
         lineChart.invalidate();
         lineChart.clear();
-        chartTimer.setText("00:00:00");
+      //  chartTimer.setText("00:00:00");
 
     }
 
@@ -461,7 +461,7 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
                 performSaveChart();
             } else {
                 // İzin reddedildi, kullanıcıya bilgi ver
-                Toast.makeText(getContext(), "Grafiği kaydetmek için depolama izni gereklidir.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "Storage permission is required to save the chart.", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -470,12 +470,12 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
      */
     private void performSaveChart() {
         if (lineChart == null) {
-            Toast.makeText(getContext(), "Grafik bileşeni henüz kullanıma hazır değil.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "The chart component is not yet ready for use.", Toast.LENGTH_SHORT).show();
             return;
         }
 // Kontrol 2: Grafikte gerçekten veri var mı? (Çizim yapılabilir mi?)
         if (lineChart.getData() == null || lineChart.getData().getEntryCount() == 0) {
-            Toast.makeText(getContext(), "Grafikte kaydedilecek veri bulunmuyor.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "No data found to be saved in the chart", Toast.LENGTH_SHORT).show();
             return;
         }
         // MikePhil Chart Kaydetme Kodu
@@ -491,17 +491,17 @@ https://stackoverflow.com/questions/40999699/i-am-trying-to-make-values-of-x-axi
 
             if (success) {
                 Toast.makeText(getContext(),
-                        "Grafik başarıyla kaydedildi.",
+                        "Chart saved successfully:.",
                         Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(getContext(),
-                        "Grafiği kaydederken bir hata oluştu.",
+                        "An error occurred while saving the chart.",
                         Toast.LENGTH_LONG).show();
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(getContext(), "Kayıt işlemi başarısız oldu: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Save operation failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 }

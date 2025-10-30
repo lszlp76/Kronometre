@@ -26,7 +26,9 @@ public class Constants {
     public static final String TIME_UNIT_SECONDS = "Sec.";
     public static final String TIME_UNIT_CMINUTES = "Cmin.";
     public static final String TIME_UNIT_DMINUTES = "Dmh.";
-
+    public static final Boolean IS_RUNNING = true;
+    public static final Boolean IS_PAUSED = false;
+    public static final String EXTRA_HOUR = "Saat";
    public static final String EXTRA_IS_RUNNING = "isRunning";
     public static final String EXTRA_IS_PAUSED = "isPaused";
     public static final int REQUEST_STORAGE_PERMISSION = 200;
@@ -38,5 +40,6 @@ public class Constants {
     // Varsayılan değer (0 -> 1 ondalık basamak, yani 0.0)
     public static final int DEFAULT_DECIMAL_PLACES = 0;
     public static final String ACTION_DECIMAL_UPDATE = "com.lszlp.choronometre.ACTION_DECIMAL_UPDATE";
-
+    // ... (Mevcut sabitlerinizin altına ekleyin)
+    public static final String ACTION_PRECISION_UPDATE = "com.lszlp.choronometre.ACTION_PRECISION_UPDATE"; // YENİ
 }

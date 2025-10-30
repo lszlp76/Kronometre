@@ -143,25 +143,26 @@ public class ChronometerService extends Service {
     private BroadcastReceiver statusRequestReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constants.ACTION_REQUEST_STATUS)) {
+            String action = intent.getAction();
+            if (Constants.ACTION_REQUEST_STATUS.equals(action)) {
+                // Durum talebi geldiğinde hemen yanıtla
                 sendCurrentStatus();
             }
+
         }
     };
-    // YENİ METOT: Fragment'a mevcut durumu gönderir
-    private void sendCurrentStatus() {
-        Intent statusIntent = new Intent(Constants.ACTION_STATUS_RESPONSE);
-
-        // Çalışma ve duraklatma durumunu gönder
-        statusIntent.putExtra(Constants.EXTRA_IS_RUNNING, isRunning);
-        statusIntent.putExtra(Constants.EXTRA_IS_PAUSED, isPaused);
-
-        // Fragment'a gösterilmesi gereken geçen süreyi gönder.
-        // Duraklatmadan önceki toplam süre (timeBeforePause) en güvenli değerdir.
-        statusIntent.putExtra(Constants.EXTRA_ELAPSED_TIME, timeBeforePause);
-
-        LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
-    }
+    // Yeni metot: Mevcut durumu Fragment'a gönderir
+//    private void sendCurrentStatus() {
+//        Intent responseIntent = new Intent(Constants.ACTION_STATUS_RESPONSE);
+//        responseIntent.putExtra(Constants.EXTRA_IS_RUNNING, isRunning);
+//        responseIntent.putExtra(Constants.EXTRA_IS_PAUSED, isPaused);
+//
+//        // KRİTİK: Toplam geçen zamanı (elapsedTime) göndermelisiniz
+//        responseIntent.putExtra(Constants.EXTRA_ELAPSED_TIME, elapsedTime);
+//
+//        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(responseIntent);
+//        Log.d(TAG, "Durum yanıtı gönderildi: isRunning=" + isRunning + ", elapsedTime=" + elapsedTime);
+//    }
     private void sendTimeUpdate(long time) {
         Intent intent = new Intent(Constants.ACTION_TIME_UPDATE);
         intent.putExtra(Constants.EXTRA_ELAPSED_TIME, time);
@@ -253,10 +254,17 @@ public class ChronometerService extends Service {
     // 🔥 2. Bildirim içeriği oluşturma
     private Notification buildNotification(String contentText) {
         Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent,
-                PendingIntent.FLAG_IMMUTABLE); // FLAG_IMMUTABLE şart!
+        // KRİTİK DEĞİŞİKLİK: Bu bayrakları ekleyin.
+// 1. FLAG_ACTIVITY_CLEAR_TOP: Görev yığınındaki MainActivity'nin üstündeki her şeyi temizler.
+// 2. FLAG_ACTIVITY_SINGLE_TOP: Eğer MainActivity zaten en üstteyse, yeni bir örnek oluşturulmaz.
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        // Zamanı formatla
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0, // İstek kodu
+                notificationIntent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT
+        );
         String timeDisplay = formatTimeAccordingToUnit(elapsedTime);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, Constants.CHANNEL_ID)
@@ -307,6 +315,14 @@ public class ChronometerService extends Service {
         pauseResumeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (Constants.ACTION_REQUEST_STATUS.equals(intent.getAction())) {
+
+                    // KRİTİK DÜZELTME: Servis çalışıyor veya duraklatılmış olsa bile durumu gönder.
+                    // Bu, UI'ın Servis'in mevcut durumunu (isRunning, isPaused, elapsedTime) öğrenmesini sağlar.
+                    sendCurrentStatus();
+
+                    Log.d(TAG, "ACTION_REQUEST_STATUS alındı. Durum gönderiliyor. Elapsed: " + elapsedTime);
+                }
                 String action = intent.getAction();
                 if (Constants.ACTION_PAUSE.equals(action)) {
                     pauseChronometer();
@@ -327,8 +343,19 @@ public class ChronometerService extends Service {
         // ContextCompat.registerReceiver(this, pauseResumeReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
     }
 
-    // --- TEMİZLEME ---
+    // --- Yeni Metot veya Mevcut Metodunuzun Kontrolü ---
+    private void sendCurrentStatus() {
+        Intent statusIntent = new Intent(Constants.ACTION_STATUS_RESPONSE);
 
+        // Geçen zaman (elapsedTime) ve başlangıç zamanı (startTime) değişkenlerinizin doğru olduğundan emin olun.
+        // Bu değişkenler, Service'in sınıf üyeleri olmalıdır.
+        statusIntent.putExtra(Constants.EXTRA_ELAPSED_TIME, elapsedTime);
+        statusIntent.putExtra(Constants.EXTRA_IS_RUNNING, isRunning);
+        statusIntent.putExtra(Constants.EXTRA_IS_PAUSED, isPaused);
+
+        // Servis içinden yanıtı Fragment'a geri gönder.
+        LocalBroadcastManager.getInstance(this).sendBroadcast(statusIntent);
+    }
     // onDestroy metodunu GÜNCELLEYİN
     @Override
     public void onDestroy() {
@@ -471,5 +498,50 @@ public class ChronometerService extends Service {
             // Widget'ı güncelle
             appWidgetManager.updateAppWidget(widgetId, views);
         }
+    }
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.d(TAG, "onTaskRemoved: Uygulama görevi sonlandırıldı (Kill).");
+
+        // Eğer kronometre çalışıyorsa (isRunning) veya duraklatılmışsa (isPaused)
+        // ve kullanıcı uygulamayı tamamen kapattıysa, Servis'i durdurup tüm UI öğelerini temizlemeliyiz.
+
+        // Önceki çözümde bahsedilen handleStopAction() metodunu çağırın.
+        // Bu metodun şunları yaptığından emin olun:
+        // 1. isRunning = false, isPaused = false yapma.
+        // 2. Timer/Handler'ı durdurma.
+        // 3. Bildirimi kaldırma (stopForeground(true)).
+        // 4. Widget'ı sıfırlama (updateWidget(0)).
+
+        handleStopAction();
+
+        // Servis'i sonlandır. handleStopAction() içinde yoksa buraya ekleyin:
+        stopSelf();
+
+        // Temizlik tamamlandıktan sonra üst sınıfı çağırın.
+        super.onTaskRemoved(rootIntent);
+    }
+    // --- handleStopAction() Metodunun Kontrolü/Oluşturulması (Varsayım) ---
+// Bu metot, Servis içinde zaten var olmalı veya eklenmelidir.
+    private void handleStopAction() {
+        // 1. Servis durumunu güncelle
+        isRunning = false;
+        isPaused = false;
+        // elapsedTime = 0; // İsteğe bağlı, reset butonu değilse gerekmez
+
+        // 2. Handler'ı durdur
+        if (handler != null && updateRunnable != null) {
+            handler.removeCallbacks(updateRunnable);
+        }
+
+        // 3. Bildirimi KALDIR (Çok Önemli)
+        // stopForeground(true) çağrısı hem bildirimi kaldırır hem de Servis'i arka plan servisi yapar (sonra stopSelf ile sonlandırılır).
+        stopForeground(true);
+
+        // 4. Widget'ı sıfırla/durdur
+        updateWidget(0); // Bu metot, widget zamanını "00:00:00.0" olarak güncelleyip durdurmalı.
+
+        // 5. Servis'i tamamen durdur
+        stopSelf();
     }
 }
