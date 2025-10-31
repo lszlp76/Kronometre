@@ -195,7 +195,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
     int lapsayisi = 0;
     ArrayList<String> laps = new ArrayList<>();
-    DecimalFormat dec = new DecimalFormat();
+
     boolean Auth;
     ArrayList<Double> lapsval = new ArrayList<>();
     int lapnomax = 0, lapnomin = 0;
@@ -499,8 +499,6 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         // Başlangıçta format desenini yükle
         currentDecimalFormatPattern = getDecimalFormatPattern();
 
-        dec = new DecimalFormat(currentDecimalFormatPattern);
-        Log.d("TimerFragmet", "dec value :"+ dec.toString());
 
 
         _binding = FragmentTimerBinding.inflate(getLayoutInflater()); // Atamayı buraya yapın
@@ -595,7 +593,9 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     // ================================================================
     private void showNoteDialog(int position) {
         if (getActivity() == null) return;
-
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).drawer.setAlpha(0.2f); // Drawer'ı soluklaştır
+        }
         // RecyclerView listesinden doğru Lap objesini al
         // (ListElementsArrayList'in ters sıralı olduğunu varsayarak)
         Lap lapToEdit = ListElementsArrayList.get(position);
@@ -608,6 +608,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 lapNumber,   // Lap'ın gerçek numarası (örn: Lap 5)
                 currentNote  // Mevcut not (varsa)
         );
+
 
         // Diyaloğu MainActivity'nin FragmentManager'ı üzerinden göster
         dialog.show(requireActivity().getSupportFragmentManager(), "ADD_NOTE_DIALOG_TAG");
@@ -686,7 +687,6 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         lapValue = new Lap(newDec.format(delta) + " ", lap, lapsayisi + 1, m_Text);
         lapsArray.add(lapsayisi, lapValue);
         ListElementsArrayList.add(0, lapValue);
-        Log.d("TimerFragment","Decimal format "+dec.format(delta));
 
         updateDisplay();
         lapsayisi++;
@@ -770,11 +770,13 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
     private void updateDisplay() {
         // Değerleri modul ile çarparak doğru birimde göster
-        maxvalue.setText(dec.format(max));
-        minvalue.setText(dec.format(min));
-        avevalue.setText(dec.format(ave));
-        cycPerMinute.setText(dec.format(calculateCycPerMinute(ave)));
-        cycPerHour.setText(dec.format(calculateCycPerHour(ave)));
+        DecimalFormat newDec = new DecimalFormat(currentDecimalFormatPattern);
+
+        maxvalue.setText(newDec.format(max));
+        minvalue.setText(newDec.format(min));
+        avevalue.setText(newDec.format(ave));
+        cycPerMinute.setText(newDec.format(calculateCycPerMinute(ave)));
+        cycPerHour.setText(newDec.format(calculateCycPerHour(ave)));
     }
 
     private double calculateCycPerMinute(double ave) {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:alpha="1"
@@ -11,13 +11,13 @@
 
     <TextView
         android:id="@+id/dialogTitle"
-        style="@style/textTitleColorStyle"
+
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="UYARI BAŞLIĞI"
         android:textAlignment="center"
         android:textSize="20sp"
-        android:textColor="#00FFFF"
+        android:textColor="#4000FF"
         android:textStyle="bold"
         android:layout_marginBottom="10dp"/>
 
@@ -27,6 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:lineSpacingMultiplier="2"
+        android:textColor="#4000FF"
         android:text="Bu, özelleştirilmiş bir uyarı metnidir."
         android:textSize="16sp"
 
@@ -38,11 +39,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
-
         android:hint="HERE"
-        android:textColorHint="#99FFFF"
+        android:textColor="#4000FF"
 
-        android:backgroundTint="#00FFFF"
+        android:backgroundTint="#00FFE5"
         android:visibility="gone" android:layout_marginBottom="20dp"/>
 
     <EditText
@@ -50,9 +50,9 @@
         android:id="@+id/dialogNoteInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColorHint="#99FFFF"
+        android:textColorHint="#FFB899"
 
-        android:backgroundTint="#00FFFF"
+        android:backgroundTint="#00FFE5"
         android:visibility="gone"
         android:layout_marginBottom="20dp"/>
 

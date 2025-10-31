@@ -914,7 +914,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showResetDialog() {
         // Düzeltildi: newInstance yerine newInstanceForReset kullanıldı
         CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForReset();
-        drawer.setAlpha(0.4f);//setScrimColor(Color.argb(100, 0, 0, 0));
+        drawer.setAlpha(0.3f);//setScrimColor(Color.argb(100, 0, 0, 0));
+
         dialog.show(getSupportFragmentManager(), "RESET_DIALOG_TAG");
 
     }
@@ -922,7 +923,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showSaveDialog() {
         // Düzeltildi: newInstance yerine newInstanceForSave kullanıldı
         CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForSave();
-        drawer.setAlpha(0.4f);
+        drawer.setAlpha(0.2f);
         dialog.show(getSupportFragmentManager(), "SAVE_DIALOG_TAG");
     }
 // LISTENER METOTLARI
@@ -961,7 +962,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
         // Düzeltildi: fileName değişkeni save() metoduna parametre olarak eklendi
         fragment.save(fileName);
-        drawer.setAlpha(1f);
+
+
     }
 
     @Override
@@ -977,11 +979,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onNoteSaved(int position, int lapNumber, String noteText) {
+        drawer.setAlpha(1.f);
         if (viewPager != null && viewPager.getAdapter() != null) {
             // TimerFragment'ı bul ve notu güncellemesi için metodunu çağır
             TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
             if (fragment != null && fragment.isAdded()) {
                 fragment.updateNoteForLap(position, noteText);
+
             }
         }
     }
