@@ -41,7 +41,7 @@
                 <item
                     android:id="@+id/precision"
                     android:checkable="true"
-                    android:icon="@drawable/ic_save"
+                    android:icon="@drawable/ic_precison"
                     app:actionLayout="@layout/precisionslider"
 
                     android:title="Precision" />

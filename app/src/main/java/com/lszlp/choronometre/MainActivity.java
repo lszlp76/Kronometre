@@ -800,6 +800,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(shareIntent);
             }
         } else if (itemId == R.id.rateApp) {
+
             if (reviewInfo != null) {
                 Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
                 flow.addOnCompleteListener(task -> {
@@ -979,7 +980,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onNoteSaved(int position, int lapNumber, String noteText) {
-        drawer.setAlpha(1.f);
+        drawer.setAlpha(1.0f);
         if (viewPager != null && viewPager.getAdapter() != null) {
             // TimerFragment'ı bul ve notu güncellemesi için metodunu çağır
             TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
