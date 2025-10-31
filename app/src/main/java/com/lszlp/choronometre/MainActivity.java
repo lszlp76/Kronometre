@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
     PageViewModel pageViewModel;
+
     private final int[] TAB_ICONS = {
             R.drawable.ic_baseline_timer_24,
             R.drawable.ic_baseline_stacked_line_chart_24,
@@ -120,6 +121,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+        //OnBoarding Kontrolü
+        // 1. SharedPreferences'ı başlat
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // 2. İlk açılış kontrolü
+        boolean isFirstTime = prefs.getBoolean(Constants.PREF_FIRST_TIME_LAUNCH, true);
+
+        if (isFirstTime) {
+            // Eğer ilk kez açılıyorsa, Onboarding ekranını göster
+            launchOnboardingScreen();
+        }
     }
     private void initializeApp() {
         setupAppContent();
@@ -547,6 +559,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+
         // Uygulama ön plana geldiğinde servis durdurulmaz
         // Sadece UI güncellemesi yapılır
     }
@@ -1027,5 +1040,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    private void launchOnboardingScreen() {
+        // SharedPreferences'a bir daha göstermemek üzere kaydet
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        //Onboarding i test etmek için aşağıdki false ->true yap
+        prefs.edit().putBoolean(Constants.PREF_FIRST_TIME_LAUNCH, false).apply();
 
+        // Onboarding Activity'yi başlat
+        Intent intent = new Intent(MainActivity.this, OnBoardingActivity.class);
+         startActivity(intent);
+        // NOTE: Onboarding Activity bittiğinde MainActivity'nin devam etmesi için burada finish() çağrılmaz.
+        // Kullanıcı Onboarding'i tamamladığında, OnboardingActivity'nin kendisi finish() yapmalıdır.
+    }
 }

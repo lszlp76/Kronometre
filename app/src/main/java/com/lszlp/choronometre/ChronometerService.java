@@ -494,6 +494,7 @@ public class ChronometerService extends Service {
             // RemoteViews oluştur ve güncel zamanı TextView'e set et
             RemoteViews views = new RemoteViews(getPackageName(), R.layout.widget_chronometer);
             views.setTextViewText(R.id.txtTime, formattedTime);
+            views.setTextViewText(R.id.timeUnitTextWidget,timeUnit);
 
             // Widget'ı güncelle
             appWidgetManager.updateAppWidget(widgetId, views);

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -97,6 +98,15 @@ public class CustomAlertDialogFragment extends DialogFragment {
     // =================================================================
     // YAŞAM DÖNGÜSÜ METOTLARI
     // =================================================================
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).drawer.setAlpha(1.f); // Drawer'ı tekrar görünür yapar
+        }
+        Log.d("DialogFragment", "onDestroy() called");
+    }
 
     @Override
     public void onAttach(@NonNull Context context) {

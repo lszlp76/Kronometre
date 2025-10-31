@@ -41,7 +41,7 @@ public class ChronometerWidget extends AppWidgetProvider {
             // Varsayalım ki layout'ta R.id.btnToggle adında tek bir buton var.
 
             views.setTextViewText(R.id.txtTime, "00:00:00");
-
+            views.setTextViewText(R.id.timeUnitText, "Cmin.");
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
     }

@@ -21,7 +21,8 @@ public class Constants {
     public static final String EXTRA_TIME_UNIT = "time_unit";
     public static final String EXTRA_MODUL = "modul";
     public static final String EXTRA_MILIS = "milis";
-
+//Onboarding
+public static final String PREF_FIRST_TIME_LAUNCH = "IsFirstTimeLaunch";
     // Zaman birimi tipleri
     public static final String TIME_UNIT_SECONDS = "Sec.";
     public static final String TIME_UNIT_CMINUTES = "Cmin.";

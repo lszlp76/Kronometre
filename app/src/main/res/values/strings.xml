@@ -7,6 +7,9 @@
     <string name="tab_text_1">Counter</string>
     <string name="tab_text_2">Chart</string>
     <string name="tab_text_3">History</string>
+    <string name="got_it">START</string>
+    <string name="next">NEXT</string>
+
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment"></string>
     <string name="max">Max :</string>

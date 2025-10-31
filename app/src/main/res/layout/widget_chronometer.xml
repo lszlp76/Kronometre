@@ -3,34 +3,51 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/widget_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/plystr"
-    android:gravity="center"
-    android:weightSum="2"
-    android:orientation="vertical"
-    android:padding="8dp">
-    <!-- Timer Display -->
-    <TextView
-        android:id="@+id/txtTime"
-        style="@style/textColorStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:fontFamily="@font/digital7mono"
-        android:gravity="center"
-        android:maxLines="1"
-        android:layout_weight="1"
-        android:text="@string/_00_00_00"
-        android:textSize="60sp"
-        android:textStyle="bold"
-        app:autoSizeMaxTextSize="60sp"
-        app:autoSizeMinTextSize="12sp"
-        app:autoSizeTextType="uniform"
-        app:layout_constraintEnd_toStartOf="@+id/unitValue"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp"
+    android:background="@drawable/futuristik">
 
-        />
+    <ImageView
+
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/chronotehcno"
+        android:layout_marginEnd="12dp"
+       />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/textWidgetColorStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Industrial Chronometer"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/timeUnitTextWidget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Unit"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+        <TextView
+            android:id="@+id/txtTime"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="00:00:00"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
 
 
 </LinearLayout>
+
