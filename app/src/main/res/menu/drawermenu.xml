@@ -26,17 +26,9 @@
 
                 <item
                     android:id="@+id/timeUnitDmin"
-                    android:icon="@drawable/ic_cmin"
+                    android:icon="@drawable/ic_baseline_timer_24"
                     android:title="@string/ten_thousandth_of_hours"
                     app:actionLayout="@layout/togglebuttonsec"
-                    app:showAsAction="always" />
-
-
-                <item
-                    android:id="@+id/screenSaver"
-                    android:icon="@drawable/outline_screenshot_monitor_24"
-                    android:title="@string/screenOn"
-                    app:actionLayout="@layout/togglebuttonscreen"
                     app:showAsAction="always" />
                 <item
                     android:id="@+id/precision"
@@ -45,6 +37,12 @@
                     app:actionLayout="@layout/precisionslider"
 
                     android:title="Precision" />
+                <item
+                    android:id="@+id/screenSaver"
+                    android:icon="@drawable/outline_screenshot_monitor_24"
+                    android:title="@string/screenOn"
+                    app:actionLayout="@layout/togglebuttonscreen"
+                    app:showAsAction="always" />
                 <item
                     android:id="@+id/nav_save"
 

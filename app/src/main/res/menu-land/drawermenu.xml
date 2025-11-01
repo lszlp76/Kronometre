@@ -25,7 +25,7 @@
             <item
                 android:id="@+id/timeUnitDmin"
                 android:checkable="true"
-                android:icon="@drawable/ic_cmin"
+                android:icon="@drawable/ic_baseline_timer_24"
                 android:title="@string/ten_thousandth_of_hours"
                 app:actionLayout="@layout/togglebuttonsec"
                 app:showAsAction="always" />
