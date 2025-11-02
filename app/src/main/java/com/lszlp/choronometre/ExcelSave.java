@@ -1,15 +1,25 @@
 package com.lszlp.choronometre;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
+import static java.security.AccessController.getContext;
+
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.text.InputFilter;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -20,8 +30,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.content.FileProvider;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -50,10 +62,33 @@ public class ExcelSave {
     private String xlString = df2.format(myDate);
 
     private String fileName = "";
+    private  DecimalFormat currentDecimalFormat = new DecimalFormat();
 
     public String getTimeUnit() {
         return timeUnit;
     }
+    public String getDecimalFormatPattern(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
+        int decimalCount = prefs.getInt(Constants.PREF_DECIMAL_PLACES, Constants.DEFAULT_DECIMAL_PLACES);
+        Log.d("ExcelSave", "Shared Prefdeki değer: " + decimalCount);
+
+        switch (decimalCount) {
+            case 0:
+                return "#0";
+            case 1:
+                return "#0.0";
+            case 2:
+                return "#0.00";
+            case 3:
+                return "#0.000";
+            default:
+                return "#0.0";
+        }
+    }
+
+
+
 
     public void setTimeUnit(String timeUnit) {
         this.timeUnit = timeUnit;
@@ -79,7 +114,7 @@ public class ExcelSave {
 
 
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
-        File folder = new File(path, "IndustrialChoronometer");
+        File folder = new File(path, "IndustrialChronometer");
         if (!folder.exists()) {
            Toast.makeText(context,"No files to share !",Toast.LENGTH_LONG).show();
 
@@ -116,157 +151,157 @@ public class ExcelSave {
     public void delete(Context context, String fileName){
         File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
         System.out.println("Path : "+path.toString());
-        File folder = new File(path, "IndustrialChoronometer");
+        File folder = new File(path, "IndustrialChronometer");
         File file = new File(folder, fileName);
         file.delete();
     }
-    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval, Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute, ArrayList<Lap> lapsArray,String fileName) {
+    public void save(Context context, String timeUnit, ArrayList<String> laps, ArrayList<Double> lapsval,
+                     Double ave, int modul, String totalStudyTime, double cycPerHour, double cycPerMinute,
+                     ArrayList<Lap> lapsArray, String fileName) {
 
+        String pattern = getDecimalFormatPattern(context);
+        currentDecimalFormat = new DecimalFormat(pattern);
 
-        if (laps.size() > 0) {
-/*
-https://medium.com/@gracekim1611/android-studio-dialogs-edb96717a64e
-alert dialog için
+        if (laps == null || laps.isEmpty()) {
+            Toast.makeText(context, "No laps to save!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            AlertDialog.Builder alertName = new AlertDialog.Builder(new ContextThemeWrapper(context, R.style.AlertDialogCustom));
-            final EditText editTextName1 = new EditText(context);
-            editTextName1.setSingleLine();
-            InputFilter[] filter = new InputFilter[1];
-            filter[0] = new InputFilter.LengthFilter(8);// max 8 harf
-            editTextName1.setFilters(filter);
-            editTextName1.setHint("Enter file name here!");
-            editTextName1.setTextColor(Color.BLUE);
-            alertName.setTitle("Save File");
-// titles can be used regardless of a custom layout or not
-            alertName.setView(editTextName1);
-            LinearLayout layoutName = new LinearLayout(context);
-            layoutName.setOrientation(LinearLayout.VERTICAL);
-            layoutName.addView(editTextName1); // displays the user input bar
-            alertName.setView(layoutName);
+        if (fileName == null || fileName.trim().isEmpty()) {
+            Toast.makeText(context, "Please enter a file name!", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-            alertName.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
+        String FILE_NAME = fileName + ".xls";
+        ByteArrayOutputStream outputStreamBuffer = new ByteArrayOutputStream();
 
- */
+        try {
+            WorkbookSettings wbSettings = new WorkbookSettings();
+            wbSettings.setLocale(new Locale("en", "EN"));
 
-                    File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);// bulunduğu folder
-                    File folder = new File(path, "IndustrialChoronometer");
-                    if (!folder.exists()) {
-                        folder.mkdirs();
+            WritableWorkbook workbook = Workbook.createWorkbook(outputStreamBuffer, wbSettings);
+            WritableSheet sheet = workbook.createSheet(fileName + " Time Study", 0);
 
+            // Headers
+            Label lbl = new Label(0, 0, fileName + " TIME STUDY DATA REPORT");
+            Label lbl1 = new Label(0, 1, "Date");
+            Label lbl2 = new Label(0, 2, "Time Unit");
+            Label lbl3 = new Label(0, 3, "Total Study Time :");
+            Label lbl4 = new Label(0, 4, "Maximum Cycle Time : ");
+            Label lbl5 = new Label(0, 5, "Lap number of Max.Cyc.Time : ");
+            Label lbl6 = new Label(0, 6, "Minimum Cycle Time : ");
+            Label lbl7 = new Label(0, 7, "Lap number of Min.Cyc.Time : ");
+            Label lbl8 = new Label(0, 8, "Average Cycle Time : ");
+            Label lblCycPerHour = new Label(0, 9, "Cyc.per Hour :");
+            Label lblCycPerMinute = new Label(0, 10, "Cyc.per Minute :");
+            Label no = new Label(0, 11, "Lap No :");
+            Label lbl9 = new Label(1, 11, "Laps Value:");
+            Label lbl10 = new Label(2, 11, "Cycle Time [" + timeUnit + "] :");
+            Label lbl10_ = new Label(3, 11, "Notes:");
+
+            DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH);
+            String xlString = df.format(new Date());
+
+            // Header values
+            Label lbl11 = new Label(1, 1, xlString);
+            Label lbl12 = new Label(1, 2, timeUnit);
+            Label lbl13 = new Label(1, 3, totalStudyTime);
+            Label lbl14 = new Label(1, 4, currentDecimalFormat.format(Collections.max(lapsval) * modul) + " " + timeUnit);
+            Label lbl15 = new Label(1, 5, String.valueOf(lapsval.indexOf(Collections.max(lapsval))));
+            Label lbl16 = new Label(1, 6, currentDecimalFormat.format(Collections.min(lapsval) * modul) + " " + timeUnit);
+            Label lbl17 = new Label(1, 7, String.valueOf(lapsval.indexOf(Collections.min(lapsval))));
+            Label lbl18 = new Label(1, 8, currentDecimalFormat.format(ave * modul) + " " + timeUnit);
+            Label lbl19 = new Label(1, 9, currentDecimalFormat.format(cycPerHour) + " cyc/hour");
+            Label lbl20 = new Label(1, 10, currentDecimalFormat.format(cycPerMinute) + " cyc/minute");
+
+            // Write headers
+            sheet.addCell(lbl);
+            sheet.addCell(lbl1);
+            sheet.addCell(lbl2);
+            sheet.addCell(lbl3);
+            sheet.addCell(lbl4);
+            sheet.addCell(lbl5);
+            sheet.addCell(lbl6);
+            sheet.addCell(lbl7);
+            sheet.addCell(lbl8);
+            sheet.addCell(lblCycPerHour);
+            sheet.addCell(lblCycPerMinute);
+            sheet.addCell(lbl9);
+            sheet.addCell(lbl10);
+            sheet.addCell(lbl10_);
+            sheet.addCell(lbl11);
+            sheet.addCell(lbl12);
+            sheet.addCell(lbl13);
+            sheet.addCell(lbl14);
+            sheet.addCell(lbl15);
+            sheet.addCell(lbl16);
+            sheet.addCell(lbl17);
+            sheet.addCell(lbl18);
+            sheet.addCell(lbl19);
+            sheet.addCell(lbl20);
+
+            // Lap data
+            for (int i = 0; i < laps.size(); i++) {
+                Label lbls0 = new Label(0, 12 + i, String.valueOf(i + 1));
+                Label lbls = new Label(1, 12 + i, laps.get(i));
+                Label lbls2 = new Label(2, 12 + i, currentDecimalFormat.format((lapsval.get(i) * modul)));
+                Label lbls3 = new Label(3, 12 + i, lapsArray.get(i).message);
+                sheet.addCell(lbls0);
+                sheet.addCell(lbls);
+                sheet.addCell(lbls2);
+                sheet.addCell(lbls3);
+            }
+
+            workbook.write();
+            workbook.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Excel creation failed!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // ✅ Save into Downloads/IndustrialChoronometer using MediaStore
+        try {
+            ContentResolver resolver = context.getContentResolver();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.Downloads.DISPLAY_NAME, FILE_NAME);
+            contentValues.put(MediaStore.Downloads.MIME_TYPE, "application/vnd.ms-excel");
+            contentValues.put(MediaStore.Downloads.RELATIVE_PATH,
+                    Environment.DIRECTORY_DOWNLOADS + "/IndustrialChronometer");
+
+            Uri fileUri = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                contentValues.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/IndustrialChronometer");
+                contentValues.put(MediaStore.MediaColumns.IS_PENDING, 1);
+                fileUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues);
+
+                if (fileUri != null) {
+                    try (OutputStream out = resolver.openOutputStream(fileUri)) {
+                        outputStreamBuffer.writeTo(out);
                     }
-                    ;
-                    if (!fileName.isEmpty()) {
-                        String FILE_NAME = fileName + ".xls";
-                        path = new File(folder.getPath());
-                        File file = new File(path, FILE_NAME);
-
-
-                        WorkbookSettings wbSettings = new WorkbookSettings();
-                        wbSettings.setLocale(new Locale("en", "EN"));
-
-                        WritableWorkbook workbook;
-                        try {
-
-                            workbook = Workbook.createWorkbook(file, wbSettings);
-                            WritableSheet sheet = workbook.createSheet(fileName + " Time Study", 0);
-                            int i = 0;
-                            // XL dosya içi başlıklar
-                            Label lbl = new Label(0, 0, fileName + " TIME STUDY DATA REPORT");
-                            Label lbl1 = new Label(0, 1, String.valueOf("Date"));
-                            Label lbl2 = new Label(0, 2, "Time Unit");
-                            Label lbl3 = new Label(0, 3, "Total Study Time :");
-                            Label lbl4 = new Label(0, 4, "Maximum Cycle Time : ");
-                            Label lbl5 = new Label(0, 5, "Lap number of Max.Cyc.Time : ");
-                            Label lbl6 = new Label(0, 6, "Minimum Cycle Time : ");
-                            Label lbl7 = new Label(0, 7, "Lap number of Min.Cyc.Time : ");
-                            Label lbl8 = new Label(0, 8, "Average Cycle Time : ");
-                            Label lblCycPerHour = new Label(0, 9, "Cyc.per Hour :");
-                            Label lblCycPerMinute = new Label(0, 10, "Cyc.per Minute :");
-                            Label no = new Label(0, 11, "Lap No :");
-                            Label lbl9 = new Label(1, 11, "Laps Value:");
-                            Label lbl10 = new Label(2, 11, "Cycle Time [" + timeUnit + "] :");
-                            Label lbl10_ = new Label(3, 11, "Notes:");
-// başlık değerleri
-                            Label lbl11 = new Label(1, 1, xlString);
-
-                            Label lbl12 = new Label(1, 2, timeUnit);
-                            Label lbl13 = new Label(1, 3, totalStudyTime); //laps.get(laps.size() - 1));
-                            Label lbl14 = new Label(1, 4, decthree.format(Collections.max(lapsval) * modul) + " " + timeUnit);
-                            Label lbl15 = new Label(1, 5, String.valueOf(lapsval.indexOf(Collections.max(lapsval))));
-                            Label lbl16 = new Label(1, 6, decthree.format(Collections.min(lapsval) * modul) + " " + timeUnit);
-                            Label lbl17 = new Label(1, 7, String.valueOf(lapsval.indexOf(Collections.min(lapsval))));
-                            Label lbl18 = new Label(1, 8, decthree.format(ave * modul) + " " + timeUnit);
-                            Label lbl19 = new Label(1, 9, String.valueOf(dec.format(cycPerHour)) + " cyc/hour");
-                            Label lbl20 = new Label(1, 10, String.valueOf(dec.format(cycPerMinute)) + " cyc/minute");
-
-                            while (i < laps.size()) {// laplar
-                                Label lbls0 = new Label(0, 12 + i, String.valueOf(i + 1));
-                                Label lbls = new Label(1, 12 + i, laps.get(i));// lap yazma
-                                Label lbls2 = new Label(2, 12 + i, String.valueOf(dec.format(lapsval.get(i) * modul))); // cycle time yazma
-                                Label lbls3 = new Label(3, 12 + i, String.valueOf(lapsArray.get(i).message));
-                                sheet.addCell(lbls);
-                                sheet.addCell(lbls0);
-                                sheet.addCell(lbls2);
-                                sheet.addCell(lbls3);
-                                i++;
-                            }
-                            try {
-                                sheet.addCell(lbl);
-                                sheet.addCell(lbl1);
-                                sheet.addCell(lbl2);
-                                sheet.addCell(lbl3);
-                                sheet.addCell(lbl4);
-                                sheet.addCell(lbl5);
-                                sheet.addCell(lbl6);
-                                sheet.addCell(lbl7);
-                                sheet.addCell(lbl8);
-                                sheet.addCell(lblCycPerHour);
-                                sheet.addCell(lblCycPerMinute);
-                                sheet.addCell(lbl9);
-                                sheet.addCell(lbl10);
-                                sheet.addCell(lbl10_);
-                                sheet.addCell(lbl11);
-                                sheet.addCell(lbl12);
-                                sheet.addCell(lbl13);
-                                sheet.addCell(lbl14);
-                                sheet.addCell(lbl15);
-                                sheet.addCell(lbl16);
-                                sheet.addCell(lbl17);
-                                sheet.addCell(lbl18);
-                                sheet.addCell(lbl19);
-                                sheet.addCell(lbl20);
-
-
-                            } catch (RowsExceededException e) {
-                                e.printStackTrace();
-                            } catch (WriteException e) {
-                                e.printStackTrace();
-
-                            }
-                            workbook.write();
-
-                            try {
-                                workbook.close();
-                                fileName = "";
-                                Toast.makeText(context, "Your datas stored in DownLoad/IndustrialChronometer folder with name " + FILE_NAME, Toast.LENGTH_LONG).show();
-                            } catch (WriteException e) {
-
-                                e.printStackTrace();
-                            }
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Toast.makeText(context, "yazma hatası", Toast.LENGTH_SHORT).show();
-                        } catch (RowsExceededException e) {
-                            e.printStackTrace();
-                        } catch (WriteException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                    contentValues.clear();
+                    contentValues.put(MediaStore.MediaColumns.IS_PENDING, 0);
+                    resolver.update(fileUri, contentValues, null, null);
+                }
+            }
+            if (fileUri != null) {
+                try (OutputStream out = resolver.openOutputStream(fileUri)) {
+                    outputStreamBuffer.writeTo(out);
                 }
 
-  }
+                Toast.makeText(context,
+                        "Saved in Downloads/IndustrialChronometer as " + FILE_NAME,
+                        Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(context, "Failed to create file in Downloads", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(context, "Save failed!", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }
 

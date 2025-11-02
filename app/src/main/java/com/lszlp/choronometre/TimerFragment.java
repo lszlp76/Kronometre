@@ -1213,7 +1213,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
         } //cut zaman güncelleme alıcınızın da burada kayıttan silindiğinden emin olun!
     }
-    private String getDecimalFormatPattern() {
+    public String getDecimalFormatPattern() {
         // SharedPreferences'ı oku
         // Fragment'ın bir Context'e bağlı olup olmadığını kontrol et
         if (!isAdded()) {
