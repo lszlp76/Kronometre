@@ -273,6 +273,9 @@ public class FileList extends Fragment
 //    }
 
     private void showDeleteDialog(int position, String fileName) {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).drawer.setAlpha(0.2f); // Drawer'ı soluklaştır
+        }
         CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForDelete(
                 position,
                 fileName
@@ -296,6 +299,7 @@ public class FileList extends Fragment
     @Override
     public void onDeleteConfirmed(int position, String fileName) {
         // Silme işlemi onaylandığında burası çalışır
+
         if (adapter != null && position >= 0 && position < pathArray.size()) {
 
             // Bu satırın çalıştığından emin olmak için log veya Toast ekleyin

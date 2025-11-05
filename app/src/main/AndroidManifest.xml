@@ -65,7 +65,7 @@
                 android:resource="@xml/path"/>
         </provider>
 
-        <!-- Foreground service type ekleyin -->
+        <!-- Foreground service type here  to use chrono timer in foreground -->
         <service
             android:name=".ChronometerService"
             android:enabled="true"
