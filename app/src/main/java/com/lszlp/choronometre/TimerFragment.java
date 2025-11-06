@@ -843,7 +843,12 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStop = sdf.format(new Date());
         //StopTime = SystemClock.uptimeMillis();
-
+        // Null kontrolü: start zamanı hiç set edilmediyse hata vermesin
+        if (currentDateandTimeStart == null || currentDateandTimeStart.trim().isEmpty()) {
+            Log.e("TimerFragment", "currentDateandTimeStart is null or empty — stopTime skipped.");
+            totalObservationTime.setText("00:00:00");
+            return;
+        }
         try {
             Date date1 = sdf.parse(currentDateandTimeStart);
             Date date2 = sdf.parse(currentDateandTimeStop);
@@ -1180,7 +1185,10 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     // YENİ METOT: Servisi duraklatmak için kullanılır
     public void pause() {
         Auth = true; // Durumu "çalışmıyor" (duraklatıldı) olarak ayarla
-
+        if (currentDateandTimeStart == null) {
+            Log.w("TimerFragment", "Pause skipped: start time is null");
+            return;
+        }
         // Servise duraklatma eylemini bildirmek için LocalBroadcast gönder
         Intent pauseIntent = new Intent(Constants.ACTION_PAUSE);
         LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(pauseIntent);
