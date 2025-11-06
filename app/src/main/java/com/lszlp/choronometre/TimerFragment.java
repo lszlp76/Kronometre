@@ -819,6 +819,11 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         currentDateandTimeStart = sdf.format(new Date());
         timeStart = new Date();
+        if (currentDateandTimeStart == null || currentDateandTimeStart.trim().isEmpty()) {
+            Log.e("TimerFragment", "currentDateandTimeStart is null or empty — stopTime skipped.");
+            totalObservationTime.setText("00:00:00");
+            return;
+        }
         //StartTime = SystemClock.uptimeMillis();
     }
 

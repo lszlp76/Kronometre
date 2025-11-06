@@ -885,7 +885,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void loadBannerAd() {
         //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
         //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
-
+        if (adView == null) {
+            Log.e(TAG, "AdView is null — skipping ad load to prevent crash");
+            return;
+        }
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
         adView.setAdListener(new AdListener() {
