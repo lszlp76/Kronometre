@@ -1,69 +1,324 @@
-⏱️ Multi-Unit Chronometer Projesi (lszlp/choronometre)
-🌟 Proje Tanımı
-Bu proje, profesyonel kullanıma uygun, gelişmiş bir Android kronometre uygulamasıdır. Standart saniye bazlı zamanlamanın yanı sıra, Santidakika (Cmin) ve Desimdakika (Dmh) gibi bilimsel ve endüstriyel standartlara uygun zaman birimlerinde de ölçüm yapabilme yeteneği sunar. Uygulama, arka planda güvenilir bir şekilde çalışırken detaylı tur (lap) kaydı ve veri analizi özelliklerini içerir.
+# INDUSTRIAL CHRONOMETER - TEKNİK DOKÜMANTASYONU
 
-✨ Temel Özellikler
-Çoklu Zaman Birimi Desteği:
+## 📱 PROJE GENEL BAKIŞ
 
-Saniye Bazlı (Sec.)
+**Industrial Chronometer**, endüstriyel zaman ölçümü ve cycle time analizi için geliştirilmiş gelişmiş bir Android kronometre uygulamasıdır.
 
-Santidakika Bazlı (Cmin.)
+### 🎯 Temel Özellikler
+- **Çoklu Zaman Birimleri**: Saniye, Santidakika, Desimdakika
+- **Cycle Time Analizi**: Lap kayıtları ve istatistiksel analiz
+- **Veri Dışa Aktarma**: Excel formatında raporlama
+- **Grafiksel Gösterim**: Real-time performans grafikleri
+- **Widget Desteği**: Ana ekrandan hızlı erişim
+- **Arka Plan Çalışması**: Foreground service ile sürekli zaman ölçümü
 
-Desimdakika Bazlı (Dmh.)
+## 🏗️ MİMARİ YAPI
 
-Güvenilir Arka Plan Çalışması: Android'in Foreground Service yapısı sayesinde uygulama arkaplanda veya ekran kapalıyken bile kesintisiz ve hassas ölçüm yapar.
+### Teknoloji Yığını
+- **Dil**: Java
+- **Mimari**: MVVM + Fragments
+- **Veri Paylaşımı**: ViewModel + LiveData
+- **Servis**: Foreground Service
+- **Veritabanı**: SharedPreferences + File Storage
 
-Detaylı Tur (Lap) Kaydı: Her tur için ayrıntılı zamanlama bilgisi kaydedilir.
+### Modül Yapısı
+```
+app/
+├── MainActivity (Ana kontrolör)
+├── TimerFragment (Zaman ölçüm ekranı)
+├── ChartFragment (Grafik analiz)
+├── FileList (Dosya yönetimi)
+├── ChronometerService (Arka plan servisi)
+├── PageViewModel (Veri paylaşımı)
+└── CustomAlertDialogFragment (Özel diyaloglar)
+```
 
-Veri Yönetimi ve Analizi:
+## 📄 KRİTİK SINIF DOKÜMANTASYONU
 
-Turların minimum, maksimum ve ortalama süreleri (PageViewModel tarafından) hesaplanır.
+### 1. MainActivity.java
 
-Veriler bir grafik görünümünde (ChartFragment) görselleştirilir.
+#### 📋 Sınıf Tanımı
+Uygulamanın ana aktivitesi, navigation drawer ve tab yapısını yönetir.
 
-Kayıtlı veriler (tur listeleri) dosya olarak saklanır (FileList).
+#### 🔧 Temel Değişkenler
+```java
+public DrawerLayout drawer; // Navigation drawer
+public Boolean isResetDone; // Reset durumu kontrolü
+private ChronoState currentState = ChronoState.STOPPED; // Kronometre durumu
+private AdView adView; // Reklam banner
+boolean auth; // Lap yetkilendirmesi
+```
 
-Esnek Kullanıcı Arayüzü: ViewPager ve TabLayout ile kronometre, grafik ve dosya listesi arasında kolay geçiş.
+#### 🎯 Önemli Metodlar
 
-Veri Dışa Aktarımı: Kaydedilen verilerin dışa aktarılmasına (örneğin Excel'e) olanak tanır (ExcelSave sınıfı).
+**onCreate()**
+- Uygulama başlangıç konfigürasyonu
+- İzin kontrolleri ve temel setup
 
-Bildirim Entegrasyonu: Çalışma durumu, devam eden bildirim (Notification) aracılığıyla anlık olarak takip edilebilir ve kontrol edilebilir (Durdur/Başlat).
+**initializeApp()**
+- Uygulama bileşenlerinin başlatılması
+- Theme ve reklam sisteminin aktivasyonu
 
-Not Ekleme: Her bir tura özel notlar eklenebilir.
+**setupAppContent()**
+- ViewPager ve Fragment'ların oluşturulması
+- Navigation drawer yapılandırması
 
-💻 Kullanılan Teknolojiler
-Kategori	Teknoloji / Bileşen	Açıklama
-Platform	Android SDK	Uygulamanın temel geliştirme ortamı.
-Dil	Java	Projenin ana programlama dili.
-Mimari	MVVM Prensibi	Veri yönetimi için ViewModel ve LiveData kullanılır (PageViewModel).
-Arkaplan	Foreground Service (ChronometerService)	Kronometrenin kesintisiz çalışması ve 5 saniye kuralına uyum.
-İletişim	Local Broadcast Manager	Servis (ChronometerService) ve UI (TimerFragment) arasındaki veri akışı.
-UI	View Pager, Tab Layout, Fragment	Sekmeli ve kaydırılabilir arayüz yapısı.
-Arayüz	View Binding (FragmentTimerBinding, LaprowsBinding)	View'lara daha güvenli erişim.
-Hata Yönetimi	Handler ve Runnable	Zamanlayıcı ve UI Thread güvenliği için kullanılır.
-Ek	AdMob	Reklam entegrasyonu (MainActivity'de belirtilmiştir).
-🚀 Kurulum ve Çalıştırma
-Geliştirme ortamınızda projeyi ayağa kaldırmak için aşağıdaki adımları takip edin:
+**checkAndRequestAllPermissions()**
+- Depolama ve bildirim izinlerinin yönetimi
 
-Projeyi Klonlayın:
+#### ⚠️ Dikkat Edilmesi Gerekenler
+- `onBackPressed()` override edilmiş - uygulama arka plana atılıyor
+- `dispatchKeyEvent()` ile volume tuşları kronometre kontrolü için kullanılıyor
 
-Bash
-git clone [repo_adresi]
-Android Studio'da Açın: Proje klasörünü Android Studio'da açın.
+### 2. TimerFragment.java
 
-SDK Gereksinimleri: Projenin gerektirdiği minimum ve hedef SDK versiyonlarının kurulu olduğundan emin olun.
+#### 📋 Sınıf Tanımı
+Zaman ölçümü ve lap yönetiminin yapıldığı ana fragment.
 
-Derleme: Projeyi derleyin ve bir emülatör veya fiziksel cihaza yükleyin.
+#### 🔧 Temel Değişkenler
+```java
+public String Timeunit; // Seçilen zaman birimi
+public int modul; // Zaman hesaplama modülü
+public int milis; // Milisaniye çarpanı
+private long lastKnownElapsedTime = 0L; // Servisten gelen zaman
+ArrayList<Lap> lapsArray = new ArrayList<>(); // Lap kayıtları
+boolean Auth; // Kronometre çalışma durumu
+```
 
-🛠️ Temel Proje Yapısı
-Dosya Adı	Açıklama
-TimerFragment.java	Kronometre ekranı, başlatma/durdurma mantığı ve lap listesi.
-ChronometerService.java	Arka plan zamanlama mantığını yöneten temel hizmet sınıfı. Foreground Service burada tanımlanır.
-PageViewModel.java	Fragmentlar arası veri paylaşımı ve grafik/istatistik verilerini tutar (Min/Max/Avg/Lap değerleri).
-Constants.java	Uygulama genelinde kullanılan Action, Extra ve Bildirim sabitlerini barındırır.
-Lap.java / LapListAdapter.java	Tur verileri (lap) modeli ve RecyclerView adaptörü.
-FileList.java	Kaydedilen Excel/CSV dosyalarını yönetme ekranı.
-CustomAlertDialogFragment.java	Reset, Save ve Not Ekleme gibi özel diyalog pencerelerini yönetir.
-👨‍💻 Katkıda Bulunma
-Bu projeye katkıda bulunmaktan memnuniyet duyarım! Lütfen herhangi bir hata bildirimi veya özellik önerisi için bir Issue açın veya bir Pull Request gönderin.
+#### 🎯 Önemli Metodlar
 
+**start()**
+- Kronometreyi başlatır
+- Foreground service'i tetikler
+
+**stop()**
+- Kronometreyi durdurur
+- Servisi sonlandırır
+
+**takeLap()**
+- Mevcut zamanı lap olarak kaydeder
+- İstatistikleri günceller
+
+**resetAll()**
+- Tüm verileri sıfırlar
+- UI'ı başlangıç durumuna getirir
+
+#### ⚠️ Kritik Noktalar
+- Zaman birimine göre farklı hesaplama algoritmaları mevcut
+- Broadcast receiver'lar ile servis-Fragment iletişimi sağlanıyor
+
+### 3. ChronometerService.java
+
+#### 📋 Sınıf Tanımı
+Arka planda zaman ölçümünü sürdüren foreground service.
+
+#### 🔧 Temel Değişkenler
+```java
+private Handler handler; // Zaman güncelleme handler'ı
+private long startTime = 0L; // Başlangıç zamanı
+private long elapsedTime = 0L; // Geçen süre
+private boolean isRunning = false; // Çalışma durumu
+private boolean isPaused = false; // Duraklatma durumu
+```
+
+#### 🎯 Önemli Metodlar
+
+**startTimer()**
+- Zaman güncelleme runnable'ını başlatır
+- Her 10ms'de bir UI ve bildirimi günceller
+
+**pauseChronometer()**
+- Kronometreyi duraklatır
+- Geçen süreyi kaydeder
+
+**resumeChronometer()**
+- Duraklatılmış kronometreyi devam ettirir
+
+**buildNotification()**
+- Özel notification layout'u oluşturur
+
+### 4. PageViewModel.java
+
+#### 📋 Sınıf Tanımı
+Fragment'lar arası veri paylaşımını sağlayan ViewModel.
+
+#### 🔧 LiveData Değişkenleri
+```java
+MutableLiveData<Integer> mIndex; // Lap sayısı
+MutableLiveData<Float> mTimeValue; // Lap değeri
+MutableLiveData<String> mTimerValue; // Kronometre değeri
+MutableLiveData<ArrayList<Lap>> lapsForChart; // Grafik verisi
+```
+
+## 🔧 TEKNİK DETAYLAR
+
+### Zaman Birimi Sistemleri
+
+#### 1. Saniye (Sec.)
+- **Modül**: 60
+- **Milisaniye**: 1000
+- **Format**: HH:MM:SS.MMM
+
+#### 2. Santidakika (Cmin.)
+- **Modül**: 100
+- **Milisaniye**: 600
+- **Format**: HH:MM:CC
+- **1 Cmin** = 0.01 dakika = 600ms
+
+#### 3. Desimdakika (Dmh.)
+- **Modül**: 166
+- **Milisaniye**: 360
+- **Format**: HH:DD:CC
+- **1 Dmh** = 0.001 dakika = 360ms
+
+### Veri Akışı Diyagramı
+
+```
+TimerFragment → ChronometerService → Broadcast → TimerFragment/ChartFragment
+     ↓
+PageViewModel (Veri Paylaşımı)
+     ↓
+ChartFragment/FileList
+```
+
+## 🛠️ KURULUM VE YAPILANDIRMA
+
+### Gereksinimler
+- **Minimum SDK**: API 21 (Android 5.0)
+- **Target SDK**: API 34 (Android 14)
+- **Gerekli İzinler**:
+  - `WRITE_EXTERNAL_STORAGE` (API 32 ve altı)
+  - `POST_NOTIFICATIONS` (API 33 ve üstü)
+  - `FOREGROUND_SERVICE`
+
+### Build Konfigürasyonu
+```gradle
+android {
+    compileSdk 34
+    defaultConfig {
+        applicationId "com.lszlp.choronometre"
+        minSdk 21
+        targetSdk 34
+    }
+}
+```
+
+## 🚨 TEST STRATEJİSİ
+
+### Birim Testleri
+- ViewModel state management
+- Zaman hesaplama algoritmaları
+- Lap istatistik hesaplamaları
+
+### Entegrasyon Testleri
+- Fragment-Service iletişimi
+- Broadcast receiver senaryoları
+- File I/O operasyonları
+
+### UI Testleri
+- Kronometre kontrol akışları
+- Navigation ve tab geçişleri
+- Dialog interaksiyonları
+
+## 🔄 GÜNCELLEME REHBERİ
+
+### API Seviyesi Güncellemeleri
+1. **Android 10+ (API 29)**: Scoped Storage adaptasyonu
+2. **Android 12+ (API 31)**: PendingIntent flags güncellemesi
+3. **Android 13+ (API 33)**: Bildirim izni yönetimi
+
+### Kritik Güncelleme Noktaları
+
+#### 1. Foreground Service Yönetimi
+```java
+// Android 8.0+ için foreground service başlatma
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    requireContext().startForegroundService(serviceIntent);
+}
+```
+
+#### 2. Bildirim Kanalı Yönetimi
+```java
+// Android 8.0+ için notification channel
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    NotificationChannel channel = new NotificationChannel(
+        Constants.CHANNEL_ID,
+        "Kronometre Servisi",
+        NotificationManager.IMPORTANCE_LOW
+    );
+}
+```
+
+#### 3. Dosya Erişim Yönetimi
+```java
+// Android 10+ için MediaStore kullanımı
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+    ContentValues contentValues = new ContentValues();
+    contentValues.put(MediaStore.Downloads.RELATIVE_PATH, 
+        Environment.DIRECTORY_DOWNLOADS + "/IndustrialChronometer");
+}
+```
+
+### Güvenlik Güncellemeleri
+- **FileProvider**: Dosya paylaşımı için güvenli yöntem
+- **PendingIntent Flags**: IMMUTABLE flag kullanımı
+- **Broadcast Export**: Receiver'ların export kontrolü
+
+## 📊 PERFORMANS OPTİMİZASYONU
+
+### Memory Yönetimi
+- View binding kullanımı
+- Broadcast receiver'ların doğru lifecycle yönetimi
+- Handler ve Runnable'ların temizlenmesi
+
+### Battery Optimizasyonu
+- Foreground service doğru kullanımı
+- WakeLock sınırlı kullanım
+- Background işlemlerin optimize edilmesi
+
+## 🐛 BİLİNEN SORUNLAR VE ÇÖZÜMLER
+
+### 1. Servis-Fragment Senkronizasyonu
+**Sorun**: Uygulama arka plana alındığında zaman senkronizasyonu kaybolabiliyor.
+
+**Çözüm**: `ACTION_REQUEST_STATUS` mekanizması ile durum senkronizasyonu.
+
+### 2. Memory Leaks
+**Sorun**: Broadcast receiver kayıtlarının temizlenmemesi.
+
+**Çözüm**: 
+```java
+@Override
+public void onDestroy() {
+    super.onDestroy();
+    LocalBroadcastManager.getInstance(requireContext())
+        .unregisterReceiver(timeUpdateReceiver);
+}
+```
+
+### 3. UI Thread Bloklama
+**Sorun**: Zaman hesaplamalarının UI thread'ini bloklaması.
+
+**Çözüm**: Handler ve Runnable kullanımı ile arka planda hesaplama.
+
+## 🔮 GELİŞTİRME ÖNERİLERİ
+
+### Kısa Vadeli
+- [ ] ViewModel test coverage artırımı
+- [ ] Error handling iyileştirmeleri
+- [ ] Memory leak detection implementasyonu
+
+### Orta Vadeli
+- [ ] Room database entegrasyonu
+- [ ] WorkManager ile background processing
+- [ ] Jetpack Compose migrasyon planı
+
+### Uzun Vadeli
+- [ ] Multi-module architecture
+- [ ] Dynamic feature modules
+- [ ] Cloud sync ve backup özellikleri
+
+---
+
+**Doküman Versiyonu**: 1.1  
+**Son Güncelleme**: 2025 (C) LsZLP 
