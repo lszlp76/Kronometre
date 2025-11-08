@@ -50,9 +50,11 @@ public class TimerFragment extends Fragment {
     private final Handler uiHandler = new Handler(Looper.getMainLooper()); // UI Thread Handler'ı
     private static final long REQUEST_DELAY_MS = 100; // 100 milisaniye gecikme
     private FragmentTimerBinding _binding;
+
     private FragmentTimerBinding getBinding() {
         return _binding;
     }
+
     private BroadcastReceiver timeUpdateReceiver;
     SpannableString spannableString;
     TextView maxvalue, minvalue, totalObservationTime, cycPerHour, cycPerMinute;
@@ -63,7 +65,7 @@ public class TimerFragment extends Fragment {
     ArrayList<Lap> lapsArray = new ArrayList<>();
     ArrayList<Lap> ListElementsArrayList;
     LapListAdapter lapListAdapter;
-// TimerFragment.java (Sınıf değişkenleri arasına ekleyin)
+    // TimerFragment.java (Sınıf değişkenleri arasına ekleyin)
     private BroadcastReceiver precisionUpdateReceiver;
     private boolean isServicePaused = false; // statusResponseReceiver içinde kullanıldığı için eklenmeli/kontrol edilmeli
     // YENİ: Servisten gelen durum (zaman ve çalışma/duraklatma) yanıtlarını dinler
@@ -86,7 +88,8 @@ public class TimerFragment extends Fragment {
 
                 // 3. UI'ı GÜNCELLE
                 updateTimeDisplay(lastKnownElapsedTime); // Bu metot, TextView'i güncelleyen metottur.
-                updateButtonStates();; // Bu metot, butonu başlat/duraklat durumuna göre günceller.
+                updateButtonStates();
+                ; // Bu metot, butonu başlat/duraklat durumuna göre günceller.
 
                 // 4. KRİTİK: Eğer Servis ÇALIŞIYOR ise, Fragment da zaman güncellemelerini almaya devam etmeli.
                 if (isRunning) {
@@ -106,7 +109,7 @@ public class TimerFragment extends Fragment {
 
     //BUNU tekrar kullan
 
-//    private BroadcastReceiver statusResponseReceiver = new BroadcastReceiver() {
+    //    private BroadcastReceiver statusResponseReceiver = new BroadcastReceiver() {
 //        @Override
 //        public void onReceive(Context context, Intent intent) {
 //            if (intent.getAction().equals(Constants.ACTION_STATUS_RESPONSE)) {
@@ -145,8 +148,6 @@ public class TimerFragment extends Fragment {
     }
 
 
-
-
     public void setUnitDisplay(String unitValue) {
         FragmentTimerBinding currentBinding = getBinding();
 
@@ -164,6 +165,7 @@ public class TimerFragment extends Fragment {
         // bu nedenle buradaki TextView adının "unitValue" olduğunu varsayıyoruz.
         currentBinding.unitValue.setText(unitValue);
     }
+
     /*Timer düzeltme için
     Runnable runnable;
     Handler handler;
@@ -205,7 +207,6 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     List<String> saveValue;
 
 
-
     String currentDateandTimeStop;
     String currentDateandTimeStart;
     Date timeStop, timeStart;
@@ -215,9 +216,11 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     private String m_Text = "";
     private TextView avevalue;
     private long lastKnownElapsedTime = 0L; // Servisten gelen son zamanı burada tutacağız
+
     public static TimerFragment newInstance() {
         return new TimerFragment();
     }
+
     private String currentDecimalFormatPattern = "#0.0"; // Varsayılan: 1 ondalık
 
     // State'leri kaydet
@@ -233,6 +236,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
 
     }
+
     // Fragment ön plana geldiğinde (arka plandan geri dönme dahil)
     @Override
     public void onResume() {
@@ -261,7 +265,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         // 2. KRİTİK: Servisten mevcut durumu ve zamanı talep et
         // Bu, uygulamanın ön plana geldiğinde zamanın hemen güncellenmesini sağlar.
         requestCurrentStatus();
-        Log.d("TimerFragment","onResume çalıştı");
+        Log.d("TimerFragment", "onResume çalıştı");
 // KRİTİK DÜZELTME: Durum isteğini küçük bir gecikmeyle gönder.
         // Bu, alıcıların tamamen kaydedildiğinden emin olmak için bir yarış koşulu düzeltmesidir.
         uiHandler.postDelayed(this::requestCurrentStatus, REQUEST_DELAY_MS);
@@ -269,6 +273,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         Log.d("TimerFragment", "onResume: Alıcılar kaydedildi, durum isteği " + REQUEST_DELAY_MS + "ms sonra gönderilecek.");
         // Not: Mevcut zaman güncelleme alıcınızın (timeUpdateReceiver) da burada kaydedildiğinden emin olun!
     }
+
     // requestCurrentStatus() metodunuzun da var ve doğru çalıştığından emin olun.
 // Eğer yoksa, bu metodu ekleyin:
     private void requestCurrentStatus() {
@@ -283,6 +288,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             Log.d("TimerFragment", "requestCurrentStatus: Durum isteği Servise gönderildi.");
         }
     }
+
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
@@ -327,6 +333,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             button4.setEnabled(false);
         }
     }
+
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -404,12 +411,14 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 filter
         );
     }
+
     // BU METODU EKLEYİN (Binding'i temizlemek için KRİTİK!)
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         _binding = null; // View yok edildiğinde binding'i temizle
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -454,6 +463,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
         currentBinding.textView.setText(spannableString);
     }
+
     // TimerFragment.java'ya bu yeni formatlama metodunu ekleyin
     private String formatTimeAccordingToUnit(long elapsedMillis) {
         long totalMinutes, totalSeconds;
@@ -493,12 +503,12 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         }
         return result;
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         // Başlangıçta format desenini yükle
         currentDecimalFormatPattern = getDecimalFormatPattern();
-
 
 
         _binding = FragmentTimerBinding.inflate(getLayoutInflater()); // Atamayı buraya yapın
@@ -560,7 +570,15 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 showNoteDialog(position);
             }
         });
+        lapListAdapter.setOnItemLongClickListener(new LapListAdapter.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(int position) {
+                showLapDeleteRowDialog(position);
+
+            }
+        });
     }
+
 
     private void setupClickListeners() {
         Log.d("ModulCheck", "Mevcut Modul Değeri: " + modul); // YENİ SATIR
@@ -584,13 +602,23 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             }
         });
 
-        button4.setOnClickListener(v -> reset());
+
+        button4.setOnClickListener(v -> resetAll());
         button3.setOnClickListener(v -> takeLap());
     }
 
     // ================================================================
     // DEĞİŞEN METOT: showNoteDialog
     // ================================================================
+    private void showLapDeleteRowDialog(int position) {
+        if (getActivity() == null) return;
+ Lap selectedLap = ListElementsArrayList.get(position);
+
+        int lapNumberToPass = selectedLap.lapsayisi;
+  CustomAlertDialogFragment dialog = CustomAlertDialogFragment.newInstanceForLapDelete(position, lapNumberToPass);
+        dialog.show(requireActivity().getSupportFragmentManager(), "DELETE_LAP_DIALOG_TAG");
+    }
+
     private void showNoteDialog(int position) {
         if (getActivity() == null) return;
         if (getActivity() instanceof MainActivity) {
@@ -616,9 +644,11 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 // ================================================================
     // YENİ METOT: updateNoteForLap (MainActivity tarafından çağrılır)
     // ================================================================
+
     /**
      * CustomAlertDialogFragment'tan gelen veriyi işler ve notu günceller.
-     * @param position RecyclerView'daki öğenin pozisyonu.
+     *
+     * @param position    RecyclerView'daki öğenin pozisyonu.
      * @param newNoteText Kullanıcının girdiği yeni not.
      */
     public void updateNoteForLap(int position, String newNoteText) {
@@ -683,9 +713,11 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         updateStatistics();
 
         m_Text = "";
-        ;
         lapValue = new Lap(newDec.format(delta) + " ", lap, lapsayisi + 1, m_Text);
-        lapsArray.add(lapsayisi, lapValue);
+        lapsArray.add(0, lapValue);             // Düzeltildi: Artık bu da başa ekliyor.
+
+        // lapsArray.add(lapsayisi, lapValue);
+        System.out.println("LapsArray içindeki Lap : "+ lapsArray.get(lapsayisi).lap +" Lap numarası :" +lapsArray.get(lapsayisi).lapsayisi);
         ListElementsArrayList.add(0, lapValue);
 
         updateDisplay();
@@ -701,6 +733,10 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         }
 
         lapListAdapter.notifyDataSetChanged();
+        // takeLap() fonksiyonunun sonuna ekleyin
+        // *** YENİ EKLENEN SATIR ***
+        // ViewModel'i güncelleyerek ChartFragment'ı tetikle
+        pageViewModel.updateLapsForChart(lapsArray);
     }
 
 
@@ -753,6 +789,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 return (long) (unitValue * 1000);
         }
     }
+
     private void updateStatistics() {
         if (lapsval.isEmpty()) return;
 
@@ -780,18 +817,19 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     }
 
     private double calculateCycPerMinute(double ave) {
-        return (1 / ave)*modul;
+        return (1 / ave) * modul;
     }
 
     private double calculateCycPerHour(double ave) {
-        return (60 / ave)*modul;
+        return (60 / ave) * modul;
     }
+
     public void save(String fileName) {
         if (getActivity() == null) return;
 
         if (Auth) {
             excelSave.save(getActivity(), unit, laps, lapsval, ave, modul, diffTime,
-                    calculateCycPerHour(ave), calculateCycPerMinute(ave), lapsArray,fileName);
+                    calculateCycPerHour(ave), calculateCycPerMinute(ave), lapsArray, fileName);
         } else {
             Toast.makeText(getContext(), "Chrono is running!", Toast.LENGTH_SHORT).show();
         }
@@ -989,12 +1027,13 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             }
         }
     }
+
     // TimerFragment.java içinde yeni eklemeniz gereken metot
     private String formatTime(long elapsedMillis) {
 // Zaman biriminin saniye (Constants.TIME_UNIT_SECONDS) olduğundan emin olun
         // Cmin ve Dmin için farklı formatlar kullanılıyorsa, o mantık korunmalıdır.
         //Timer sayacı uygun birime göre düzenliyor
-        if (unit != null){
+        if (unit != null) {
             int hours, minutes, seconds, subUnit;
             String result;
 
@@ -1030,8 +1069,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                     break;
             }
             return result;
-        }
-        else {
+        } else {
             return "00:00:00.000";
         }
     }
@@ -1187,6 +1225,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
         }
     }
+
     // YENİ METOT: Servisi duraklatmak için kullanılır
     public void pause() {
         Auth = true; // Durumu "çalışmıyor" (duraklatıldı) olarak ayarla
@@ -1213,6 +1252,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         // Not: getStartTime() burada çağrılmaz, çünkü gözlem süresi
         // ilk başta başladı. Servis kendi zamanını tutuyor.
     }
+
     // Fragment arka plana gittiğinde (başka bir aktiviteye geçiş veya HOME tuşu)
     @Override
     public void onPause() {
@@ -1222,10 +1262,11 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
         if (isAdded()) {
             // 1. Alıcıları KAYITTAN SİL (Çok önemli, her zaman burada yapılmalı)
-                LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timeUpdateReceiver);
-                LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timeUpdateReceiver);
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
         } //cut zaman güncelleme alıcınızın da burada kayıttan silindiğinden emin olun!
     }
+
     public String getDecimalFormatPattern() {
         // SharedPreferences'ı oku
         // Fragment'ın bir Context'e bağlı olup olmadığını kontrol et
@@ -1239,7 +1280,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         // Constants'tan tanımladığımız anahtar ve varsayılan değeri kullan
         int decimalCount = prefs.getInt(Constants.PREF_DECIMAL_PLACES, Constants.DEFAULT_DECIMAL_PLACES);
         // DecimalFormat desenini oluştur
-        Log.d("TimerFragment","Shared Prefdeki değer "+ decimalCount);
+        Log.d("TimerFragment", "Shared Prefdeki değer " + decimalCount);
         switch (decimalCount) {
             case 0:
                 return "#0";   // Slider 0: 0 ondalık
@@ -1251,6 +1292,124 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 return "#0.000"; // Slider 3: 3 ondalık
             default:
                 return "#0.0"; // Güvenlik
+        }
+    }
+
+    public void deleteLap(int position, int lapNumber) {
+        // Geçersiz bir pozisyon için işlem yapmayı engelle
+        if (ListElementsArrayList == null || position < 0 || position >= ListElementsArrayList.size()) {
+            Log.e("DeleteLap", "Geçersiz pozisyon: " + position);
+            return;
+        }
+
+        // 1. Öğeyi tüm veri kaynaklarından SADECE 'position' kullanarak sil
+        Log.d("DeleteLap", "Pozisyon " + position + "'daki tur siliniyor.");
+        ListElementsArrayList.remove(position);
+        lapsArray.remove(position);
+        laps.remove(position);
+        lapsval.remove(position);
+
+        // 2. Toplam tur sayısını (lapsayisi) ListElementArraylist in boyut kadar olacak yeni durumda
+        lapsayisi = ListElementsArrayList.size();
+
+        // 3. Silme işleminden sonra RecyclerView'daki tur numaralarını yeniden düzenle
+        reorderLapNumbers();
+
+        // 4. İstatistikleri (min, max, ortalama) yeniden hesapla ve UI'ı güncelle
+        updateStatisticsAndDisplay();
+
+        // 5. RecyclerView'a değişiklikleri bildir
+        // notifyDataSetChanged() burada en güvenli yöntemdir çünkü hem silme
+        // hem de kalan tüm öğelerin içeriği (tur numaraları) değişti.
+        if (lapListAdapter != null) {
+            lapListAdapter.notifyDataSetChanged();
+        }
+        // *** YENİ EKLENEN SATIR ***
+        // ViewModel'i güncelleyerek ChartFragment'ı tetikle
+        pageViewModel.updateLapsForChart(lapsArray);
+    }
+        /**
+         * Tur silindikten sonra kalan turların numaralarını (1'den başlayarak) yeniden düzenler.
+         * RecyclerView'daki listenin ters sıralı olduğunu varsayar (yeni turlar üstte).
+         */
+        private void reorderLapNumbers() {
+            // ListElementsArrayList, RecyclerView'da görünen ve ters sıralı olan listedir.
+            // Listenin boyutu, kalan toplam tur sayısıdır (yeni lapsayisi).
+            int currentLapCount = lapsayisi;
+            for (int i = 0; i < ListElementsArrayList.size(); i++) {
+                // En üstteki öğe (i=0) en son turdur ve en yüksek numaraya sahip olmalıdır.
+                Lap lapItem = ListElementsArrayList.get(i);
+                lapItem.lapsayisi = currentLapCount - i;
+
+                // lapsArray'in de aynı sırada olduğunu varsayarak onu da güncelleyelim.
+                // Eğer sıraları farklıysa, burada daha karmaşık bir eşleştirme gerekir.
+                // Kodunuza göre sıraları aynı.
+                if (i < lapsArray.size()) {
+                    lapsArray.get(i).lapsayisi = currentLapCount - i;
+                }
+            }
+        }
+
+/**
+ * İstatistikleri yeniden hesaplar ve UI'daki (min, max, avg) değerleri günceller.
+ * updateStatistics() ve updateDisplay() metodlarını birleştirir.
+ */
+        private void updateStatisticsAndDisplay() {
+            if (lapsval.isEmpty()) {
+                // Hiç tur kalmadıysa, ekranı sıfırla
+                max = 0; min = 0; ave = 0;
+                lapnomin = 0; lapnomax = 0;
+
+                maxvalue.setText(departure); // 'departure' sizin varsayılan string'iniz
+                minvalue.setText(departure);
+                avevalue.setText(departure);
+                cycPerMinute.setText("");
+                cycPerHour.setText("");
+                return;
+            }
+
+            // İstatistikleri yeniden hesapla
+            updateStatistics(); // Bu sizin mevcut metodunuz, min/max/ave değişkenlerini doldurur
+
+            // Ekranı yeni istatistiklerle güncelle
+            updateDisplay(); // Bu da sizin mevcut metodunuz, TextView'leri doldurur
+        }
+// TimerFragment.java'da Reset Fonksiyonu (Örneğin, button4 için)
+
+    public void resetAll() {
+        // 1. Durdurma Servisini Durdur
+        reset(); // Bu metot zaten mevcut olmalı
+
+        // 2. Tüm Veri Yapılarını Temizle (KRİTİK DÜZELTME)
+        lapsArray.clear();
+        ListElementsArrayList.clear();
+        lapsval.clear();
+        laps.clear(); // Varsayılan String listesini de temizle
+
+        // Sayıcıları ve Durum Değişkenlerini Sıfırla
+        lapsayisi = 0;
+        lapnomax = 0;
+        lapnomin = 0;
+        lastKnownElapsedTime = 0L;
+        Auth = true; // Durum: Durdu (Çalışmıyor)
+
+        // 3. RecyclerView Adaptörünü Güncelle (KRİTİK DÜZELTME)
+        if (lapListAdapter != null) {
+            lapListAdapter.notifyDataSetChanged();
+        }
+
+        // 4. İstatistikleri ve UI'ı Güncelle (Min, Max, Avg, Toplam Gözlem Süresi)
+        updateStatisticsAndDisplay(); // Bu metot boş listeyi kontrol edip '---' göstermeli
+
+        // 5. Ana Zamanı ve Butonları Sıfırla
+        resetTimerUI(); // pageViewModel.setTimerValue("00:00:00.000") çağrılmalı
+        updateButtonStates(); // Butonları "START" durumuna geri döndür
+
+        // 6. PageViewModel'i Temizle (GRAFİK İÇİN KRİTİK DÜZELTME)
+        // ChartFragment'ın grafiği temizlemesini sağlamak için ViewModel'e boş bir liste gönderin.
+        if (pageViewModel != null) {
+            // ViewModel'in içindeki lap listesini boş bir liste ile güncelle.
+            pageViewModel.updateLapsForChart(new ArrayList<>());
         }
     }
 }

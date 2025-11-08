@@ -16,6 +16,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -54,6 +56,7 @@ import java.util.List;
 
 
 public class ChartFragment extends Fragment {
+
 
     LineChart lineChart;
     ArrayList<Entry> lineEntry, lapValue;
@@ -96,63 +99,334 @@ public class ChartFragment extends Fragment {
 
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        //grafik için değişkenlerin oluşturulması
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            tf = getResources().getFont(R.font.digital7);
-        }
-        lineChart = view.findViewById(R.id.chart);
+//    @Override
+//    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+//        //grafik için değişkenlerin oluşturulması
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            tf = getResources().getFont(R.font.digital7);
+//        }
+//        lineChart = view.findViewById(R.id.chart);
+//        lineChart.setNoDataTextTypeface(tf);
+//        lineChart.setNoDataTextColor(R.color.chartColor);
+//
+//        lineEntry = new ArrayList<>();
+//        lapValue = new ArrayList<>();
+//      //  chartTimer = view.findViewById(R.id.chartTimer);
+//        /*tAvgValue = new ArrayList<>();
+//        tMinValue = new ArrayList<>();
+//        tMaxValue = new ArrayList<>();*/
+//
+//           pageViewModel.getTimerValue().observe(requireActivity(), new Observer<String>() {
+//                @Override
+//                public void onChanged(String s) {
+//
+//                    ;
+//                 // displayFormattedTime(chartTimer,s);
+//                   // chartTimer.setText(s);
+//                  //  System.out.println("Chart timer value :" + s );
+//                }
+//            });;
+//
+//
+//
+//
+//        pageViewModel.getIndex().observe(requireActivity(), new Observer<Integer>() {
+//            @Override
+//            public void onChanged(Integer integer) {
+//                /*
+//                ama her seferinde lap tuşuna basınca lineENTRY dizisine eklemesi lazım
+//                */
+//                ;
+//
+//                DrawChart();
+//            }
+//        });
+//        // --- YENİ EKLENEN KISIM ---
+//        // Tur verisi değiştiğinde (silindiğinde) tetiklenecek gözlemciyi ayarlayın.
+//        pageViewModel.getOnLapDataChanged().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+//            @Override
+//            public void onChanged(Boolean hasChanged) {
+//                // Sinyal geldiğinde...
+//                if (hasChanged != null && hasChanged) {
+//                    Log.d("ChartFragment", "Tur verisi değişti, grafik yeniden çiziliyor.");
+//
+//                    // Grafiği yeniden çizecek olan metodu burada çağırın.
+//                    // Bu metodun, güncel veri listesini (örneğin lapsval) alması gerekir.
+//                    // Bu veriyi ViewModel üzerinden veya başka bir paylaşılan kaynaktan alabilirsiniz.
+//                    // Örneğin, veriyi doğrudan alan bir metodunuz varsa:
+//                  redrawChart();
+//                }
+//            }
+//        });
+//
+//        //grafik için değişkenlerin oluşturulması
+//        //1-Grafik tipini tanıt
+//        //lineChart.invalidate();
+//        //2- *** X değerleri***/
+//        //3 ***Y değerleri ***/
+//
+//        //4
+//        //lineDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
+//
+//        //5
+//        //6
+//
+//
+//    }
+@Override
+public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+    super.onViewCreated(view, savedInstanceState);
+
+    // Grafik bileşenini ve temel ayarları yap
+    lineChart = view.findViewById(R.id.chart);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        tf = getResources().getFont(R.font.digital7);
         lineChart.setNoDataTextTypeface(tf);
-        lineChart.setNoDataTextColor(R.color.chartColor);
-
-        lineEntry = new ArrayList<>();
-        lapValue = new ArrayList<>();
-      //  chartTimer = view.findViewById(R.id.chartTimer);
-        /*tAvgValue = new ArrayList<>();
-        tMinValue = new ArrayList<>();
-        tMaxValue = new ArrayList<>();*/
-
-           pageViewModel.getTimerValue().observe(requireActivity(), new Observer<String>() {
-                @Override
-                public void onChanged(String s) {
-
-                    ;
-                 // displayFormattedTime(chartTimer,s);
-                   // chartTimer.setText(s);
-                  //  System.out.println("Chart timer value :" + s );
-                }
-            });;
-
-
-
-
-        pageViewModel.getIndex().observe(requireActivity(), new Observer<Integer>() {
-            @Override
-            public void onChanged(Integer integer) {
-                /*
-                ama her seferinde lap tuşuna basınca lineENTRY dizisine eklemesi lazım
-                */
-                ;
-
-                DrawChart();
-            }
-        });
-
-        //grafik için değişkenlerin oluşturulması
-        //1-Grafik tipini tanıt
-        //lineChart.invalidate();
-        //2- *** X değerleri***/
-        //3 ***Y değerleri ***/
-
-        //4
-        //lineDataSet.setAxisDependency(YAxis.AxisDependency.LEFT);
-
-        //5
-        //6
-
-
     }
+    lineChart.setNoDataTextColor(ContextCompat.getColor(getContext(), R.color.chartColor));
+    lineChart.setNoDataText("Henüz tur verisi yok.");
+
+    // ViewModel'den gelen ve tur listesini temsil eden LiveData'yı gözlemle.
+    // Bu, hem yeni tur eklendiğinde hem de bir tur silindiğinde grafiğin güncellenmesini sağlar.
+    pageViewModel.getLapsForChart().observe(getViewLifecycleOwner(), new Observer<ArrayList<Lap>>() {
+        @Override
+        public void onChanged(ArrayList<Lap> laps) {
+            // LiveData her değiştiğinde (ekleme/silme), grafiği bu yeni listeyle çiz.
+            if (laps != null) {
+                Log.d("ChartFragment", "LiveData değişti. " + laps.size() + " adet tur ile grafik çiziliyor.");
+                drawChartWithLaps(laps);
+            }
+        }
+    });
+}
+    /**
+     * Verilen tur listesine (laps) göre grafiği temizler ve yeniden çizer.
+     * Bu metod, hem yeni tur eklendiğinde hem de bir tur silindiğinde çağrılır.
+     * @param laps Grafik için kullanılacak güncel Lap listesi.
+     */
+    private void drawChartWithLaps(ArrayList<Lap> laps) {
+        // Eğer liste boşsa, grafiği temizle ve işlemi bitir.
+        // KRİTİK KONTROL: Eğer liste boşsa, grafiği temizle ve çık.
+        if (laps == null || laps.isEmpty()) {
+            lineChart.setData(null); // Grafik verisini temizle
+            lineChart.clear();       // Grafiği görsel olarak sıfırla
+            lineChart.invalidate();  // UI'ı güncelle
+            lineChart.setNoDataText("Henüz tur verisi yok."); // Varsayılan mesajı göster
+            return;
+        }
+
+        // 1. Grafik için 'Entry' listesini oluştur
+        // Gelen 'laps' listesi ViewModel tarafından zaten doğru sırada (1, 2, 3...) gönderiliyor.
+        ArrayList<Entry> entries = new ArrayList<>();
+        for (Lap lap : laps) {
+            try {
+                // "12.34 sn" gibi bir string'den sadece sayısal değeri al
+                String numericString = lap.unit.replaceAll("[^\\d.]", "");
+                float value = Float.parseFloat(numericString);
+                entries.add(new Entry(lap.lapsayisi, value));
+            } catch (NumberFormatException e) {
+                Log.e("ChartFragment", "Tur verisi ('" + lap.unit + "') parse edilirken hata oluştu.", e);
+            }
+        }
+
+        // 2. LineDataSet oluştur ve biçimlendir
+        LineDataSet dataSet = new LineDataSet(entries, "Cycle Time"); // Grafik etiketi
+        dataSet.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        dataSet.setCircleColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+        dataSet.setLineWidth(2.5f);
+        dataSet.setCircleRadius(4.5f);
+        dataSet.setDrawCircleHole(false);
+        dataSet.setValueTextSize(12f);
+        dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER); // Çizgiyi daha yumuşak yapar
+        dataSet.setValueTypeface(tf); // Değerler için font
+
+        // 3. LineData oluştur ve grafiğe ata
+        LineData lineData = new LineData(dataSet);
+        lineChart.setData(lineData);
+
+        // 4. Grafik UI Ayarlarını Yapılandır
+        setupChartUI();
+
+        // 5. Ortalama, Min, Max çizgilerini (LimitLine) hesapla ve ekle
+        addLimitLines();
+
+        // 6. Grafiği ekranda yenile
+        lineChart.invalidate();
+        Log.d("ChartFragment", "Grafik başarıyla yeniden çizildi.");
+    }
+    /**
+     * Grafiğin eksenleri, açıklaması gibi genel UI ayarlarını yapar.
+     */
+    private void setupChartUI() {
+        // Açıklamayı (description) kaldır
+        Description description = new Description();
+        description.setText("");
+        lineChart.setDescription(description);
+
+        // Dokunma, sürükleme, yakınlaştırma ayarları
+        lineChart.setTouchEnabled(true);
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(true);
+        lineChart.setPinchZoom(true);
+
+        // X Ekseni Ayarları
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); // X ekseni altta olsun
+        xAxis.setTextColor(Color.WHITE);
+        xAxis.setGranularity(1f); // Adımlar arası en az 1 olsun (1, 2, 3...)
+        xAxis.setDrawGridLines(false); // Arka plan grid çizgilerini kapat
+        xAxis.setTypeface(tf);
+
+        // Sol Y Ekseni Ayarları
+        YAxis leftAxis = lineChart.getAxisLeft();
+        leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setAxisMinimum(0f); // Minimum değer 0'dan başlasın
+        leftAxis.setDrawGridLines(true);
+        leftAxis.setGridColor(Color.GRAY);
+        leftAxis.setTypeface(tf);
+
+        // Sağ Y Ekseni'ni kapat
+        lineChart.getAxisRight().setEnabled(false);
+
+        // Legend (Veri setlerinin isimleri) ayarları
+        lineChart.getLegend().setEnabled(false); // "Cycle Time" yazısını gizle
+    }
+
+
+    /**
+     * ViewModel'den Min, Max, Avg değerlerini alıp grafiğe LimitLine olarak ekler.
+     */
+    private void addLimitLines() {
+        YAxis leftAxis = lineChart.getAxisLeft();
+        // Önceki LimitLine'ları temizle
+        leftAxis.removeAllLimitLines();
+
+        Float tmax = pageViewModel.getMaxTimeValue().getValue();
+        Float tmin = pageViewModel.getMinTimeValue().getValue();
+        Float tave = pageViewModel.getAvgTimeValue().getValue();
+        timeUnit = pageViewModel.getTimeUnit(); // Zaman birimi "sn" vb.
+
+        if (tmax != null) {
+            LimitLine maxLine = new LimitLine(tmax, "Max: " + String.format(Locale.US, "%.2f", tmax) + " " + timeUnit);
+            maxLine.setLineColor(Color.RED);
+            maxLine.setLineWidth(1.5f);
+            maxLine.setTextColor(Color.WHITE);
+            maxLine.setTextSize(10f);
+            maxLine.setTypeface(tf);
+            leftAxis.addLimitLine(maxLine);
+        }
+
+        if (tmin != null) {
+            LimitLine minLine = new LimitLine(tmin, "Min: " + String.format(Locale.US, "%.2f", tmin) + " " + timeUnit);
+            minLine.setLineColor(Color.GREEN);
+            minLine.setLineWidth(1.5f);
+            minLine.setTextColor(Color.WHITE);
+            minLine.setTextSize(10f);
+            minLine.setTypeface(tf);
+            leftAxis.addLimitLine(minLine);
+        }
+
+        if (tave != null) {
+            LimitLine avgLine = new LimitLine(tave, "Avg: " + String.format(Locale.US, "%.2f", tave) + " " + timeUnit);
+            avgLine.setLineColor(Color.YELLOW);
+            avgLine.setLineWidth(1.5f);
+          //  avgLine.setTextStyle(LimitLine.LimitLabelPosition.LEFT_TOP);
+            avgLine.setTextColor(Color.WHITE);
+            avgLine.setTextSize(10f);
+            avgLine.setTypeface(tf);
+            leftAxis.addLimitLine(avgLine);
+        }
+    }
+
+
+    /**
+     * Grafiği tamamen temizler ve başlangıç durumuna getirir.
+     */
+    public void clearChart() {
+        lineChart.clear(); // Tüm veriyi, setleri ve limit line'ları siler
+        lineChart.invalidate(); // Grafiğin temizlendiğini ekranda gösterir
+        Log.d("ChartFragment", "Grafik temizlendi.");
+    }
+    // ChartFragment.java içine
+
+    /**
+     * Grafiği, TimerFragment'taki güncel lapsArray verisiyle yeniden çizer.
+     * Bu metot, bir tur silindikten sonra çağrılmak üzere tasarlanmıştır.
+     */
+//    private void redrawChart() {
+//        // 1. Mevcut grafik verilerini temizle
+//        // lineChart.clear() kullanmak eski LimitLine'ları da sileceği için
+//        // sadece data'yı temizlemek daha iyi bir yaklaşım olabilir.
+//        lineChart.getData().clearValues(); // Sadece veri setlerini temizler
+//        lineChart.invalidate(); // Grafiğin boşaldığını ekranda göster
+//
+//        // 2. TimerFragment'taki güncel tur listesini al
+//        // lapsArray statik olduğu için doğrudan erişebiliriz.
+//        ArrayList<Lap> currentLaps = TimerFragment.lapsArray;
+//
+//        // Eğer silme sonrası hiç tur kalmadıysa, işlemi bitir.
+//        if (currentLaps == null || currentLaps.isEmpty()) {
+//            Log.d("redrawChart", "Silme sonrası hiç tur kalmadı, grafik temizlendi.");
+//            return;
+//        }
+//
+//        // 3. Güncel tur listesini grafik için 'Entry' formatına dönüştür
+//        ArrayList<Entry> newEntries = new ArrayList<>();
+//        // lapsArray'in ters sıralı olduğunu unutma! (En son tur en başta)
+//        // Grafiğin doğru (1, 2, 3...) sırada çizilmesi için listeyi tersten okumalıyız.
+//        for (int i = currentLaps.size() - 1; i >= 0; i--) {
+//            Lap lap = currentLaps.get(i);
+//            try {
+//                // LapsArray'deki 'unit' alanı bir string ("12.34 sn" gibi).
+//                // Grafik için sadece sayısal kısmı almalıyız.
+//                String numericString = lap.unit.replaceAll("[^\\d.,]", "").replace(',', '.');
+//                float value = Float.parseFloat(numericString);
+//                int lapNumber = lap.lapsayisi;
+//                newEntries.add(new Entry(lapNumber, value));
+//            } catch (NumberFormatException e) {
+//                Log.e("redrawChart", "Tur verisi parse edilirken hata: " + lap.unit, e);
+//            }
+//        }
+//
+//        // 4. Yeni veri seti (LineDataSet) oluştur ve biçimlendir
+//        LineDataSet dataSet = new LineDataSet(newEntries, "Cycle Time"); // Etiket
+//        dataSet.setColor(Color.parseColor("#FF5722")); // Çizgi rengi (örnek)
+//        dataSet.setCircleColor(Color.parseColor("#FF5722")); // Noktaların rengi
+//        dataSet.setLineWidth(2f);
+//        dataSet.setCircleRadius(4f);
+//        dataSet.setValueTextSize(10f);
+//        dataSet.setValueTextColor(Color.WHITE);
+//        // Diğer biçimlendirme ayarlarını buraya ekleyebilirsiniz...
+//
+//        // 5. Yeni LineData oluştur ve grafiğe ata
+//        LineData lineData = new LineData(dataSet);
+//        lineChart.setData(lineData);
+//
+//        // 6. LimitLine'ları ve diğer UI elemanlarını yeniden ayarla
+//        // Ortalama, min, max gibi çizgiler de yeniden hesaplanmalı ve çizilmeli.
+//        // Bunun için DrawChart metodundaki LimitLine mantığını buraya taşıyabiliriz.
+//        // VEYA daha iyisi: DrawChart metodunu bu yeni veriyle çağırabiliriz.
+//        // Ancak DrawChart'ın kendisi de veri hazırladığı için çakışma olabilir.
+//        // Bu yüzden temel UI ayarlarını burada yapalım:
+//
+//        // X ve Y eksenlerini tekrar yapılandır
+//        XAxis xAxis = lineChart.getXAxis();
+//        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM); // X ekseni altta olsun
+//        xAxis.setTextColor(Color.WHITE);
+//        xAxis.setGranularity(1f); // Adım aralığı 1 olsun (1, 2, 3...)
+//
+//        YAxis leftAxis = lineChart.getAxisLeft();
+//        leftAxis.setTextColor(Color.WHITE);
+//
+//        lineChart.getAxisRight().setEnabled(false); // Sağ Y eksenini kapat
+//
+//        // 7. Grafiği ekranda yenile
+//        lineChart.invalidate();
+//
+//        Log.d("redrawChart", newEntries.size() + " adet güncel veri ile grafik yeniden çizildi.");
+//    }
+
     /**
      * Verilen zaman dizesini HH:mm:ss.SS formatında biçimlendirir,
      * son 4 rakamı (salise) daha küçük ve farklı renkte yapar.

@@ -1,7 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.Kronometre" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
+    <style name="Theme.Kronometre" parent="Theme.Material3.DayNight.NoActionBar">
+
+    <!-- Primary brand color. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -123,6 +124,14 @@
         <item name="android:textStyle">bold</item>
         <item name="android:tint">@color/elektrikturuncu</item>
 
+    </style>
+<!-- In res/values/styles.xml -->
+    <style name="ThemeOverlay.App.Switch" parent="">
+        <!-- This points to your custom color state list for the thumb -->
+        <item name="colorSwitchThumbNormal">@color/switch_thumb_selector</item>
+
+        <!-- For newer Material Components, this attribute is often used for the thumb's "on" color -->
+        <item name="colorControlActivated">@color/switch_thumb_selector</item>
     </style>
 
   </resources>

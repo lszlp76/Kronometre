@@ -328,6 +328,11 @@ public class FileList extends Fragment
 
     }
 
+    @Override
+    public void onDeleteLap(int position, int lapNumber) {
+
+    }
+
     // Bu Fragment'ta kullanılmayan metotlar boş bırakılabilir
     @Override
     public void onResetConfirmed() {

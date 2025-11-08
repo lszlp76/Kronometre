@@ -25,6 +25,9 @@ public class CustomAlertDialogFragment extends DialogFragment {
     private static final String ARG_POSITION = "position";
     private static final String ARG_LAP_NUMBER = "lapNumber"; // Bunu ekleyin
     private static final String ARG_NOTE_TEXT = "noteText";   // Bunu ekleyin
+    private static final String ARG_NOTE_LAP_ROW = "deleteLap"; // Bunu ekleyin
+
+
     // Sınıf Değişkenleri
     private CustomDialogListener listener;
     private ChronometerAction currentAction;
@@ -36,7 +39,8 @@ public class CustomAlertDialogFragment extends DialogFragment {
         RESET,
         SAVE,
         DELETE,
-        ADD_NOTE
+        ADD_NOTE,
+        DELETE_LAP
     }
 
     // Geri çağırma (Callback) arayüzü
@@ -46,6 +50,7 @@ public class CustomAlertDialogFragment extends DialogFragment {
         void onCancelled();
         void onDeleteConfirmed(int position, String fileName);
         void onNoteSaved(int position, int lapNumber, String noteText); // Bunu ekleyin
+        void onDeleteLap(int position, int lapNumber); // Bunu ekleyin
         // Not: onPositiveClick(String tag) ve onNegativeClick(String tag) metotları
         // daha spesifik metotlar (onResetConfirmed, onCancelled vb.) olduğu için
         // temizlik amacıyla kaldırılabilir. Eğer başka yerlerde kullanılıyorsa geri ekleyin.
@@ -92,6 +97,15 @@ public class CustomAlertDialogFragment extends DialogFragment {
         args.putInt(ARG_POSITION, position);
         args.putInt(ARG_LAP_NUMBER, lapNumber);
         args.putString(ARG_NOTE_TEXT, currentNote);
+        fragment.setArguments(args);
+        return fragment;
+    }
+    public static CustomAlertDialogFragment newInstanceForLapDelete (int position, int lapNumber) {
+        CustomAlertDialogFragment fragment = new CustomAlertDialogFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_ACTION, ChronometerAction.DELETE_LAP);
+        args.putInt(ARG_POSITION, position);
+        args.putInt(ARG_LAP_NUMBER, lapNumber);
         fragment.setArguments(args);
         return fragment;
     }
@@ -186,6 +200,12 @@ public class CustomAlertDialogFragment extends DialogFragment {
             fileNameInput.setText(currentNote); // Mevcut notu EditText'e ata
             fileNameInput.setVisibility(View.VISIBLE); // EditText'i göster
             btnPositive.setText("SAVE NOTE");
+        } else if (currentAction == ChronometerAction.DELETE_LAP) {
+            int lapNumber = getArguments().getInt(ARG_LAP_NUMBER);
+            titleView.setText("Delete Lap " + lapNumber);
+            messageView.setText("Are you sure you want to delete this lap?");
+            btnPositive.setText("DELETE");
+            fileNameInput.setVisibility(View.GONE);
         }
 
         // ==================================================
@@ -213,6 +233,10 @@ public class CustomAlertDialogFragment extends DialogFragment {
                 int lapNum = getArguments().getInt(ARG_LAP_NUMBER);
                 String noteText = fileNameInput.getText().toString();
                 listener.onNoteSaved(pos, lapNum, noteText);
+            }else if (currentAction == ChronometerAction.DELETE_LAP) {
+                int pos = getArguments().getInt(ARG_POSITION);
+                int lapNum = getArguments().getInt(ARG_LAP_NUMBER);
+                listener.onDeleteLap(pos, lapNum);
             }
             // Tüm başarılı işlemlerden sonra diyaloğu kapat
             dismiss();

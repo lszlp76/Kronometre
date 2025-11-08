@@ -14,7 +14,7 @@
                     android:checkable="true"
                     android:icon="@drawable/second"
                     android:title="Second"
-                    app:actionLayout="@layout/togglebutton"
+                    app:actionLayout="@layout/togglebuttonsec"
                     app:showAsAction="ifRoom" />
 
                 <item
@@ -41,8 +41,9 @@
                     android:id="@+id/screenSaver"
                     android:icon="@drawable/outline_screenshot_monitor_24"
                     android:title="@string/screenOn"
-                    app:actionLayout="@layout/togglebuttonscreen"
-                    app:showAsAction="always" />
+                    app:actionLayout="@layout/togglebuttonsec"
+                    app:showAsAction="always"
+                    app:theme="@style/ThemeOverlay.App.Switch"/>
                 <item
                     android:id="@+id/nav_save"
 

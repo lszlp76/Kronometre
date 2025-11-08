@@ -21,7 +21,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RatingBar;
-import android.widget.Switch;
 import android.widget.Toast;
 import com.google.android.gms.ads.AdView;
 import androidx.activity.OnBackPressedCallback;
@@ -30,11 +29,11 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewGroupCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.gms.ads.AdListener;
@@ -54,7 +53,9 @@ import com.lszlp.choronometre.main.SectionsPagerAdapter;
 import com.google.android.material.slider.Slider; // Bu importu eklediğinizden emin olun!
 import java.util.ArrayList;
 import java.util.List;
-
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.ViewCompat;
 //rate app teset internal
 
 
@@ -79,7 +80,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
    Slider drawerSlider;
     ViewPager viewPager;
     private AdView adView ;
-    Button startButton, lapButton, resetButton, saveButton;
+    Button startButton;
+    Button lapButton;
+    Button resetButton;
+    Button saveButton;
     private static final String TAG = "MainActivity";
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
@@ -94,16 +98,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+// KRİTİK: Modern Uçtan Uca Desteği Etkinleştirme
 
+        //WindowCompat.enableEdgeToEdge(getWindow());
         super.onCreate(savedInstanceState);
-        // ActionBar'ı gizle
+
+        // 2. KRİTİK: setContentView() burada olmalıdır.
+        setContentView(R.layout.activity_main);
+
+        // 3. ActionBar'ı gizle
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        if (savedInstanceState == null)
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        // 4. KRİTİK: Görünüm Hiyerarşisi Oluşturulduktan SONRA Insets'leri işle
+        DrawerLayout rootLayout = findViewById(R.id.drawer_layout);
+        if (rootLayout != null) {
+
+            ViewGroupCompat.installCompatInsetsDispatch(rootLayout);
+            // ... ViewCompat.setOnApplyWindowInsetsListener kodunuz buraya gelmeli ...
+            ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, insets) -> {
+                // ... insets işleme mantığı ...
+                WindowInsetsCompat windowInsets = ViewCompat.getRootWindowInsets(v);
+                if (windowInsets != null) {
+                    androidx.core.graphics.Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    // Butonların kesilmesini önlemek için BOTTOM padding ekleme (Navigasyon Çubuğu yüksekliği)
+                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                }
+                return insets;
+            });
+        }
+
+        // 5. FLAG_FULLSCREEN Kullanımı
+        // WindowCompat kullanıldığı için bu satır gereksiz hale gelebilir.
+        // Eğer sadece durumu gizlemek istiyorsanız, WindowInsetsControllerCompat kullanın.
+       // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 // Uygulama açılır açılmaz gerekli tüm izinleri kontrol et ve iste
+
         checkAndRequestAllPermissions();
         initializeApp();
         // KRİTİK EKLEME: BACK tuşuna basıldığında uygulamayı arka plana at./!\
@@ -243,19 +274,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Log.e(TAG, "HATA: Inflate edilen View içinde Slider bulunamadı!");
             }
         }
-        //menu item'a ulaşmak için menuıtem olarak çağırmalısın
-        MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
-        screenSaverSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked){
-
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı açık tutma
-                scren.setTitle(getString(R.string.screenOff));
-            }else{
-                screenSaverSwitch.setChecked(false);
-                scren.setTitle(getString(R.string.screenOn));
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı kapatma
-            }
-        });
         //Mark:--> SWİÇLER
         drawerSwitchSec.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
         drawerSwitchSec.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
@@ -265,6 +283,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerSwitchDmin.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
         screenSaverSwitch.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
         screenSaverSwitch.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
+
+       // menu item'a ulaşmak için menuıtem olarak çağırmalısın
+        MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
+        screenSaverSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked){
+
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı açık tutma
+                scren.setTitle(getString(R.string.screenOff));
+
+
+            }else{
+                scren.setTitle(getString(R.string.screenOn));
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı kapatma
+            }
+        });
+
         drawerSwitchSec.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 drawerSwitchSec.setEnabled(false);
@@ -947,33 +981,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onResetConfirmed() {
-        TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-        ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
-        resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat
-        startButton.setText(R.string.start_text);
-        startButton.setEnabled(true);// start tuşu açılıyor
-        lapButton.setEnabled(false);// lap tuşu kapanıyor
-        saveButton.setEnabled(false); //save butonu kapat
-        fragment.reset();
-        chartFragment.ClearChart();
-        Toast.makeText(this, "All data has been deleted.", Toast.LENGTH_SHORT).show();
+        if (viewPager.getAdapter() != null) {
+            // Fragment'ı doğru şekilde al
+            TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
 
-        // --- YENİ EKLENEN KISIM ---
-        // Durum makinesini sıfırla
-        currentState = ChronoState.STOPPED;
-        auth = false;
-        drawer.setAlpha(1f);
-        // İSTEK: Switch'leri tekrar etkinleştir
-        drawerSwitchCmin.setEnabled(true);
-        drawerSwitchSec.setEnabled(true);
-        drawerSwitchDmin.setEnabled(true);
-        drawerSlider.setEnabled(true);
-        navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
-        navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
-        navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
-        // --- YENİ EKLENEN KISIM SONU ---
+            if (fragment != null && fragment.isAdded()) {
+                // Yeni oluşturduğumuz kapsamlı sıfırlama metodunu çağır
+                fragment.resetAll();
+
+                // MainActivity'deki durumu da sıfırla
+                currentState = ChronoState.STOPPED;
+
+
+                // TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                // ChartFragment chartFragment = (ChartFragment) viewPager.getAdapter().instantiateItem(viewPager, 1);
+                resetButton.setEnabled(false); //dataları sildikten sonra butonu kapat
+                startButton.setText(R.string.start_text);
+                startButton.setEnabled(true);// start tuşu açılıyor
+                lapButton.setEnabled(false);// lap tuşu kapanıyor
+                saveButton.setEnabled(false); //save butonu kapat
+                // fragment.reset();
+                // chartFragment.ClearChart();
+                Toast.makeText(this, "All data has been deleted.", Toast.LENGTH_SHORT).show();
+
+                // --- YENİ EKLENEN KISIM ---
+                // Durum makinesini sıfırla
+                currentState = ChronoState.STOPPED;
+                auth = false;
+                drawer.setAlpha(1f);
+                // İSTEK: Switch'leri tekrar etkinleştir
+                drawerSwitchCmin.setEnabled(true);
+                drawerSwitchSec.setEnabled(true);
+                drawerSwitchDmin.setEnabled(true);
+                drawerSlider.setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitSec).setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitCmin).setEnabled(true);
+                navigationView.getMenu().findItem(R.id.timeUnitDmin).setEnabled(true);
+                // --- YENİ EKLENEN KISIM SONU ---
+            }
+        }
     }
-
     @Override
     public void onSaveConfirmed(String fileName) {
         TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
@@ -1006,6 +1053,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
+
+    @Override
+    public void onDeleteLap(int position, int lapNumber) {
+        Log.d("ModulCheck", "Long Click: " + position + " Lap Number : "+lapNumber);
+        if (viewPager != null && viewPager.getAdapter() != null) {
+            TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+            if (fragment != null && fragment.isAdded()) {
+                fragment.deleteLap(position, lapNumber);
+            }
+        }
+    }
+
 
     private void initializeDrawerSlider(Slider slider) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

@@ -15,15 +15,9 @@ public class ChronometerWidget extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
             // Layout dosyanızı kullanın (R.layout.widget_chronometer mevcut olmalı)
-            @SuppressLint("RemoteViewLayout") RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_chronometer);
+            RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_chronometer);
 
-            // --- START/PAUSE/RESUME Intent ---
-            Intent toggleIntent = new Intent(context, ChronometerService.class);
-            // Servis içinde bu eylemi kontrol etmek için yeni bir aksiyon tanımlayabilirsiniz
-            // Ancak mevcut kodunuz ACTION_START/ACTION_PAUSE/ACTION_RESUME kullanıyor.
-
-            // Basitlik için, butonu her zaman uygulamayı açacak şekilde ayarlayalım (En güvenilir yöntem)
-            Intent launchAppIntent = new Intent(context, MainActivity.class);
+          Intent launchAppIntent = new Intent(context, MainActivity.class);
 
             // KRİTİK DEĞİŞİKLİK: Uygulamanın zaten çalışıp çalışmadığını kontrol etmek ve
             // mevcut görevi kullanmak için bayrakları ekle.
@@ -35,8 +29,8 @@ public class ChronometerWidget extends AppWidgetProvider {
             );
 
             // Widget'ın ana gövdesine tıklama işlevi atama (Uygulamayı açar)
-            views.setOnClickPendingIntent(R.id.widget_container, launchPendingIntent);
-
+            // **!!! R.id.widget_container widget'ın en dıştaki (Root) View'ının ID'si olmalıdır !!!**
+            views.setOnClickPendingIntent(R.id.widget_container, launchPendingIntent); // <-- BURASI KRİTİK
             // Eğer widget'ın içinde START/STOP butonu varsa, onun intent'ini ayarlayın
             // Varsayalım ki layout'ta R.id.btnToggle adında tek bir buton var.
 
@@ -46,9 +40,5 @@ public class ChronometerWidget extends AppWidgetProvider {
         }
     }
 
-    // It's good practice to add constants in your ChronometerService
-    // or a dedicated Constants file. For now, I'll add a placeholder comment.
-    // Make sure these are defined in your ChronometerService.java:
-    // public static final String ACTION_START = "com.lszlp.choronometre.action.START";
-    // public static final String ACTION_STOP = "com.lszlp.choronometre.action.STOP";
+
 }
