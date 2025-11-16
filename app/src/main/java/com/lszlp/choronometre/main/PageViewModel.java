@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel;
 
 import com.lszlp.choronometre.Lap;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -20,12 +19,16 @@ public class PageViewModel extends ViewModel {
     private String mTimeUnit = new String();
     private int mPrecisionValue  ;
     private MutableLiveData<String> mTimerValue = new MutableLiveData<>();
+
+
     public void setAvgTimeValue (float timeValue){
         mAvgTimeValue.setValue(timeValue);
     }
     public LiveData<Float> getAvgTimeValue() {
         return mAvgTimeValue;
     }
+
+
    public String getmPrecisionValue  () {
 
         switch (mPrecisionValue) {
@@ -39,6 +42,9 @@ public class PageViewModel extends ViewModel {
                 return "#0.0";
         }
     }
+
+
+
     public void setmPrecisionValue (int mPrecisionValue){
         this.mPrecisionValue = mPrecisionValue;
     }
@@ -81,6 +87,7 @@ public class PageViewModel extends ViewModel {
     public LiveData<Float> getTimeValue() {
         return mTimeValue;
     }
+
     public void setIndex(int index) {
         mIndex.setValue(index);
     }
@@ -126,6 +133,8 @@ public class PageViewModel extends ViewModel {
     public void updateLapsForChart(ArrayList<Lap> currentLaps) {
         if (currentLaps == null) {
             lapsForChart.setValue(new ArrayList<>());
+
+
             return;
         }
         // Grafik soldan sağa (1, 2, 3...) çizileceği için listenin ters çevrilmesi gerekir.
@@ -134,5 +143,8 @@ public class PageViewModel extends ViewModel {
         Collections.reverse(reversedList);
         lapsForChart.setValue(reversedList);
     }
-
+    // 🔥 YENİ: Zaman Birimini ayarlama metodu
+    public void setmTimeUnit(String timeUnit) {
+        this.mTimeUnit = timeUnit;
+    }
 }

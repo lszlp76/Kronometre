@@ -1,38 +1,23 @@
 package com.lszlp.choronometre;
 
-import static androidx.core.content.ContentProviderCompat.requireContext;
-
-import static java.security.AccessController.getContext;
-
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.text.InputFilter;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.content.FileProvider;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -47,8 +32,6 @@ import jxl.WorkbookSettings;
 import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
-import jxl.write.WriteException;
-import jxl.write.biff.RowsExceededException;
 
 public class ExcelSave {
     String timeUnit;
@@ -161,7 +144,7 @@ public class ExcelSave {
 
         String pattern = getDecimalFormatPattern(context);
         currentDecimalFormat = new DecimalFormat(pattern);
-
+            //Collections.reverse(lapsArray);
         if (laps == null || laps.isEmpty()) {
             Toast.makeText(context, "No laps to save!", Toast.LENGTH_SHORT).show();
             return;
@@ -206,15 +189,15 @@ public class ExcelSave {
             Label lbl11 = new Label(1, 1, xlString);
             Label lbl12 = new Label(1, 2, timeUnit);
             Label lbl13 = new Label(1, 3, totalStudyTime);
-            Label lbl14 = new Label(1, 4, currentDecimalFormat.format(Collections.max(lapsval) * modul) + " " + timeUnit);
+            Label lbl14 = new Label(1, 4, currentDecimalFormat.format(Collections.max(lapsval) ) + " " + timeUnit);
             Label lbl15 = new Label(1, 5, String.valueOf(lapsval.indexOf(Collections.max(lapsval))));
-            Label lbl16 = new Label(1, 6, currentDecimalFormat.format(Collections.min(lapsval) * modul) + " " + timeUnit);
+            Label lbl16 = new Label(1, 6, currentDecimalFormat.format(Collections.min(lapsval) ) + " " + timeUnit);
             Label lbl17 = new Label(1, 7, String.valueOf(lapsval.indexOf(Collections.min(lapsval))));
-            Label lbl18 = new Label(1, 8, currentDecimalFormat.format(ave * modul) + " " + timeUnit);
+            Label lbl18 = new Label(1, 8, currentDecimalFormat.format(ave) + " " + timeUnit);
             Label lbl19 = new Label(1, 9, currentDecimalFormat.format(cycPerHour) + " cyc/hour");
             Label lbl20 = new Label(1, 10, currentDecimalFormat.format(cycPerMinute) + " cyc/minute");
 
-            // Write headers
+            // Write headersΩ
             sheet.addCell(lbl);
             sheet.addCell(lbl1);
             sheet.addCell(lbl2);
@@ -241,10 +224,11 @@ public class ExcelSave {
             sheet.addCell(lbl20);
 
             // Lap data
-            for (int i = 0; i < laps.size(); i++) {
+            Collections.reverse(lapsArray);
+            for (int i = laps.size()-1; i >= 0; i--) {
                 Label lbls0 = new Label(0, 12 + i, String.valueOf(i + 1));
-                Label lbls = new Label(1, 12 + i, laps.get(i));
-                Label lbls2 = new Label(2, 12 + i, currentDecimalFormat.format((lapsval.get(i) * modul)));
+                Label lbls = new Label(1, 12 + i, lapsArray.get(i).lap);
+                Label lbls2 = new Label(2, 12 + i, currentDecimalFormat.format(lapsval.get(i)));
                 Label lbls3 = new Label(3, 12 + i, lapsArray.get(i).message);
                 sheet.addCell(lbls0);
                 sheet.addCell(lbls);
@@ -258,6 +242,7 @@ public class ExcelSave {
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(context, "Excel creation failed!", Toast.LENGTH_SHORT).show();
+            Log.d("ExcelSave", "Exception: " + e.getMessage());
             return;
         }
 

@@ -16,11 +16,11 @@
         android:layout_marginTop="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_arrow_back"
-        app:tint="@android:color/black"
+        app:tint="@color/elektrikturuncu"
         android:contentDescription="@string/action_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:elevation="4dp"
+        android:elevation="44dp"
         />
     <WebView
         android:id="@+id/webView"

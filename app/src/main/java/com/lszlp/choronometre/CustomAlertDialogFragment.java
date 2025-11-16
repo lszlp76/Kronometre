@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -233,7 +234,7 @@ public class CustomAlertDialogFragment extends DialogFragment {
                 int lapNum = getArguments().getInt(ARG_LAP_NUMBER);
                 String noteText = fileNameInput.getText().toString();
                 listener.onNoteSaved(pos, lapNum, noteText);
-            }else if (currentAction == ChronometerAction.DELETE_LAP) {
+            } else if (currentAction == ChronometerAction.DELETE_LAP) {
                 int pos = getArguments().getInt(ARG_POSITION);
                 int lapNum = getArguments().getInt(ARG_LAP_NUMBER);
                 listener.onDeleteLap(pos, lapNum);
@@ -247,6 +248,29 @@ public class CustomAlertDialogFragment extends DialogFragment {
             listener.onCancelled();
             dismiss();
         });
+
+        // ==================================================
+// AŞAMA 3: EditText Enter/Done Dinleyicisini Ayarlama
+// ==================================================
+
+// Yalnızca giriş gerektiren eylemler için bu dinleyiciyi ayarlayın
+        if (currentAction == ChronometerAction.SAVE || currentAction == ChronometerAction.ADD_NOTE) {
+
+            // EditText'e bir dinleyici ekle
+            fileNameInput.setOnEditorActionListener((v, actionId, event) -> {
+                // actionId: Sanal klavyedeki "Done" (Bitti) tuşuna basıldığını kontrol eder.
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+
+                    // Eğer "Done" tuşuna basıldıysa, pozitif butonu programatik olarak tıkla.
+                    // Bu, yukarıda tanımlanan btnPositive.setOnClickListener'daki kodu tetikleyecektir.
+                    btnPositive.performClick();
+
+                    // Olayı işlediğimizi belirtmek için 'true' döndür.
+                    return true;
+                }
+                return false; // Diğer tuş vuruşlarını normal şekilde işle
+            });
+        }
     }
 
     // Başlık çubuğunu kaldırmak ve pencere stilini ayarlamak için

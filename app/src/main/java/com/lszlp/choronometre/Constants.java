@@ -43,4 +43,13 @@ public static final String PREF_FIRST_TIME_LAUNCH = "IsFirstTimeLaunch";
     public static final String ACTION_DECIMAL_UPDATE = "com.lszlp.choronometre.ACTION_DECIMAL_UPDATE";
     // ... (Mevcut sabitlerinizin altına ekleyin)
     public static final String ACTION_PRECISION_UPDATE = "com.lszlp.choronometre.ACTION_PRECISION_UPDATE"; // YENİ
+
+    // 🔥 YENİ: Zaman Birimi SharedPreferences Anahtarı
+    public static final String PREF_TIME_UNIT = "pref_time_unit";
+    public static final String DEFAULT_TIME_UNIT = TIME_UNIT_SECONDS; // Varsayılan birim (Örn: Saniye)
+
+    // 🔥 YENİ: Zaman Birimi Güncelleme Eylemi (Broadcast için)
+    public static final String ACTION_TIME_UNIT_UPDATE = "com.lszlp.choronometre.ACTION_TIME_UNIT_UPDATE";
+
+
 }

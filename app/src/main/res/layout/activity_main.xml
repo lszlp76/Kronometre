@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false"
+
     style="@style/textTitleColorStyle"
 
     android:id="@+id/drawer_layout"
-    android:background="@drawable/futuristik"
 
+    android:background="#2D2D30"
     tools:context=".MainActivity"
     >
 
@@ -49,10 +49,11 @@
             android:id="@+id/tabs"
            style="@style/MyTabLayoutStyle"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
+            android:layout_height="22dp"
             android:contentDescription="@string/lap"
+            app:tabIndicatorColor="@color/btn_color"
             android:background="@color/fully_transparent"
-            android:fontFamily="@font/digital7" />
+            android:fontFamily="@font/robotoflex" />
 
 
 
@@ -82,59 +83,58 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:layout_gravity="bottom"
-
-        >
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" >
 
         <LinearLayout
 
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="55dp"
             android:orientation="horizontal"
             android:weightSum="4"
+
             android:gravity="center_vertical"
             android:layout_alignParentTop="true"
 
 
             >
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@id/button2"
                 style="@style/ButtonAdjustmentStyle"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:maxLines="1"
-
-
+                app:backgroundTint="#00ffff"
                 android:text="Start" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button3"
                 android:layout_weight="1"
                 style="@style/ButtonAdjustmentStyle"
                 android:layout_width="0dp"
+                app:backgroundTint="@color/btn_color"
                 android:maxLines="1"
 
                 android:text="LAP" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button4"
                 android:layout_weight="1"
                 style="@style/ButtonAdjustmentStyle"
                 android:layout_width="0dp"
                 android:maxLines="1"
-
+                app:backgroundTint="@color/btn_color"
                 android:text="Reset" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 style="@style/ButtonAdjustmentStyle"
                 android:text="Save"
                 android:maxLines="1"
-
+                app:backgroundTint="@color/btn_color"
                 />
         </LinearLayout>
 
@@ -147,14 +147,13 @@
 <com.google.android.material.navigation.NavigationView
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="@color/fully_transparent"
+    android:background="#4D4949"
     android:layout_gravity="start"
     android:alpha="0.9"
     android:id="@+id/nav_view"
     app:itemIconTint="@color/elektrikturuncu"
-    app:itemTextAppearance="@style/MyNavigationTextAppearance"
+    android:fitsSystemWindows="true"
     app:itemTextColor="@color/checked_track_color"
-    android:theme="@style/MyNavigationViewStyle"
     app:headerLayout="@layout/nav_drawer"
     app:menu="@menu/drawermenu">
 

@@ -10,7 +10,7 @@ android {
         minSdk 29
         targetSdk 36
         versionCode 44
-        versionName '5.1'
+        versionName '5.2'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -38,7 +38,7 @@ dependencies {
     implementation "androidx.core:core:$core_version"
     // To use RoleManagerCompat
     implementation "androidx.core:core-role:1.1.0"
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0-alpha'
     implementation 'androidx.appcompat:appcompat:1.7.1'// build.gradle (Önerilen Değişiklik)
     implementation 'com.google.android.material:material:1.13.0' // Lütfen güncel stabil sürümü kullanın
     implementation 'androidx.navigation:navigation-ui:2.9.6'

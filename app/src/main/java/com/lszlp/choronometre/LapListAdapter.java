@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -50,16 +49,16 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
         holder.itemView.laprow2.setText(lapArrayList.get(position).lap);
 
 //listedeki her bir satırın rengini değiştiriyor
-//if (position % 2 == 0) {
-//           holder.itemView.lapline.setBackgroundColor(
-//               ContextCompat.getColor(
-//                   holder.itemView.lapline.getContext(),
-//                   R.color.colorDisable
-//               )
-//           );
-//       } else {
-//           holder.itemView.lapline.setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisableq));
-//       }
+if (position % 2 == 0) {
+           holder.itemView.lapline.setBackgroundColor(
+               ContextCompat.getColor(
+                   holder.itemView.lapline.getContext(),
+                   R.color.colorDisable
+               )
+           );
+       } else {
+           holder.itemView.lapline.setBackgroundColor(ContextCompat.getColor(context, R.color.colorDisableq));
+       }
 
     }
 
@@ -116,14 +115,14 @@ public void setOnItemLongClickListener(OnItemLongClickListener listener){
             itemView.getRoot().setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if (longClickListener != null) {
-                        int position = getBindingAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            // Trigger the interface method
-                            longClickListener.onItemLongClick(position);
-                            return true; // Return true to indicate the click was consumed
-                        }
-                    }
+//                    if (longClickListener != null) {
+//                        int position = getBindingAdapterPosition();
+//                        if (position != RecyclerView.NO_POSITION) {
+//                            // Trigger the interface method
+//                            longClickListener.onItemLongClick(position);
+//                            return true; // Return true to indicate the click was consumed
+//                        }
+//                    }
                     return false; // Return false if not consumed
                 }
             });

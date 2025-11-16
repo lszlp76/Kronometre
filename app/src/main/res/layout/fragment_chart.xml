@@ -33,7 +33,7 @@
                 style="@style/textColorStyle"
                 android:layout_width="43dp"
                 android:layout_height="45dp"
-
+android:contentDescription="photo"
 
 
                 android:src="@drawable/ic_photo"></ImageView>
@@ -62,8 +62,23 @@
 
             android:layout_below="@+id/tool"
             android:background="@color/fully_transparent"
-
+                android:visibility="gone"
             />
+
+        <com.github.mikephil.charting.charts.CombinedChart
+            android:id="@+id/combinedchart"
+            style="@style/TableText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+
+            android:layout_below="@+id/tool"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="0dp"
+            android:layout_marginEnd="0dp"
+            android:background="@color/fully_transparent">
+
+        </com.github.mikephil.charting.charts.CombinedChart>
 
 
     </RelativeLayout>
@@ -73,5 +88,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.94" />
+        app:layout_constraintGuide_percent="0.95" />
 </androidx.constraintlayout.widget.ConstraintLayout>

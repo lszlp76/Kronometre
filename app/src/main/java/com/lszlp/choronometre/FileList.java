@@ -1,12 +1,10 @@
 package com.lszlp.choronometre;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,13 +24,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.Locale;
 
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator;
@@ -245,32 +238,6 @@ public class FileList extends Fragment
     }
 
 
-//    private void loadFiles() {
-//        // setUserVisibleHint içindeki dosya yükleme mantığı
-//        pathArray.clear();
-//        File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-//        File folder = new File(path, "IndustrialChoronometer");
-//        Log.d("FileList","File Folder "+path+ "/IndustrialChoronometer");
-//        if (folder.exists()) {
-//            File file = new File(String.valueOf(path + "/IndustrialChoronometer"));
-//            File[] listFiles = file.listFiles();
-//
-//            if (listFiles != null) {
-//                Arrays.sort(listFiles, new Comparator<File>() {
-//                    @Override
-//                    public int compare(File o1, File o2) {
-//                        return Long.compare(o2.lastModified(), o1.lastModified());
-//                    }
-//                });
-//
-//                for (File f : listFiles) {
-//                    if (f.isFile() && f.getName().endsWith(".xls")) {
-//                        pathArray.add(f.getName());
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     private void showDeleteDialog(int position, String fileName) {
         if (getActivity() instanceof MainActivity) {

@@ -2,12 +2,10 @@ package com.lszlp.choronometre;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.Build;
 
 import androidx.annotation.ColorInt;
 

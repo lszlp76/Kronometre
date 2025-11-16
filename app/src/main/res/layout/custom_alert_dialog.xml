@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:alpha="1"
     android:padding="20dp"
-    android:background="@drawable/glass_panel_background"
-    >
+    android:background="@drawable/glass_panel_background">
 
     <TextView
         android:id="@+id/dialogTitle"
@@ -36,6 +35,8 @@
     <EditText
         style="@style/TableText"
         android:id="@+id/dialogFileNameInput"
+        android:imeOptions="actionDone"
+        android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
@@ -63,23 +64,26 @@
         android:orientation="horizontal"
         android:gravity="center_horizontal">
 
-        <Button
-            style="@style/TableText"
+        <com.google.android.material.button.MaterialButton
+            style="@style/ButtonAdjustmentStyle"
             android:id="@+id/btnNegative"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="CANCEL"
+            app:backgroundTint="#00ffff"
+            android:textSize="15dp"
             android:background="@drawable/glass_button_background"
 
             android:layout_marginEnd="10dp"/>
 
-        <Button
-            style="@style/TableText"
+        <com.google.android.material.button.MaterialButton
+            style="@style/ButtonAdjustmentStyle"
             android:id="@+id/btnPositive"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="OK"
-
+            app:backgroundTint="#00ffff"
+            android:textSize="15dp"
             android:background="@drawable/glass_button_background"
             />
 

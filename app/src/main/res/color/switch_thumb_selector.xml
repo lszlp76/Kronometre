@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- State when the switch is ON (checked) and enabled -->
-    <item android:state_checked="true" android:state_enabled="true" android:color="#2E3BFF"/>
 
-    <!-- State when the switch is OFF (unchecked) and enabled -->
     <item android:state_checked="false" android:state_enabled="true" android:color="#AAAAAA"/>
 
-    <!-- State when the switch is disabled (optional, but good practice) -->
-    <!-- You might want a different color for disabled state, e.g., a lighter gray -->
-    <item android:state_enabled="false" android:color="#808080" />
+    <item android:state_enabled="false" android:color="#7C7287" />
 
-    <!-- Default fallback color (for OFF state) -->
-    <item android:color="#AAAAAA"/>
+    <item android:state_checked="true" android:state_enabled="true" android:color="#27B0A9"/>
+
+
 </selector>

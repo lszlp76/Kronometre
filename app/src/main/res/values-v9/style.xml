@@ -6,10 +6,7 @@
         <item name="colorPrimaryDark">#000000</item>
         <item name="colorAccent">#000000</item>
     </style>
-    <style name="MySwitchStyle" parent="Widget.MaterialComponents.CompoundButton.Switch">
-        <item name="thumbTint">@color/switch_thumb_selector</item>
-        <item name="trackTint">@color/switch_track_selector</item>
-    </style>
+
     <style name="T_00000f">
         <item name="colorPrimary">#00000f</item>
         <item name="colorPrimaryDark">#00000b</item>
@@ -34989,20 +34986,11 @@
         <item name="colorPrimaryDark">#b2b2a8</item>
         <item name="colorAccent">#fffff0</item>
     </style>
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
-        <item name="colorOnSurface">@color/switch_thumb_selector</item>
-        <item name="colorSecondary">@color/switch_track_selector</item>
-    </style>
+
     <style name="T_ffffff">
         <item name="colorPrimary">#ffffff</item>
         <item name="colorPrimaryDark">#b2b2b2</item>
         <item name="colorAccent">#ffffff</item>
     </style>
-    <style name="MyTabLayoutStyle" parent="Widget.MaterialComponents.TabLayout">
-        <item name="tabTextColor">#00FFFF</item>
-        <item name="tabSelectedTextColor">#97E2E2</item>
-        <item name="tabIconTint">#00FFFF</item>
-        <item name="tabIconTint">#00FFFF</item>
-        <item name="tabRippleColor">#00FFFF</item>
-    </style>
+
 </resources>

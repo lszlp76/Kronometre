@@ -8,7 +8,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -32,8 +34,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.ViewGroupCompat;
+import androidx.core.view.WindowCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.gms.ads.AdListener;
@@ -53,7 +56,7 @@ import com.lszlp.choronometre.main.SectionsPagerAdapter;
 import com.google.android.material.slider.Slider; // Bu importu eklediğinizden emin olun!
 import java.util.ArrayList;
 import java.util.List;
-import androidx.core.view.WindowCompat;
+
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.ViewCompat;
 //rate app teset internal
@@ -100,40 +103,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
 // KRİTİK: Modern Uçtan Uca Desteği Etkinleştirme
 
-        //WindowCompat.enableEdgeToEdge(getWindow());
+
         super.onCreate(savedInstanceState);
 
-        // 2. KRİTİK: setContentView() burada olmalıdır.
-        setContentView(R.layout.activity_main);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+       //setContentView(R.layout.activity_main);
 
-        // 3. ActionBar'ı gizle
-        if (getSupportActionBar() != null) {
+         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-
-        // 4. KRİTİK: Görünüm Hiyerarşisi Oluşturulduktan SONRA Insets'leri işle
-        DrawerLayout rootLayout = findViewById(R.id.drawer_layout);
-        if (rootLayout != null) {
-
-            ViewGroupCompat.installCompatInsetsDispatch(rootLayout);
-            // ... ViewCompat.setOnApplyWindowInsetsListener kodunuz buraya gelmeli ...
-            ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, insets) -> {
-                // ... insets işleme mantığı ...
-                WindowInsetsCompat windowInsets = ViewCompat.getRootWindowInsets(v);
-                if (windowInsets != null) {
-                    androidx.core.graphics.Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-                    // Butonların kesilmesini önlemek için BOTTOM padding ekleme (Navigasyon Çubuğu yüksekliği)
-                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-                }
-                return insets;
-            });
-        }
-
-        // 5. FLAG_FULLSCREEN Kullanımı
-        // WindowCompat kullanıldığı için bu satır gereksiz hale gelebilir.
-        // Eğer sadece durumu gizlemek istiyorsanız, WindowInsetsControllerCompat kullanın.
-       // getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-// Uygulama açılır açılmaz gerekli tüm izinleri kontrol et ve iste
 
         checkAndRequestAllPermissions();
         initializeApp();
@@ -170,9 +148,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void setupAppContent() {
         // Ana uygulama içeriğini hazırla
 
-        new ThemeColors(this); // renk değiştirme sınıfı
+       // new ThemeColors(this); // renk değiştirme sınıfı
         com.lszlp.choronometre.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+
+        // Uçtan Uca (Edge-to-Edge) Inset'lerini (boşluklarını) yönetme
+
+        // Bu listener, sistem çubukları (status, navigation) değiştiğinde tetiklenir.
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
+            // Sistem çubuklarının (üst ve alt) piksellerini al
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+// Yeni: Navigasyon çubuğu boşluğunu al
+            // Bu, sistem çubukları boşluğundan (top+bottom) ayrılan
+            // sadece alt navigasyon çubuğu boşluğunu verir.
+            Insets navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
+
+            // 1. Üstteki AppBarLayout'a (Toolbar'ı içeren) üst padding uygula
+            binding.mainToolbar.setPadding(
+                    binding.mainToolbar.getPaddingLeft(),
+                    systemBars.top, // Sistem çubuğu (status bar) boşluğu
+                    binding.mainToolbar.getPaddingRight(),
+                    binding.mainToolbar.getPaddingBottom()
+            );
+
+            // 2. Alttaki buton layout'una (RelativeLayout) alt padding uygula
+            // BURAYI DEĞİŞTİRİYORUZ!
+            binding.buttons.setPadding(
+                    binding.buttons.getPaddingLeft(),
+                    binding.buttons.getPaddingTop(),
+                    binding.buttons.getPaddingRight(),
+                    // Sadece navigasyon çubuğu boşluğunu kullanıyoruz
+                    navigationBars.bottom
+            );
+
+            // Inset'leri (boşlukları) tükettik,
+            // alt görünümlerin tekrar işlemesine gerek yok.
+            return WindowInsetsCompat.CONSUMED;
+        });
 
         activateReviewInfo();
 
@@ -207,7 +220,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         viewPager.setOffscreenPageLimit(2);
-
+        // 🔥 KRITIK: ViewPager adapter set edildikten sonra time unit'i yükle
+        viewPager.post(() -> {
+            initializeTimeUnitFromPreference();
+        });
 
         drawer = binding.drawerLayout;
         Toolbar toolbar = binding.toolbar;
@@ -224,8 +240,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
         toggle.setDrawerIndicatorEnabled(true);
+        // 🔥 Hamburger ikonunun rengini değiştir
+
         drawer.addDrawerListener(toggle);
 
+        Drawable drawable = toggle.getDrawerArrowDrawable();
+        if (drawable != null) {
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.btn_color), PorterDuff.Mode.SRC_IN);
+        }
         navigationView.getMenu().findItem(R.id.timeUnitSec)
                 .setActionView(new androidx.appcompat.widget.SwitchCompat(this));
         navigationView.getMenu().findItem(R.id.timeUnitCmin)
@@ -275,16 +297,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
         //Mark:--> SWİÇLER
-        drawerSwitchSec.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
-        drawerSwitchSec.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
-        drawerSwitchCmin.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
-        drawerSwitchCmin.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
-        drawerSwitchDmin.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
-        drawerSwitchDmin.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
-        screenSaverSwitch.setThumbTintList(getResources().getColorStateList(R.color.switch_thumb_selector, null));
-        screenSaverSwitch.setTrackTintList(getResources().getColorStateList(R.color.switch_track_selector, null));
+        // Düzeltme için bu kısmı düzenleyin:
 
-       // menu item'a ulaşmak için menuıtem olarak çağırmalısın
+
+        drawerSwitchSec.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+        drawerSwitchSec.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+
+        drawerSwitchCmin.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+        drawerSwitchCmin.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+
+        drawerSwitchDmin.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+        drawerSwitchDmin.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+
+        screenSaverSwitch.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+        screenSaverSwitch.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector)); // menu item'a ulaşmak için menuıtem olarak çağırmalısın
         MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
         screenSaverSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked){
@@ -299,6 +325,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
+        setupSwitchListeners();
+        // Setup switch listeners
+       /*
         drawerSwitchSec.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
                 drawerSwitchSec.setEnabled(false);
@@ -315,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         // Fragment'ın unit değişkenini alıp, yeni metoda parametre olarak gönderin.
                         // unit değişkeni, TimerFragment'ta hala public veya erişilebilir olmalıdır.
                         fragment.setUnitDisplay(fragment.unit);
+                        saveTimeUnitPreference(fragment.unit);
                     }
 
 
@@ -342,6 +372,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         // Fragment'ın unit değişkenini alıp, yeni metoda parametre olarak gönderin.
                         // unit değişkeni, TimerFragment'ta hala public veya erişilebilir olmalıdır.
                         fragment.setUnitDisplay(fragment.unit);
+                        saveTimeUnitPreference(fragment.unit);
                     }
                 }
                 drawer.close();
@@ -365,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         // Fragment'ın unit değişkenini alıp, yeni metoda parametre olarak gönderin.
                         // unit değişkeni, TimerFragment'ta hala public veya erişilebilir olmalıdır.
                         fragment.setUnitDisplay(fragment.unit);
+                        saveTimeUnitPreference(fragment.unit);
                     }
                 }
                 drawer.close();
@@ -372,17 +404,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawerSwitchDmin.setEnabled(true);
             }
         });
-
+*/
         /**** navigation sonu ***/
 
-        startButton = binding.button2;
-        lapButton = binding.button3;
+        startButton = (Button) binding.button2;
+        lapButton = (Button)binding.button3;
         lapButton.setEnabled(false);
-        resetButton = binding.button4;
+        resetButton = (Button)binding.button4;
         resetButton.setEnabled(false);
-        saveButton = binding.button;
+        saveButton = (Button)binding.button;
         saveButton.setEnabled(false);
 
+        buttonSetup();
         saveButton.setOnClickListener(view -> {
             if (viewPager.getAdapter() != null) {
                 showSaveDialog();
@@ -402,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 switch (currentState) {
                     case STOPPED:
                         // Bu ilk "START" tıklamasıdır
-                        if (fragment.modul == 0) {
+                        if(!isTimeUnitReady() ){// if (fragment.modul == 0)
                             drawer.open();
                             Toast.makeText(getApplicationContext(), "Choose time unit!", Toast.LENGTH_SHORT).show();
                         } else {
@@ -426,6 +459,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             startButton.setText("PAUSE"); // Metni "PAUSE" yap
                             resetButton.setEnabled(false);
                             saveButton.setEnabled(false);
+                            startButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.pause, 0, 0) ;// Play simgesi
                         }
                         break;
 
@@ -442,6 +476,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         lapButton.setEnabled(false);
                         saveButton.setEnabled(true);
                         resetButton.setEnabled(true);
+                        startButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.play, 0, 0) ;// Play simgesi
+
 
                         // Switch'ler devre dışı kalmaya devam eder
                         break;
@@ -459,6 +495,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         lapButton.setEnabled(true);
                         saveButton.setEnabled(false);
                         resetButton.setEnabled(false);
+                        startButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.pause, 0, 0) ;// Play simgesi
 
                         // Switch'ler devre dışı kalmaya devam eder
                         break;
@@ -494,6 +531,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+
+    private void buttonSetup(){
+        lapButton.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.lap,0,0);
+        startButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.play, 0, 0) ;
+        resetButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.reset, 0, 0);
+        saveButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.save, 0, 0);
+    }
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
 
@@ -515,6 +559,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             viewPager.setCurrentItem(currentTab);
         }
 
+
+        // 🔥 EKLE: Time unit'ı geri yükle
+        initializeTimeUnitFromPreference();
         // auth = savedInstanceState.getBoolean("isRunning", false); // BU SATIRI SİLİN VEYA YORUM SATIRI YAPIN
 
         // Yeni durumu (state) geri yükle
@@ -593,6 +640,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+
 
         // Uygulama ön plana geldiğinde servis durdurulmaz
         // Sadece UI güncellemesi yapılır
@@ -800,7 +848,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int itemId = item.getItemId();
         if (itemId == R.id.nav_about) {
             Intent intent = new Intent(MainActivity.this, WebpagesActivities.class);
-            String link = "https://www.agromtek.com/industrialchronometer/about.html";
+            String link = "https://www.agromtek.com/industrialchronometer/";
             intent.putExtra("link", link);
             startActivity(intent);
 
@@ -988,6 +1036,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (fragment != null && fragment.isAdded()) {
                 // Yeni oluşturduğumuz kapsamlı sıfırlama metodunu çağır
                 fragment.resetAll();
+                //UI güncellemesi
+                startButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.play, 0, 0) ;// Play simgesi
+
 
                 // MainActivity'deki durumu da sıfırla
                 currentState = ChronoState.STOPPED;
@@ -1057,12 +1108,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onDeleteLap(int position, int lapNumber) {
         Log.d("ModulCheck", "Long Click: " + position + " Lap Number : "+lapNumber);
+        /*
+        BU versiyonda kullanılmayacak. Başka bir versiyonda olabilir
+        Silme fonksiyonu hazır. Yorum satırını kaldırırsan çalışır
+        Ancak ChartFragment içindekim average tcy serisini
+        lap ı silersen güncelleyemiyorsun.
         if (viewPager != null && viewPager.getAdapter() != null) {
             TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
             if (fragment != null && fragment.isAdded()) {
                 fragment.deleteLap(position, lapNumber);
             }
-        }
+        }*/
     }
 
 
@@ -1113,5 +1169,190 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          startActivity(intent);
         // NOTE: Onboarding Activity bittiğinde MainActivity'nin devam etmesi için burada finish() çağrılmaz.
         // Kullanıcı Onboarding'i tamamladığında, OnboardingActivity'nin kendisi finish() yapmalıdır.
+    }
+
+    //kullanıcı time unit seçtiğinde bu time unit kshared prefe kayıt ediliyor
+    private void saveTimeUnitPreference(String selectedUnit) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this); // 1. SharedPreferences'a kaydet
+        prefs.edit().putString(Constants.PREF_TIME_UNIT, selectedUnit).apply();
+
+        Log.d("MainActivity", "Ölçü Birimi kaydedildi: " + selectedUnit);
+// 1. SharedPreferences'a kaydet (Kalıcı Durum)
+        // Also initialize the fragment immediately
+        switch (selectedUnit) {
+            case "Sec.":
+                initializeTimerFragmentWithUnit("Sec.", 60, 1000);
+                break;
+            case "Cmin.":
+                initializeTimerFragmentWithUnit("Cmin.", 100, 600);
+                break;
+            case "Dmh.":
+                initializeTimerFragmentWithUnit("Dmh.", 166, 360);
+                break;
+        }
+        // 2. TimerFragment'a hemen güncelleme mesajı gönder (Anlık Senkronizasyon)
+        Intent unitUpdateIntent = new Intent(Constants.ACTION_TIME_UNIT_UPDATE);
+        unitUpdateIntent.putExtra(Constants.EXTRA_TIME_UNIT, selectedUnit);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(unitUpdateIntent);
+    }
+    // Add this method in MainActivity
+    private void initializeTimeUnitFromPreference() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String savedUnit = prefs.getString(Constants.PREF_TIME_UNIT, "No Unit");
+
+        Log.d("MainActivity", "Initializing time unit from preference: " + savedUnit);
+
+        // Remove listeners temporarily to avoid triggering them during initialization
+        drawerSwitchSec.setOnCheckedChangeListener(null);
+        drawerSwitchCmin.setOnCheckedChangeListener(null);
+        drawerSwitchDmin.setOnCheckedChangeListener(null);
+
+        // Reset all switches first
+        drawerSwitchSec.setChecked(false);
+        drawerSwitchCmin.setChecked(false);
+        drawerSwitchDmin.setChecked(false);
+
+        // 🔥 DÜZELTME: Hepsini ETKİN olarak başlat
+        drawerSwitchSec.setEnabled(true);
+        drawerSwitchCmin.setEnabled(true);
+        drawerSwitchDmin.setEnabled(true);
+
+        // Set the correct switch based on saved preference
+        switch (savedUnit) {
+            case "Sec.":
+                drawerSwitchSec.setChecked(true);
+              //  drawerSwitchSec.setEnabled(false);
+                initializeTimerFragmentWithUnit("Sec.", 60, 1000);
+                break;
+            case "Cmin.":
+                drawerSwitchCmin.setChecked(true);
+                //drawerSwitchCmin.setEnabled(false);
+                initializeTimerFragmentWithUnit("Cmin.", 100, 600);
+                break;
+            case "Dmh.":
+                drawerSwitchDmin.setChecked(true);
+               // drawerSwitchDmin.setEnabled(false);
+                initializeTimerFragmentWithUnit("Dmh.", 166, 360);
+                break;
+            default:
+                // No unit selected, all switches remain enabled
+                Log.d("MainActivity", "No time unit saved, using default");
+                break;
+        }
+
+        // Restore listeners
+        setupSwitchListeners();
+    }
+    // Add this helper method
+    private void initializeTimerFragmentWithUnit(String unit, int modul, int milis) {
+        if (viewPager.getAdapter() != null) {
+            TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+            if (fragment != null) {
+                fragment.modul = modul;
+                fragment.milis = milis;
+                fragment.unit = unit;
+                fragment.Timeunit = getTimeUnitDescription(unit);
+                fragment.setUnitDisplay(unit);
+
+                Log.d("MainActivity", "TimerFragment initialized with unit: " + unit +
+                        ", modul: " + modul + ", milis: " + milis);
+            }
+        }
+    }
+    // Add this helper method to get unit descriptions
+    private String getTimeUnitDescription(String unit) {
+        switch (unit) {
+            case "Sec.":
+                return "Sec. - Second";
+            case "Cmin.":
+                return "Cmin. - Hundredth of Minute";
+            case "Dmh.":
+                return "Dmh. - 10Thousandth of Minute";
+            default:
+                return "No Unit";
+        }
+    }
+    // Add this method to setup switch listeners
+    private void setupSwitchListeners() {
+        drawerSwitchSec.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+
+                drawerSwitchCmin.setChecked(false);
+                drawerSwitchDmin.setChecked(false);
+                if (viewPager.getAdapter() != null) {
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    fragment.modul = 60;
+                    fragment.milis = 1000;
+                    fragment.unit = "Sec.";
+                    fragment.Timeunit = "Sec. - Second";
+                    if (fragment != null) {
+                        fragment.setUnitDisplay(fragment.unit);
+                        saveTimeUnitPreference(fragment.unit);
+                    }
+                }
+                drawer.close();
+            } else {
+                if (!drawerSwitchCmin.isChecked() && !drawerSwitchDmin.isChecked()) {
+                    buttonView.setChecked(true);
+                }
+            }
+        });
+
+        drawerSwitchCmin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+               // drawerSwitchCmin.setEnabled(false);
+                drawerSwitchSec.setChecked(false);
+                drawerSwitchDmin.setChecked(false);
+                if (viewPager.getAdapter() != null) {
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    fragment.modul = 100;
+                    fragment.milis = 600;
+                    fragment.unit = "Cmin.";
+                    fragment.Timeunit = "Cmin. - Hundredth of Minute";
+                    if (fragment != null) {
+                        fragment.setUnitDisplay(fragment.unit);
+                        saveTimeUnitPreference(fragment.unit);
+                    }
+                }
+                drawer.close();
+            } else {
+                // KORUMA:
+                if (!drawerSwitchSec.isChecked() && !drawerSwitchDmin.isChecked()) {
+                    buttonView.setChecked(true);
+                }
+            }
+        });
+
+        drawerSwitchDmin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                //drawerSwitchDmin.setEnabled(false);
+                drawerSwitchCmin.setChecked(false);
+                drawerSwitchSec.setChecked(false);
+                if (viewPager.getAdapter() != null) {
+                    TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                    fragment.modul = 166;
+                    fragment.milis = 360;
+                    fragment.unit = "Dmh.";
+                    fragment.Timeunit = "Dmh. - 10Thousandth of Minute";
+                    if (fragment != null) {
+                        fragment.setUnitDisplay(fragment.unit);
+                        saveTimeUnitPreference(fragment.unit);
+                    }
+                }
+                drawer.close();
+            } else {
+                if (!drawerSwitchSec.isChecked() && !drawerSwitchCmin.isChecked()) {
+                    buttonView.setChecked(true);
+                }
+            }
+        });
+    }
+    // Add this method to verify time unit is properly set
+    private boolean isTimeUnitReady() {
+        if (viewPager.getAdapter() != null) {
+            TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+            return fragment != null && fragment.modul > 0 && fragment.unit != null && !fragment.unit.equals("No Unit");
+        }
+        return false;
     }
 }

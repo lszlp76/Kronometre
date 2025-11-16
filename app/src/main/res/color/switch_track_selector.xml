@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- State when the switch is ON (checked) and enabled. -->
-    <!-- The color is often a semi-transparent version of the thumb's "on" color. -->
-    <item android:state_checked="true" android:state_enabled="true" android:color="#96A1FF"/> <!-- Example: A lighter/faded blue -->
+    <item android:state_checked="true" android:state_enabled="true" android:color="#3CEBD4"/>
 
-    <!-- State when the switch is OFF (unchecked) and enabled. -->
-    <!-- This is the default track color. -->
+    <item android:state_enabled="false" android:color="#7c7287"/>
+
     <item android:state_checked="false" android:state_enabled="true" android:color="#7c7287"/>
-
-    <!-- State when the switch is disabled (optional, but good practice). -->
-    <!-- You might want a different color for the disabled track. -->
-    <item android:state_enabled="false" android:color="#E0E0E0"/> <!-- Example: A light gray -->
-
-    <!-- Default fallback color (for the OFF state) -->
-    <item android:color="#7c7287"/>
 
 </selector>

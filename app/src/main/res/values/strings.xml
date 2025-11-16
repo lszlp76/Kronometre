@@ -46,6 +46,7 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
 
     <string name="action_back">Back</string>
     <string name="ondal_k_basamak_se_imi">Ondalık Basamak Seçimi</string>
+    <string name="axisFontSize">15f</string>
 
     <style name="AlertDialogCustom2" parent="@style/AlertDialogCustom">
         <item name="android:textColor">#FF3700B3</item>
@@ -57,19 +58,6 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
     </style>
 
 
-    <style name="ButtonAdjustmentStyle">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1.25</item>
-        <item name="android:background">@drawable/glass_button_background</item>
-        <item name="android:elevation">4dp</item>
-        <item name="android:layout_marginLeft">3dp</item>
-        <item name="android:layout_marginRight">3dp</item>
-        <item name="android:textColor">@color/purple_700</item>
-        <item name="android:fontFamily">@font/digital7</item>
-        <item name="android:textSize">18dp</item>
 
-
-    </style>
 
 </resources>

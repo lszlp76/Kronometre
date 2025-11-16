@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.SpannableString;
 import android.text.style.RelativeSizeSpan;
 import android.util.Log;
@@ -69,6 +68,7 @@ public class TimerFragment extends Fragment {
     private BroadcastReceiver precisionUpdateReceiver;
     private boolean isServicePaused = false; // statusResponseReceiver içinde kullanıldığı için eklenmeli/kontrol edilmeli
     // YENİ: Servisten gelen durum (zaman ve çalışma/duraklatma) yanıtlarını dinler
+
     private final BroadcastReceiver statusResponseReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -84,8 +84,9 @@ public class TimerFragment extends Fragment {
                 // 2. Fragment'ın kendi değişkenlerini güncelle
                 lastKnownElapsedTime = serviceElapsedTime; // Fragment'ın kendi değişkeni olmalı
                 Boolean isRunning = serviceIsRunning;
-                Boolean isPaused = serviceIsPaused;
-
+               // Boolean isPaused = serviceIsPaused;
+                // 🔥 KRİTİK EKLEME: ÜYE DEĞİŞKENİ GÜNCELLE-12.11.2025 uı backgroun uyumusuzluk problemi
+                isServicePaused = serviceIsPaused; // Servis'ten gelen duraklatma durumunu Fragment'a kaydet!
                 // 3. UI'ı GÜNCELLE
                 updateTimeDisplay(lastKnownElapsedTime); // Bu metot, TextView'i güncelleyen metottur.
                 updateButtonStates();
@@ -149,6 +150,12 @@ public class TimerFragment extends Fragment {
 
 
     public void setUnitDisplay(String unitValue) {
+        Log.d("lifeCycle","setUnitDisplay çalıştı");
+
+        // Handle null or empty unit value
+        if (unitValue == null || unitValue.trim().isEmpty()) {
+            unitValue = "No Unit";
+        }
         FragmentTimerBinding currentBinding = getBinding();
 
         // Binding'in ve Fragment'ın hazır olduğunu kontrol et
@@ -157,13 +164,13 @@ public class TimerFragment extends Fragment {
             return;
         }
 
-        // unitValue'yu unit değişkenine kaydet (İleride kullanmak için)
-        this.unit = unitValue;
+
+            this.unit = unitValue;
 
         // TextView'ı güncelle
-        // Not: "unitValue" yerine "unitValue.setText" kullanılıyordu,
-        // bu nedenle buradaki TextView adının "unitValue" olduğunu varsayıyoruz.
-        currentBinding.unitValue.setText(unitValue);
+        if (currentBinding.unitValue != null) {
+            currentBinding.unitValue.setText(unitValue);
+        }
     }
 
     /*Timer düzeltme için
@@ -205,7 +212,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     PageViewModel pageViewModel;
     ExcelSave excelSave = new ExcelSave();
     List<String> saveValue;
-
+    FragmentTimerBinding currentBinding;
 
     String currentDateandTimeStop;
     String currentDateandTimeStart;
@@ -342,7 +349,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         pageViewModel = new ViewModelProvider(requireActivity()).get(PageViewModel.class);
         // UI Thread'e geçişi sağlamak için Handler tanımla
         final Handler uiHandler = new Handler(requireContext().getMainLooper());
-
+currentBinding = getBinding();
         timeUpdateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -410,6 +417,11 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 timeUpdateReceiver,
                 filter
         );
+        //time unit pref den almak
+       loadTimeUnitPreference();
+
+        registerTimeUnitUpdateReceiver(); // Birim değişikliği alıcısını kaydet
+     Log.d("TimerFragment","OnCreate çalıştı");
     }
 
     // BU METODU EKLEYİN (Binding'i temizlemek için KRİTİK!)
@@ -417,6 +429,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     public void onDestroyView() {
         super.onDestroyView();
         _binding = null; // View yok edildiğinde binding'i temizle
+
     }
 
     @Override
@@ -436,12 +449,16 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 e.printStackTrace();
             }
         }
+        if (getContext() != null) {
+            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(timeUnitUpdateReceiver);
+        }
     }
 
     // TimerFragment.java (updateTimeDisplay metodu)
     @SuppressLint("SetTextI18n")
     private void updateTimeDisplay(long elapsedMillis) {
-        FragmentTimerBinding currentBinding = getBinding();
+       currentBinding = getBinding();
+        Log.d("TimerFragment","updateTimeDisplay çalıştı");
         if (currentBinding == null || getActivity() == null || !isAdded()) return;
 
         // 1. YENİ KISIM: Formatlama metodunu çağırın
@@ -506,12 +523,15 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
+        Log.d("TimerFragment","OnCreateView çalıştı");
         // Başlangıçta format desenini yükle
         currentDecimalFormatPattern = getDecimalFormatPattern();
 
 
         _binding = FragmentTimerBinding.inflate(getLayoutInflater()); // Atamayı buraya yapın
+        // 🔥 ÖNEMLİ: Binding oluşturulduktan hemen sonra unit preference'ı yükle
+
+        loadTimeUnitPreference();
         return _binding.getRoot();
 
     }
@@ -520,13 +540,16 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+// 🔥 ÖNEMLİ: Önce view'ları başlat, sonra unit değerini yükle
         initializeViews();
+// 🔥 EKLE: View'lar hazır olduğunda unit değerini tekrar yükle
+        loadTimeUnitPreference();
         setupRecyclerView();
         setupClickListeners();
     }
 
     private void initializeViews() {
+        Log.d("TimerFragment","InıtılizeViews çalıştı");
         cycPerHour = _binding.cycPerHour;
         cycPerMinute = _binding.cycPerMinute;
         totalObservationTime = _binding.totalObservationTime;
@@ -538,6 +561,17 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         maxvalue = _binding.maxVal;
         minvalue = _binding.minVal;
         avevalue = _binding.aveVal;
+
+
+        // 🔥 EKLE: unitValue TextView'ını başlat ve değerini ayarla
+        if (_binding.unitValue != null) {
+            // Eğer unit değişkeni henüz ayarlanmadıysa, SharedPreferences'tan yükle
+            if (unit == null) {
+                loadTimeUnitPreference();
+            } else {
+                _binding.unitValue.setText(unit);
+            }
+        }
 
         // Butonları görünür yap
         setWidgetsVisibility(false);
@@ -559,6 +593,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     }
 
     private void setupRecyclerView() {
+        Log.d("TimerFragment","SetupRecyclerVİew  çalıştı");
         ListElementsArrayList = new ArrayList<>();
         _binding.lapList.setLayoutManager(new LinearLayoutManager(getContext()));
         lapListAdapter = new LapListAdapter(ListElementsArrayList);
@@ -622,7 +657,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
     private void showNoteDialog(int position) {
         if (getActivity() == null) return;
         if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).drawer.setAlpha(0.2f); // Drawer'ı soluklaştır
+            ((MainActivity) getActivity()).drawer.setAlpha(0.8f); // Drawer'ı soluklaştır
         }
         // RecyclerView listesinden doğru Lap objesini al
         // (ListElementsArrayList'in ters sıralı olduğunu varsayarak)
@@ -803,6 +838,7 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         max = Collections.max(lapsval);
         lapnomax = lapsval.indexOf(max) + 1;
         ave = (sum / lapsval.size());
+        pageViewModel.setAvgTimeValue((float)(ave));
     }
 
     private void updateDisplay() {
@@ -1307,7 +1343,10 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
         ListElementsArrayList.remove(position);
         lapsArray.remove(position);
         laps.remove(position);
+        Collections.reverse(lapsval);
         lapsval.remove(position);
+        Collections.reverse(lapsval);
+
 
         // 2. Toplam tur sayısını (lapsayisi) ListElementArraylist in boyut kadar olacak yeni durumda
         lapsayisi = ListElementsArrayList.size();
@@ -1412,4 +1451,70 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
             pageViewModel.updateLapsForChart(new ArrayList<>());
         }
     }
+    // 🔥 YENİ: Kayıtlı zaman birimi ayarını yükler
+    private void loadTimeUnitPreference() {
+        Context context = getContext();
+
+        if (context == null) return;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        // Kayıtlı birim yoksa varsayılanı kullan
+        String savedUnit = prefs.getString(Constants.PREF_TIME_UNIT, Constants.DEFAULT_TIME_UNIT);
+        Log.d("TimerFragment","loadTimeUnitPreference çalıştı. Unit --> "+ savedUnit);
+        // Update the member variable
+        this.unit = savedUnit;
+        // ViewModel'i ve dolayısıyla Fragment'ın durumunu güncelle
+        if (pageViewModel != null) {
+            pageViewModel.setmTimeUnit(savedUnit);
+        }
+        // 🔥 KRITIK: Update UI immediately if binding is available
+        if (_binding != null && _binding.unitValue != null) {
+                _binding.unitValue.setText(savedUnit);
+        }
+
+        // Also update currentBinding for consistency
+        currentBinding = _binding;
+
+
+    }
+
+    // 🔥 YENİ: BroadcastReceiver'ı zaman birimi güncellemeleri için kaydet
+    private void registerTimeUnitUpdateReceiver() {
+        if (getContext() == null) return;
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(timeUnitUpdateReceiver,
+                new IntentFilter(Constants.ACTION_TIME_UNIT_UPDATE));
+    }
+    // 🔥 YENİ: Zaman birimi değişikliğini yakalayan alıcı
+    private final BroadcastReceiver timeUnitUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Constants.ACTION_TIME_UNIT_UPDATE.equals(intent.getAction())) {
+                String newUnit = intent.getStringExtra(Constants.EXTRA_TIME_UNIT);
+
+                // Handle null case
+                if (newUnit == null || newUnit.trim().isEmpty()) {
+                    newUnit = "No Unit";
+                }
+                if (pageViewModel != null) {
+                    // 1. ViewModel'i yeni birimle güncelle
+                    pageViewModel.setmTimeUnit(newUnit);
+                    Log.d("TimerFragment", "Ölçü birimi TimerFragment'a geldi: " + newUnit);
+                }
+
+                // 2. Unit değişkenini güncelle
+                unit = newUnit;
+// 3. 🔥 KRİTİK: unitValue TextView'ı yüklenen değerle güncelle (UI Katmanı)
+                if (_binding != null && _binding.unitValue != null) {
+                    _binding.unitValue.setText(newUnit);
+                }
+
+                // Also update currentBinding for consistency
+                if (currentBinding != null && currentBinding.unitValue != null) {
+                    currentBinding.unitValue.setText(newUnit);
+                }
+
+                // 4. UI'ı anında güncelle
+                updateTimeDisplay(lastKnownElapsedTime);
+            }
+        }
+    };
 }

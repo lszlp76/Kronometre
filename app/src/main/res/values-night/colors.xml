@@ -2,10 +2,12 @@
 <resources>
 
     <color name="colorDisable">#4C90DD</color>
-    <color name="darkbuttonrengi">#7AACE4</color>
-    <color name="colorPrimary">#00fFFF</color>
+    <color name="darkbuttonrengi">#586FE4</color> <!--#7AACE4-->
+    <color name="colorPrimary">#00FFFF</color>
     <color name="colorPrimaryDark">#586FE4</color>
     <color name="colorDisableq">#7AACE4</color>
     <color name="chartColor">#FFFFFFFF</color>
+    <!--Kronometre sayacının rengi-->
     <color name="checked_track_color">#FFFF</color> <!-- Light Purple -->
+
 </resources>

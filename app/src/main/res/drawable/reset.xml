@@ -1,0 +1,55 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="@color/btn_color"
+      android:pathData="M13.66,0.006A10.024,10.024 0,0 0,5.937 3.396,12.8 12.8,0 0,0 2.71,12.006L0.593,12.006a0.673,0.673 0,0 0,-0.414 1.133l3.3,3.719a0.541,0.541 0,0 0,0.84 0l3.311,-3.719A0.686,0.686 0,0 0,7.191 12.006L5.075,12.006c0,-5.186 3.784,-9.411 8.4,-9.331 4.387,0.067 8.089,4.239 8.16,9.2 0.071,5.212 -3.666,9.465 -8.278,9.465a7.626,7.626 0,0 1,-5 -1.906,1.078 1.078,0 0,0 -1.549,0.12 1.44,1.44 0,0 0,0.106 2,9.856 9.856,0 0,0 6.445,2.453c5.984,0 10.809,-5.559 10.643,-12.331C23.837,5.406 19.206,0.179 13.66,0.006ZM13.353,6.671ZM13.353,8.004A1.268,1.268 0,0 1,14.537 9.337S12.702,8.006 13.353,8.006Z"/>
+  <path
+      android:pathData="M17.663,17.961L9.337,17.961L13.5,11.149L17.663,17.961Z"
+      android:fillColor="#0affff"
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M13.5,12.588L10.675,17.211L16.325,17.211L13.5,12.588M13.5,9.711L19,18.711L8,18.711L13.5,9.711Z"
+      android:fillColor="@color/btn_color"
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M9.521,6.511L17.479,6.511L13.5,12.299L9.521,6.511Z"
+
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M13.5,10.887L15.958,7.311L11.042,7.311L13.5,10.887M13.5,13.711L8,5.711L19,5.711L13.5,13.711Z"
+      android:fillColor="@color/btn_color"
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M12.959,15.98m-0.5,0a0.5,0.5 0,1 1,1 0a0.5,0.5 0,1 1,-1 0"
+      android:strokeWidth="1"
+      android:fillColor="@color/btn_color"
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M12.959,15.98m-0,0a0,0 0,1 1,0 0a0,0 0,1 1,-0 0"
+      android:strokeWidth="1"
+
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M16.522,17.865m-0.5,0a0.5,0.5 0,1 1,1 0a0.5,0.5 0,1 1,-1 0"
+      android:strokeWidth="1"
+      android:fillColor="@color/btn_color"
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M16.522,17.865m-0,0a0,0 0,1 1,0 0a0,0 0,1 1,-0 0"
+      android:strokeWidth="1"
+      android:fillColor="@color/btn_color"
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M13.741,14.211m-0.5,0a0.5,0.5 0,1 1,1 0a0.5,0.5 0,1 1,-1 0"
+      android:strokeWidth="1"
+      android:fillColor="@color/btn_color"
+      android:strokeColor="@color/btn_color"/>
+  <path
+      android:pathData="M13.741,14.211m-0,0a0,0 0,1 1,0 0a0,0 0,1 1,-0 0"
+      android:strokeWidth="1"
+      android:fillColor="@color/btn_color"
+      android:strokeColor="@color/btn_color"/>
+</vector>

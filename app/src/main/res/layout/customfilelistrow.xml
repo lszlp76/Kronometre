@@ -10,8 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listviewrow"
-        style="@style/textColorStyle"
-        android:fontFamily="@font/digital7"
+        style="@style/TableText"
+
         android:textSize="24dp"
         android:text="deneme"
         android:paddingTop="10dip"
@@ -20,14 +20,14 @@
 
     <ImageView
         android:id="@+id/share"
-        style="@style/textColorStyle"
+        style="@style/TableText"
         android:textAlignment="viewEnd"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_weight="2"
         android:background="#009688"
         android:visibility="gone"
-
+        android:contentDescription=""
 
         android:src="@drawable/ic_send"
 
@@ -35,7 +35,7 @@
         />
     <ImageView
         android:id="@+id/delete"
-        style="@style/textColorStyle"
+        style="@style/TableText"
         android:textAlignment="viewEnd"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -43,7 +43,7 @@
         android:background="#001496"
         android:src="@drawable/ic_delete"
         android:visibility="gone"
-
+        android:contentDescription="delete"
 
         />
 </LinearLayout>
