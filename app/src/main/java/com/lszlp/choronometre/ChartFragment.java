@@ -10,7 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
-
+import android.content.ContentValues;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import java.io.OutputStream;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -139,21 +144,48 @@ public class ChartFragment extends Fragment {
 
         for (int i = 0; i < laps.size(); i++) {
             Lap lap = laps.get(i);
+
+            // --- DÜZELTME BAŞLANGICI ---
+
+            // 1. lap veya lap.unit NULL ise bu turu atla veya varsayılan değer ver
+            if (lap == null || lap.unit == null) {
+                continue; // Veya value = 0f diyebilirsiniz.
+            }
             try {
+                // Null olmadığından emin olduktan sonra replaceAll yapıyoruz
                 String numericString = lap.unit.replaceAll("[^\\d.]", "");
+
+                // Eğer string boşaldıysa (örneğin sadece harf varsa), hata almamak için kontrol et
+                if (numericString.isEmpty()) {
+                    numericString = "0";
+                }
+
                 float value = Float.parseFloat(numericString);
                 barEntries.add(new BarEntry(lap.lapsayisi, value));
 
-                // Ortalamayı dinamik olarak hesapla ve avgTimes listesine ekle
+                // Ortalamayı hesapla
                 float currentSum = 0;
+                int count = 0; // Geçerli sayı adedi
+
                 for (int j = 0; j <= i; j++) {
-                    String currentNumericString = laps.get(j).unit.replaceAll("[^\\d.]", "");
-                    currentSum += Float.parseFloat(currentNumericString);
+                    Lap innerLap = laps.get(j);
+                    if (innerLap != null && innerLap.unit != null) {
+                        String currentNumericString = innerLap.unit.replaceAll("[^\\d.]", "");
+                        if (!currentNumericString.isEmpty()) {
+                            currentSum += Float.parseFloat(currentNumericString);
+                            count++;
+                        }
+                    }
                 }
-                avgTimes.add(currentSum / (i + 1));
+                // Bölenin 0 olmamasına dikkat et
+                if (count > 0) {
+                    avgTimes.add(currentSum / count);
+                } else {
+                    avgTimes.add(0f);
+                }
 
             } catch (NumberFormatException e) {
-                Log.e("ChartFragment", "Tur verisi ('" + lap.unit + "') parse edilirken hata.", e);
+                Log.e("ChartFragment", "Tur verisi parse edilirken hata: " + lap.unit, e);
             }
         }
         BarDataSet barDataSet = new BarDataSet(barEntries, "Cycle Time");
@@ -309,17 +341,49 @@ public class ChartFragment extends Fragment {
         Log.d("ChartFragment", "Grafik temizlendi.");
     }
 
-    /**
-     * Grafiğin mevcut görünümünü galeriye kaydeder.
-     * (Bu metodun içeriğinin çalıştığını varsayıyoruz, değişiklik yapılmasına gerek yok.)
-     */
     private void saveChartToGallery() {
-        // ... Mevcut saveChartToGallery kodunuz ...
-        // Örnek:
-        if (combinedChart.saveToGallery("Kronometre_Chart_" + System.currentTimeMillis(), 100)) {
-            Toast.makeText(getContext(), "Chart's screenchot registered in your gallery.", Toast.LENGTH_SHORT).show();
+        // 1. Grafiği Bitmap nesnesine dönüştür
+        Bitmap bitmap = combinedChart.getChartBitmap();
+
+        // 2. Dosya ismini ve diğer bilgileri hazırla
+        String fileName = "Chronometer_Chart_" + System.currentTimeMillis() + ".jpg";
+        ContentValues values = new ContentValues();
+
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, fileName);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+
+        // Android 10 (Q) ve üzeri için klasör ayarı
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Chronometer");
+            values.put(MediaStore.Images.Media.IS_PENDING, 1); // Yazma bitene kadar dosyayı gizle
+        }
+
+        // 3. MediaStore kullanarak dosyayı oluştur
+        Uri uri = requireContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        if (uri != null) {
+            try {
+                // 4. Dosya içeriğini yaz (Stream açıp bitmap'i sıkıştır)
+                OutputStream outputStream = requireContext().getContentResolver().openOutputStream(uri);
+                if (outputStream != null) {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    outputStream.close();
+
+                    // Android 10 ve üzeri için "Pending" durumunu kaldır (Dosya artık görünür)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        values.clear();
+                        values.put(MediaStore.Images.Media.IS_PENDING, 0);
+                        requireContext().getContentResolver().update(uri, values, null, null);
+                    }
+
+                    Toast.makeText(getContext(), "Chart saved into your gallery", Toast.LENGTH_SHORT).show();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(getContext(), "Saving error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         } else {
-            Toast.makeText(getContext(), "Chart's can not be registered in your gallery.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "File creation error.", Toast.LENGTH_SHORT).show();
         }
     }
 }

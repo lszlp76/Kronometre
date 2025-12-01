@@ -54,6 +54,25 @@
         </item>
 
     </group>
+    <!--item android:title="Appearance">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/theme_system"
+                    android:title="System Default"
+                    android:icon="@drawable/outline_brightness_auto_24" />
+                <item
+                    android:id="@+id/theme_light"
+                    android:title="Light Mode"
+                    android:icon="@drawable/outline_brightness_empty_24" />
+
+                <item
+                    android:id="@+id/theme_dark"
+                    android:title="Dark Mode"
+                    android:icon="@drawable/outline_brightness_7_24"/>
+            </group>
+        </menu>
+    </item-->
     <item android:title="About">
 
         <menu>

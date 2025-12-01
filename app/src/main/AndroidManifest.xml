@@ -20,7 +20,7 @@
         android:label="Industrial Chronometer"
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Kronometre.NoActionBar"
+        android:theme="@style/Theme.Kronometre"
         android:exported="true">
 
         <activity

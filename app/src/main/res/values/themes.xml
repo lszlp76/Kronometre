@@ -3,6 +3,10 @@
     <style name="Theme.Kronometre" parent="Theme.MaterialComponents.DayNight.NoActionBar">>
 
     <!-- Primary brand color. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <item name="android:windowLightStatusBar">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
         <item name="colorOnPrimary">@color/white</item>
@@ -154,4 +158,9 @@
         <item name="colorOnSurface">@color/switch_thumb_selector</item>
         <item name="colorSecondary">@color/switch_track_selector</item>
     </style>
-  </resources>
+
+
+
+</resources>
+
+

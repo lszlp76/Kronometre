@@ -41,13 +41,26 @@ public class LapListAdapter extends RecyclerView.Adapter<LapListAdapter.LapListV
 
     @Override
     public void onBindViewHolder(@NonNull LapListViewHolder holder, int position) {
-        ;
+
 
         Context context = holder.itemView.lapline.getContext();
+        Lap currentLap = lapArrayList.get(position);
         holder.itemView.laprow3.setText(lapArrayList.get(position).unit);
         holder.itemView.laprow1.setText(String.valueOf(lapArrayList.get(position).lapsayisi));
         holder.itemView.laprow2.setText(lapArrayList.get(position).lap);
-
+// --- İKON DEĞİŞTİRME MANTIĞI BAŞLANGICI ---
+        // Not (message) var mı kontrol et
+        if (currentLap.message != null && !currentLap.message.trim().isEmpty())
+        {
+            // Not varsa "Düzenle" ikonunu göster
+            holder.addNote.setImageResource(R.drawable.outline_edit_note_24);
+        }
+        else
+        {
+            // Not yoksa "Ekle" ikonunu göster
+            holder.addNote.setImageResource(R.drawable.outline_add_notes_24);
+        }
+        // --- İKON DEĞİŞTİRME MANTIĞI SONU ---
 //listedeki her bir satırın rengini değiştiriyor
 if (position % 2 == 0) {
            holder.itemView.lapline.setBackgroundColor(

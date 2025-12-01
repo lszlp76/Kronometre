@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import androidx.activity.EdgeToEdge;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -36,7 +37,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
-import androidx.core.view.WindowCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.gms.ads.AdListener;
@@ -102,16 +102,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 // KRİTİK: Modern Uçtan Uca Desteği Etkinleştirme
-
+// 1. Edge-to-Edge özelliğini aktif et (Android 15 uyumu için en kritik satır)
+        // Bu satır WindowCompat.setDecorFitsSystemWindows(getWindow(), false); işlemini de kapsar.
+        EdgeToEdge.enable(this);
 
         super.onCreate(savedInstanceState);
 
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-       //setContentView(R.layout.activity_main);
+        // WindowCompat.setDecorFitsSystemWindows(getWindow(), false); // <-- Buna artık gerek yok, EdgeToEdge.enable hallediyor.
 
-         if (getSupportActionBar() != null) {
+        if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
+
 
         checkAndRequestAllPermissions();
         initializeApp();
@@ -155,36 +157,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Uçtan Uca (Edge-to-Edge) Inset'lerini (boşluklarını) yönetme
 
-        // Bu listener, sistem çubukları (status, navigation) değiştiğinde tetiklenir.
+        // 2. Uçtan Uca (Edge-to-Edge) Inset Ayarları
+        // EdgeToEdge.enable() kullanıldığında sistem çubukları şeffaf olur.
+        // Bu yüzden Toolbar'ın üstüne ve Butonların altına manuel boşluk (padding) eklemeliyiz.
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            // Sistem çubuklarının (üst ve alt) piksellerini al
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-// Yeni: Navigasyon çubuğu boşluğunu al
-            // Bu, sistem çubukları boşluğundan (top+bottom) ayrılan
-            // sadece alt navigasyon çubuğu boşluğunu verir.
-            Insets navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars());
-
-            // 1. Üstteki AppBarLayout'a (Toolbar'ı içeren) üst padding uygula
+// Toolbar'ı status bar'ın altına itmek için üst padding ekle
             binding.mainToolbar.setPadding(
                     binding.mainToolbar.getPaddingLeft(),
-                    systemBars.top, // Sistem çubuğu (status bar) boşluğu
+                    systemBars.top,
                     binding.mainToolbar.getPaddingRight(),
                     binding.mainToolbar.getPaddingBottom()
             );
 
-            // 2. Alttaki buton layout'una (RelativeLayout) alt padding uygula
-            // BURAYI DEĞİŞTİRİYORUZ!
+            // Alt butonları navigasyon çubuğunun (gesture bar veya 3 buton) üzerine itmek için alt padding ekle
             binding.buttons.setPadding(
                     binding.buttons.getPaddingLeft(),
                     binding.buttons.getPaddingTop(),
                     binding.buttons.getPaddingRight(),
-                    // Sadece navigasyon çubuğu boşluğunu kullanıyoruz
-                    navigationBars.bottom
+                    systemBars.bottom // navigationBars.bottom yerine systemBars.bottom kullanmak daha güvenlidir
             );
 
-            // Inset'leri (boşlukları) tükettik,
-            // alt görünümlerin tekrar işlemesine gerek yok.
-            return WindowInsetsCompat.CONSUMED;
+            // DrawerLayout kullandığınız için 'CONSUMED' döndürmeyin, insets'i zincirleme devam ettirin.
+            // Böylece DrawerLayout da kendi inset ayarlarını yapabilsin.
+            return insets;
         });
 
         activateReviewInfo();
