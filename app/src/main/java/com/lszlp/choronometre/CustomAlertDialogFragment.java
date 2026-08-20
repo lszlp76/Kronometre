@@ -13,7 +13,21 @@ import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.content.Intent;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import java.util.ArrayList;
+import java.util.Locale;
+import android.widget.Toast;
+import android.content.pm.PackageManager;
+import android.Manifest;
+import androidx.core.content.ContextCompat;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -34,6 +48,15 @@ public class CustomAlertDialogFragment extends DialogFragment {
     private ChronometerAction currentAction;
     private EditText fileNameInput;
     private EditText noteInput;
+    private ImageButton btnVoiceInput;
+    private LinearLayout inputContainer;
+
+    private SpeechRecognizer speechRecognizer;
+    private Intent speechRecognizerIntent;
+    private boolean isListening = false;
+    private String textBeforeSpeech = "";
+
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     // Diyalog Tiplerini tanımlıyoruz
     public enum ChronometerAction {
@@ -115,8 +138,88 @@ public class CustomAlertDialogFragment extends DialogFragment {
     // =================================================================
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (SpeechRecognizer.isRecognitionAvailable(requireContext())) {
+            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(requireContext());
+            speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+            speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+
+            speechRecognizer.setRecognitionListener(new RecognitionListener() {
+                @Override
+                public void onReadyForSpeech(Bundle params) {
+                    isListening = true;
+                    textBeforeSpeech = fileNameInput.getText().toString().trim();
+                    btnVoiceInput.setColorFilter(Color.RED);
+                    Toast.makeText(getContext(), "Listening...", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onBeginningOfSpeech() {}
+
+                @Override
+                public void onRmsChanged(float rmsdB) {}
+
+                @Override
+                public void onBufferReceived(byte[] buffer) {}
+
+                @Override
+                public void onEndOfSpeech() {
+                    isListening = false;
+                    btnVoiceInput.clearColorFilter();
+                }
+
+                @Override
+                public void onError(int error) {
+                    isListening = false;
+                    btnVoiceInput.clearColorFilter();
+                    Log.e("SpeechRecognizer", "Error: " + error);
+                }
+
+                @Override
+                public void onResults(Bundle results) {
+                    ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                    if (data != null && !data.isEmpty()) {
+                        String spokenText = data.get(0);
+                        updateInputText(spokenText);
+                    }
+                }
+
+                @Override
+                public void onPartialResults(Bundle partialResults) {
+                    ArrayList<String> data = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                    if (data != null && !data.isEmpty()) {
+                        String partialText = data.get(0);
+                        updateInputText(partialText);
+                    }
+                }
+
+                @Override
+                public void onEvent(int eventType, Bundle params) {}
+            });
+        }
+
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        startSpeechToText();
+                    } else {
+                        Toast.makeText(getContext(), "Microphone permission is required for voice input", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).drawer.setAlpha(1.f); // Drawer'ı tekrar görünür yapar
         }
@@ -166,6 +269,8 @@ public class CustomAlertDialogFragment extends DialogFragment {
         TextView messageView = view.findViewById(R.id.dialogMessage);
         fileNameInput = view.findViewById(R.id.dialogFileNameInput);
         noteInput = view.findViewById(R.id.dialogNoteInput);
+        inputContainer = view.findViewById(R.id.inputContainer);
+        btnVoiceInput = view.findViewById(R.id.btnVoiceInput);
         Button btnPositive = view.findViewById(R.id.btnPositive);
         Button btnNegative = view.findViewById(R.id.btnNegative);
 
@@ -177,7 +282,9 @@ public class CustomAlertDialogFragment extends DialogFragment {
             titleView.setText("SAVE FILE");
             messageView.setText("Please enter your file name:");
             btnPositive.setText("SAVE");
+            inputContainer.setVisibility(View.VISIBLE);
             fileNameInput.setVisibility(View.VISIBLE);
+            btnVoiceInput.setVisibility(View.GONE);
 
         } else if (currentAction == ChronometerAction.RESET) {
             titleView.setText("RESET ALL DATA");
@@ -199,7 +306,9 @@ public class CustomAlertDialogFragment extends DialogFragment {
 
             fileNameInput.setHint("Add notes here..."); // EditText'in hint'ini değiştir
             fileNameInput.setText(currentNote); // Mevcut notu EditText'e ata
+            inputContainer.setVisibility(View.VISIBLE); // Konteynırı göster
             fileNameInput.setVisibility(View.VISIBLE); // EditText'i göster
+            btnVoiceInput.setVisibility(View.VISIBLE); // Sesli giriş butonunu göster
             btnPositive.setText("SAVE NOTE");
         } else if (currentAction == ChronometerAction.DELETE_LAP) {
             int lapNumber = getArguments().getInt(ARG_LAP_NUMBER);
@@ -241,6 +350,11 @@ public class CustomAlertDialogFragment extends DialogFragment {
             }
             // Tüm başarılı işlemlerden sonra diyaloğu kapat
             dismiss();
+        });
+
+        // Sesli giriş butonu tıklama olayı
+        btnVoiceInput.setOnClickListener(v -> {
+            startSpeechToText();
         });
 
         // Negatif butona tıklama olayı (Tüm eylemler için aynı: İptal)
@@ -289,5 +403,34 @@ public class CustomAlertDialogFragment extends DialogFragment {
         return dialog;
 
 
+    }
+
+    private void startSpeechToText() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO);
+            return;
+        }
+
+        if (speechRecognizer != null) {
+            if (isListening) {
+                speechRecognizer.stopListening();
+                isListening = false;
+                btnVoiceInput.clearColorFilter();
+            } else {
+                speechRecognizer.startListening(speechRecognizerIntent);
+            }
+        } else {
+            Toast.makeText(getContext(), getString(R.string.speech_not_supported), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateInputText(String spokenText) {
+        if (textBeforeSpeech.isEmpty()) {
+            fileNameInput.setText(spokenText);
+        } else {
+            fileNameInput.setText(textBeforeSpeech + " " + spokenText);
+        }
+        fileNameInput.setSelection(fileNameInput.getText().length());
     }
 }

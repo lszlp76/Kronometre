@@ -42,6 +42,9 @@ HM unit is used  as 'centième de minute - CMin ' for some industrial sector. Ma
     <string name="save_text">SAVE</string>
     <string name="ratetext">How much did you like Industrial Chronometer?</string>
     <string name="ten_thousandth_of_hours">Ten thousandth of hours</string>
+    <string name="voice_input">Voice Input</string>
+    <string name="speak_now">Speak now...</string>
+    <string name="speech_not_supported">Speech recognition not supported on this device</string>
 
 
     <string name="action_back">Back</string>

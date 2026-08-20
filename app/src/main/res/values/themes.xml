@@ -48,13 +48,20 @@
         <!--item name="android:autoSizeTextType">uniform</item-->
 
     </style>
-    <style name="AlertDialogCustom" parent="@android:style/Theme.Dialog">
+    <style name="AlertDialogCustom" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
         <item name="android:textColor">@color/white</item>
-
-        <item name="android:backgroundTint">#f48fb1</item>
-
+        <item name="android:windowBackground">@drawable/glass_panel_background</item>
+        <item name="android:background">#2D2D30</item>
         <item name="android:typeface">sans</item>
         <item name="android:textSize">15sp</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DialogButtonStyle</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogButtonStyle</item>
+    </style>
+
+    <style name="DialogButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">#00ffff</item>
+        <item name="android:fontFamily">@font/robotoflex</item>
+        <item name="android:textSize">16sp</item>
     </style>
     <style name="PositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
         <item name="android:textColor">#FFFFFF</item>
@@ -157,6 +164,13 @@
     <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorOnSurface">@color/switch_thumb_selector</item>
         <item name="colorSecondary">@color/switch_track_selector</item>
+    </style>
+
+    <style name="DialogInputStyle" parent="TableText">
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:paddingStart">4dp</item>
     </style>
 
 

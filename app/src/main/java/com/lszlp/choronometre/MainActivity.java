@@ -43,6 +43,10 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.play.core.review.ReviewInfo;
@@ -91,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean auth;// lap için onay verilmesi lazım  auth = true ise çalışıyor demek
     private ActionBarDrawerToggle toggle;
     PageViewModel pageViewModel;
+    private InterstitialAd mInterstitialAd;
 
     private final int[] TAB_ICONS = {
             R.drawable.ic_baseline_timer_24,
@@ -192,6 +197,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         MobileAds.initialize(this, initializationStatus -> {
             // SDK is initialized, now load the ad.
             loadBannerAd();
+            loadInterstitialAd();
         });
         adView = binding.adView;
 
@@ -682,6 +688,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
 
+        // 3. Ses Kayıt İzni (Sesle Not Yazma İçin)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.RECORD_AUDIO);
+        }
+
         // Diğer İzinler (FOREGROUND_SERVICE, WAKE_LOCK, vb. koruma seviyesi normal olduğu için Runtimeda istenmezler)
         // Internet, FOREGROUND_SERVICE gibi izinler "normal" koruma seviyesindedir ve kurulurken otomatik verilir.
         // Bu yüzden sadece kullanıcı izni gerektirenleri (Depolama ve Bildirim) istiyoruz.
@@ -907,10 +918,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (dialog.getWindow() != null) {
                     dialog.getWindow().setBackgroundDrawable
                             (new ColorDrawable
-                                    (Color.parseColor
-                                            ("#" + Integer.toHexString
-                                                    (ContextCompat.getColor
-                                                            (this, R.color.colorDisable)))));
+                                    (Color.parseColor("#2D2D30")));
                 }
                 dialog.setContentView(R.layout.dialog);
                 dialog.show();
@@ -999,6 +1007,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+
+    private void loadInterstitialAd() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+        // Geçiş Reklamı Test ID: ca-app-pub-3940256099942544/1033173712
+        InterstitialAd.load(this, "ca-app-pub-2013051048838339/7369512645", adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        mInterstitialAd = interstitialAd;
+                        Log.i(TAG, "Interstitial ad loaded");
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        Log.i(TAG, "Interstitial ad failed to load: " + loadAdError.getMessage());
+                        mInterstitialAd = null;
+                    }
+                });
+    }
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -1025,6 +1052,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onResetConfirmed() {
+        if (mInterstitialAd != null) {
+            mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    Log.d(TAG, "Ad dismissed");
+                    mInterstitialAd = null;
+                    loadInterstitialAd();
+                    performReset();
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    Log.e(TAG, "Ad failed to show: " + adError.getMessage());
+                    mInterstitialAd = null;
+                    performReset();
+                }
+            });
+            mInterstitialAd.show(MainActivity.this);
+        } else {
+            performReset();
+        }
+    }
+
+    private void performReset() {
         if (viewPager.getAdapter() != null) {
             // Fragment'ı doğru şekilde al
             TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
@@ -1033,7 +1084,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // Yeni oluşturduğumuz kapsamlı sıfırlama metodunu çağır
                 fragment.resetAll();
                 //UI güncellemesi
-                startButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.play, 0, 0) ;// Play simgesi
+                startButton.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.play, 0, 0);// Play simgesi
 
 
                 // MainActivity'deki durumu da sıfırla
@@ -1070,11 +1121,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
     @Override
     public void onSaveConfirmed(String fileName) {
+        if (mInterstitialAd != null) {
+            mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    Log.d(TAG, "Save ad dismissed");
+                    mInterstitialAd = null;
+                    loadInterstitialAd();
+                    performSave(fileName);
+                }
+
+                @Override
+                public void onAdFailedToShowFullScreenContent(@NonNull AdError adError) {
+                    Log.e(TAG, "Save ad failed to show: " + adError.getMessage());
+                    mInterstitialAd = null;
+                    performSave(fileName);
+                }
+            });
+            mInterstitialAd.show(MainActivity.this);
+        } else {
+            performSave(fileName);
+        }
+    }
+
+    private void performSave(String fileName) {
         TimerFragment fragment = (TimerFragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
         // Düzeltildi: fileName değişkeni save() metoduna parametre olarak eklendi
         fragment.save(fileName);
-
-
     }
 
     @Override
