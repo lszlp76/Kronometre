@@ -31,6 +31,10 @@ import android.os.Handler;
 import android.os.Looper;
 import com.lszlp.choronometre.databinding.FragmentTimerBinding;
 import com.lszlp.choronometre.main.PageViewModel;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.AdView;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -536,10 +540,29 @@ currentBinding = getBinding();
 
     }
 
+    private void loadBannerAd() {
+        if (_binding == null || _binding.adView == null) return;
+        AdView adView = _binding.adView;
+        AdRequest adRequest = new AdRequest.Builder().build();
+        adView.loadAd(adRequest);
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                Log.d("TimerFragment", "Ad loaded successfully");
+            }
+
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError adError) {
+                Log.e("TimerFragment", "Ad failed to load: " + adError.getMessage());
+            }
+        });
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        loadBannerAd();
 // 🔥 ÖNEMLİ: Önce view'ları başlat, sonra unit değerini yükle
         initializeViews();
 // 🔥 EKLE: View'lar hazır olduğunda unit değerini tekrar yükle

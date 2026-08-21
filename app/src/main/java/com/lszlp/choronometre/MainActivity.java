@@ -25,7 +25,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.Toast;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -39,10 +39,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
-import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
@@ -86,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     androidx.appcompat.widget.SwitchCompat screenSaverSwitch;
    Slider drawerSlider;
     ViewPager viewPager;
-    private AdView adView ;
     Button startButton;
     Button lapButton;
     Button resetButton;
@@ -190,16 +187,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         activateReviewInfo();
 
-        //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
-        //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
-        adView = binding.adView;
         // / Initialize the Google Mobile Ads SDK on the main thread.
         MobileAds.initialize(this, initializationStatus -> {
             // SDK is initialized, now load the ad.
-            loadBannerAd();
             loadInterstitialAd();
         });
-        adView = binding.adView;
 
         // Check for WRITE_EXTERNAL_STORAGE permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -967,45 +959,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             });
         }
 
-    }
-    private void loadBannerAd() {
-        //ad mob banner test id :ca-app-pub-3940256099942544/9214589741
-        //Ad mod banner ıd : ca-app-pub-2013051048838339/8612047524
-        if (adView == null) {
-            Log.e(TAG, "AdView is null — skipping ad load to prevent crash");
-            return;
-        }
-        AdRequest adRequest = new AdRequest.Builder().build();
-        adView.loadAd(adRequest);
-        adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                // Code to be executed when an ad finishes loading.
-                Log.d(TAG, "Ad loaded successfully");
-            }
-
-            @Override
-            public void onAdFailedToLoad(@NonNull LoadAdError adError) {
-                // Code to be executed when an ad request fails.
-                Log.e(TAG, "Ad failed to load: " + adError.getMessage());
-                Toast.makeText(MainActivity.this, "Ad failed to load", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onAdOpened() {
-                // Code to be executed when an ad opens an overlay that covers the screen.
-            }
-
-            @Override
-            public void onAdClicked() {
-                // Code to be executed when the user clicks on an ad.
-            }
-
-            @Override
-            public void onAdClosed() {
-                // Code to be executed when the user is about to return to the app after tapping on an ad.
-            }
-        });
     }
 
     private void loadInterstitialAd() {
