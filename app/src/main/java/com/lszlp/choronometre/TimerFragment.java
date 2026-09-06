@@ -90,7 +90,7 @@ public class TimerFragment extends Fragment {
                 Boolean isRunning = serviceIsRunning;
                // Boolean isPaused = serviceIsPaused;
                 // 🔥 KRİTİK EKLEME: ÜYE DEĞİŞKENİ GÜNCELLE-12.11.2025 uı backgroun uyumusuzluk problemi
-                isServicePaused = serviceIsPaused; // Servis'ten gelen duraklatma durumunu Fragment'a kaydet!
+                isServicePaused = serviceIsPaused; // Servis'ten gelen duraklatma durumunu Fragment'ا kaydet!
                 // 3. UI'ı GÜNCELLE
                 updateTimeDisplay(lastKnownElapsedTime); // Bu metot, TextView'i güncelleyen metottur.
                 updateButtonStates();
@@ -107,6 +107,18 @@ public class TimerFragment extends Fragment {
                     // updateTimeDisplay(lastKnownElapsedTime); çağrısının hemen ardından
                     // Zaman güncelleme yayınlarını (ACTION_TIME_UPDATE) beklemeye başlanır.
                     // Bu yüzden 3. adımdaki UI güncellemesi HAYATİDİR.
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver adsRemovedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Constants.ACTION_ADS_REMOVED.equals(intent.getAction())) {
+                if (_binding != null && _binding.adView != null) {
+                    _binding.adView.setVisibility(View.GONE);
+                    _binding.adView.pause();
                 }
             }
         }
@@ -265,6 +277,17 @@ long MillisecondTime, StopTime, StartTime, TimeBuff, UpdateTime = 0L;
                 statusResponseReceiver,
                 new IntentFilter(Constants.ACTION_STATUS_RESPONSE)
         );
+        LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
+                adsRemovedReceiver,
+                new IntentFilter(Constants.ACTION_ADS_REMOVED)
+        );
+        if (_binding != null && _binding.adView != null) {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            if (prefs.getBoolean("is_ads_removed", false)) {
+                _binding.adView.setVisibility(View.GONE);
+                _binding.adView.pause();
+            }
+        }
         //IntentFilter timeUpdateFilter = new IntentFilter(Constants.ACTION_TIME_UPDATE);
         //LocalBroadcastManager.getInstance(requireContext()).registerReceiver(timeUpdateReceiver, timeUpdateFilter);
 
@@ -542,6 +565,14 @@ currentBinding = getBinding();
 
     private void loadBannerAd() {
         if (_binding == null || _binding.adView == null) return;
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        if (prefs.getBoolean("is_ads_removed", false)) {
+            _binding.adView.setVisibility(View.GONE);
+            _binding.adView.pause();
+            return;
+        }
+
         AdView adView = _binding.adView;
         AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
@@ -1323,6 +1354,7 @@ currentBinding = getBinding();
             // 1. Alıcıları KAYITTAN SİL (Çok önemli, her zaman burada yapılmalı)
             LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(timeUpdateReceiver);
             LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(statusResponseReceiver);
+            LocalBroadcastManager.getInstance(requireContext()).unregisterReceiver(adsRemovedReceiver);
         } //cut zaman güncelleme alıcınızın da burada kayıttan silindiğinden emin olun!
     }
 

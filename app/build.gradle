@@ -9,15 +9,16 @@ android {
         applicationId "com.lszlp.choronometre"
         minSdk 29
         targetSdk 36
-        versionCode 47
-        versionName '5.5'
+        versionCode 52
+        versionName '6.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -56,10 +57,11 @@ dependencies {
     implementation 'it.xabaras.android:recyclerview-swipedecorator:1.4'
 
 
-    testImplementation 'junit:junit:'
+    testImplementation 'junit:junit:4.13.2'
     implementation 'net.sourceforge.jexcelapi:jxl:2.6.12'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     implementation 'com.google.android.gms:play-services-ads:24.7.0'
+    implementation 'com.android.billingclient:billing:8.3.0'
 }

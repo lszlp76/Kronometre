@@ -51,5 +51,7 @@ public static final String PREF_FIRST_TIME_LAUNCH = "IsFirstTimeLaunch";
     // 🔥 YENİ: Zaman Birimi Güncelleme Eylemi (Broadcast için)
     public static final String ACTION_TIME_UNIT_UPDATE = "com.lszlp.choronometre.ACTION_TIME_UNIT_UPDATE";
 
+    // 🔥 YENİ: Reklam Kaldırma Eylemi
+    public static final String ACTION_ADS_REMOVED = "com.lszlp.choronometre.ACTION_ADS_REMOVED";
 
 }

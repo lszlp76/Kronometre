@@ -61,6 +61,18 @@ import java.util.List;
 
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.ViewCompat;
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.ProductDetails;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.QueryProductDetailsParams;
+import com.android.billingclient.api.QueryPurchasesParams;
+import com.android.billingclient.api.PendingPurchasesParams;
+import com.android.billingclient.api.QueryProductDetailsResult;
 //rate app teset internal
 
 
@@ -93,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ActionBarDrawerToggle toggle;
     PageViewModel pageViewModel;
     private InterstitialAd mInterstitialAd;
+    private BillingClient billingClient;
+    private boolean isAdsRemoved = false;
+    ActivityMainBinding binding;
 
     private final int[] TAB_ICONS = {
             R.drawable.ic_baseline_timer_24,
@@ -103,12 +118,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-// KRİTİK: Modern Uçtan Uca Desteği Etkinleştirme
-// 1. Edge-to-Edge özelliğini aktif et (Android 15 uyumu için en kritik satır)
+        super.onCreate(savedInstanceState);
+
+        // KRİTİK: Modern Uçtan Uca Desteği Etkinleştirme
+        // 1. Edge-to-Edge özelliğini aktif et (Android 15 uyumu için en kritik satır)
         // Bu satır WindowCompat.setDecorFitsSystemWindows(getWindow(), false); işlemini de kapsar.
         EdgeToEdge.enable(this);
-
-        super.onCreate(savedInstanceState);
 
         // WindowCompat.setDecorFitsSystemWindows(getWindow(), false); // <-- Buna artık gerek yok, EdgeToEdge.enable hallediyor.
 
@@ -153,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Ana uygulama içeriğini hazırla
 
        // new ThemeColors(this); // renk değiştirme sınıfı
-        com.lszlp.choronometre.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
 
@@ -165,27 +180,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
 // Toolbar'ı status bar'ın altına itmek için üst padding ekle
-            binding.mainToolbar.setPadding(
-                    binding.mainToolbar.getPaddingLeft(),
-                    systemBars.top,
-                    binding.mainToolbar.getPaddingRight(),
-                    binding.mainToolbar.getPaddingBottom()
-            );
+            if (binding.mainToolbar != null) {
+                binding.mainToolbar.setPadding(
+                        binding.mainToolbar.getPaddingLeft(),
+                        systemBars.top,
+                        binding.mainToolbar.getPaddingRight(),
+                        binding.mainToolbar.getPaddingBottom()
+                );
+            }
 
             // Alt butonları navigasyon çubuğunun (gesture bar veya 3 buton) üzerine itmek için alt padding ekle
-            binding.buttons.setPadding(
-                    binding.buttons.getPaddingLeft(),
-                    binding.buttons.getPaddingTop(),
-                    binding.buttons.getPaddingRight(),
-                    systemBars.bottom // navigationBars.bottom yerine systemBars.bottom kullanmak daha güvenlidir
-            );
+            if (binding.buttons != null) {
+                binding.buttons.setPadding(
+                        binding.buttons.getPaddingLeft(),
+                        binding.buttons.getPaddingTop(),
+                        binding.buttons.getPaddingRight(),
+                        systemBars.bottom // navigationBars.bottom yerine systemBars.bottom kullanmak daha güvenlidir
+                );
+            }
 
             // DrawerLayout kullandığınız için 'CONSUMED' döndürmeyin, insets'i zincirleme devam ettirin.
             // Böylece DrawerLayout da kendi inset ayarlarını yapabilsin.
             return insets;
         });
 
-        activateReviewInfo();
+        setupBillingClient();
 
         // / Initialize the Google Mobile Ads SDK on the main thread.
         MobileAds.initialize(this, initializationStatus -> {
@@ -226,6 +245,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //navigation menu aktivasyon
         navigationView = binding.navView;
         navigationView.setNavigationItemSelectedListener(this);
+        if (isAdsRemoved) {
+            updateRemoveAdsMenuState();
+        }
+        activateReviewInfo();
 
         toggle = new ActionBarDrawerToggle(
                 this,
@@ -845,7 +868,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
         int itemId = item.getItemId();
-        if (itemId == R.id.nav_about) {
+        if (itemId == R.id.nav_remove_ads) {
+            buyRemoveAds();
+        } else if (itemId == R.id.nav_about) {
             Intent intent = new Intent(MainActivity.this, WebpagesActivities.class);
             String link = "https://www.agromtek.com/industrialchronometer/";
             intent.putExtra("link", link);
@@ -941,8 +966,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 reviewInfo = task.getResult();
             } else {
                 // There was some problem, log or handle the error code.
-                navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated !");
+                if (navigationView != null && navigationView.getMenu() != null) {
+                    MenuItem item = navigationView.getMenu().findItem(R.id.rateApp);
+                    if (item != null) {
+                        item.setEnabled(false);
+                        item.setTitle("Rated !");
+                    }
+                }
             }
         });
     }
@@ -954,14 +984,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // reviewed or not, or even whether the review dialog was shown. Thus, no
                 // matter the result, we continue our app flow.
                 Toast.makeText(this,"Review completed",Toast.LENGTH_LONG).show();
-                navigationView.getMenu().findItem(R.id.rateApp).setEnabled(false);
-                navigationView.getMenu().findItem(R.id.rateApp).setTitle("Rated!");
+                if (navigationView != null && navigationView.getMenu() != null) {
+                    MenuItem item = navigationView.getMenu().findItem(R.id.rateApp);
+                    if (item != null) {
+                        item.setEnabled(false);
+                        item.setTitle("Rated!");
+                    }
+                }
             });
         }
 
     }
 
     private void loadInterstitialAd() {
+        if (isAdsRemoved) {
+            mInterstitialAd = null;
+            return;
+        }
         AdRequest adRequest = new AdRequest.Builder().build();
         // Geçiş Reklamı Test ID: ca-app-pub-3940256099942544/1033173712
         InterstitialAd.load(this, "ca-app-pub-2013051048838339/7369512645", adRequest,
@@ -1376,5 +1415,169 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return fragment != null && fragment.modul > 0 && fragment.unit != null && !fragment.unit.equals("No Unit");
         }
         return false;
+    }
+
+    private void setupBillingClient() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        isAdsRemoved = prefs.getBoolean("is_ads_removed", false);
+
+        PurchasesUpdatedListener purchasesUpdatedListener = (billingResult, purchases) -> {
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
+                for (Purchase purchase : purchases) {
+                    handlePurchase(purchase);
+                }
+            }
+        };
+
+        billingClient = BillingClient.newBuilder(this)
+                .setListener(purchasesUpdatedListener)
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
+                .build();
+
+        connectBillingService();
+    }
+
+    private void connectBillingService() {
+        billingClient.startConnection(new BillingClientStateListener() {
+            @Override
+            public void onBillingSetupFinished(@NonNull BillingResult billingResult) {
+                if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                    checkExistingPurchases();
+                }
+            }
+
+            @Override
+            public void onBillingServiceDisconnected() {
+                // Retry connection if needed
+            }
+        });
+    }
+
+    private void checkExistingPurchases() {
+        billingClient.queryPurchasesAsync(
+                QueryPurchasesParams.newBuilder()
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build(),
+                (billingResult, purchases) -> {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        boolean hasRemoveAds = false;
+                        if (purchases != null) {
+                            for (Purchase purchase : purchases) {
+                                if (purchase.getProducts().contains("remove_ads") &&
+                                        purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+                                    hasRemoveAds = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (hasRemoveAds) {
+                            isAdsRemoved = true;
+                            hideAdsFromUI();
+                        } else {
+                            isAdsRemoved = false;
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                            prefs.edit().putBoolean("is_ads_removed", false).apply();
+                            updateRemoveAdsMenuState();
+                        }
+                    }
+                }
+        );
+    }
+
+    public void buyRemoveAds() {
+
+        if (billingClient == null || !billingClient.isReady()) {
+            Toast.makeText(this, "Billing client is not ready", Toast.LENGTH_SHORT).show();
+            System.out.println("buyRemoveAds");
+            return;
+        }
+
+        List<QueryProductDetailsParams.Product> productList = new ArrayList<>();
+        productList.add(
+                QueryProductDetailsParams.Product.newBuilder()
+                        .setProductId("remove_ads")
+                        .setProductType(BillingClient.ProductType.INAPP)
+                        .build()
+        );
+
+        QueryProductDetailsParams params = QueryProductDetailsParams.newBuilder()
+                .setProductList(productList)
+                .build();
+
+        billingClient.queryProductDetailsAsync(params, (billingResult, queryProductDetailsResult) -> {
+            List<ProductDetails> productDetailsList = queryProductDetailsResult.getProductDetailsList();
+            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && productDetailsList != null && !productDetailsList.isEmpty()) {
+                ProductDetails productDetails = productDetailsList.get(0);
+
+                List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList = new ArrayList<>();
+                productDetailsParamsList.add(
+                        BillingFlowParams.ProductDetailsParams.newBuilder()
+                                .setProductDetails(productDetails)
+                                .build()
+                );
+
+                BillingFlowParams billingFlowParams = BillingFlowParams.newBuilder()
+                        .setProductDetailsParamsList(productDetailsParamsList)
+                        .build();
+
+                billingClient.launchBillingFlow(MainActivity.this, billingFlowParams);
+            } else {
+                Toast.makeText(this, "Product details not found.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void handlePurchase(Purchase purchase) {
+        if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+            if (!purchase.isAcknowledged()) {
+                AcknowledgePurchaseParams acknowledgePurchaseParams =
+                        AcknowledgePurchaseParams.newBuilder()
+                                .setPurchaseToken(purchase.getPurchaseToken())
+                                .build();
+                billingClient.acknowledgePurchase(acknowledgePurchaseParams, billingResult -> {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        isAdsRemoved = true;
+                        hideAdsFromUI();
+                        Toast.makeText(this, "Ads successfully removed!", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                isAdsRemoved = true;
+                hideAdsFromUI();
+            }
+        }
+    }
+
+    private void updateRemoveAdsMenuState() {
+        runOnUiThread(() -> {
+            if (navigationView != null && navigationView.getMenu() != null) {
+                MenuItem item = navigationView.getMenu().findItem(R.id.nav_remove_ads);
+                if (item != null) {
+                    item.setVisible(!isAdsRemoved);
+                }
+            }
+        });
+    }
+
+    private void hideAdsFromUI() {
+        isAdsRemoved = true;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putBoolean("is_ads_removed", true).apply();
+        mInterstitialAd = null;
+
+        runOnUiThread(() -> {
+            if (binding != null && binding.adView != null) {
+                binding.adView.setVisibility(View.GONE);
+                binding.adView.pause();
+            }
+
+            updateRemoveAdsMenuState();
+
+            Intent intent = new Intent(Constants.ACTION_ADS_REMOVED);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+            Toast.makeText(this, "Ads are disabled.", Toast.LENGTH_SHORT).show();
+        });
     }
 }
