@@ -206,10 +206,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         setupBillingClient();
 
-        // / Initialize the Google Mobile Ads SDK on the main thread.
-        MobileAds.initialize(this, initializationStatus -> {
-            // SDK is initialized, now load the ad.
-            loadInterstitialAd();
+        // Initialize the Google Mobile Ads SDK on a background thread to prevent blocking onCreate (ANR fix).
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            MobileAds.initialize(this, initializationStatus -> {
+                runOnUiThread(this::loadInterstitialAd);
+            });
         });
 
         // Check for WRITE_EXTERNAL_STORAGE permission
