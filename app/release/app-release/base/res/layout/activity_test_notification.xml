@@ -1,0 +1,69 @@
+
+¹#
+;
+android*http://schemas.android.com/apk/res/android/
+ScrollView"w
+*http://schemas.android.com/apk/res/android
+background@android:color/white"(Ô„2
+‹€˜android:color/white0"K
+*http://schemas.android.com/apk/res/androidpadding16dp"(Õ„2:h "`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"(ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightmatch_parent"(õ„2:0ÿÿÿÿÿÿÿÿÿ*â
+ÙLinearLayout"`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"(ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightwrap_content"(õ„2:0şÿÿÿÿÿÿÿÿ"R
+*http://schemas.android.com/apk/res/androidorientationvertical"(Ä„2:0*ì
+ãTextView"W
+*http://schemas.android.com/apk/res/androidlayout_marginBottom16dp"(ú„2:h "L
+*http://schemas.android.com/apk/res/androidgravitycenter"(¯„2:8"`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"(ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightwrap_content"(õ„2:0şÿÿÿÿÿÿÿÿ"L
+*http://schemas.android.com/apk/res/androidtextSize20sp"(•„2:h‚("v
+*http://schemas.android.com/apk/res/android	textColor@android:color/black"(˜„2
+Œ€˜android:color/black0"W
+*http://schemas.android.com/apk/res/androidtextNotification Debug Information(Ï‚„"L
+*http://schemas.android.com/apk/res/android	textStylebold"(—„2:88*†
+ıTextView"ƒ
+*http://schemas.android.com/apk/res/android
+background@android:color/darker_gray" (Ô„2$
+"€€˜android:color/darker_gray0"K
+*http://schemas.android.com/apk/res/androidpadding12dp" (Õ„2:h"`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent" (ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightwrap_content" (õ„2:0şÿÿÿÿÿÿÿÿ"L
+*http://schemas.android.com/apk/res/androidtextSize12sp" (•„2:h‚"v
+*http://schemas.android.com/apk/res/android	textColor@android:color/black" (˜„2
+Œ€˜android:color/black0"S
+*http://schemas.android.com/apk/res/androidtextIsSelectabletrue" (–†„2:@"g
+*http://schemas.android.com/apk/res/androidid@+id/tvDebugInfo" (Ğ„2
+Ø„¤øid/tvDebugInfo0"U
+*http://schemas.android.com/apk/res/androidtextLoading debug information...(Ï‚„ /*ñ
+èButton"`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"((ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightwrap_content"((õ„2:0şÿÿÿÿÿÿÿÿ"z
+*http://schemas.android.com/apk/res/androidbackgroundTint@color/colorPrimary"((ëˆ„2
+¼€”øcolor/colorPrimary0"T
+*http://schemas.android.com/apk/res/androidlayout_marginTop16dp"((ø„2:h "w
+*http://schemas.android.com/apk/res/androidid@+id/btnTestNotification"((Ğ„2"
+ ı€¤øid/btnTestNotification0"N
+*http://schemas.android.com/apk/res/androidtextTest Notification Now(Ï‚„(<*ı
+ôButton"`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"/(ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightwrap_content"/(õ„2:0şÿÿÿÿÿÿÿÿ"S
+*http://schemas.android.com/apk/res/androidlayout_marginTop8dp"/(ø„2:h"w
+*http://schemas.android.com/apk/res/androidid@+id/btnCheckPermissions"/(Ğ„2"
+ ø€¤øid/btnCheckPermissions0"W
+*http://schemas.android.com/apk/res/androidtextCheck Notification Permissions(Ï‚„/.*ñ
+èButton"`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"6(ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightwrap_content"6(õ„2:0şÿÿÿÿÿÿÿÿ"S
+*http://schemas.android.com/apk/res/androidlayout_marginTop8dp"6(ø„2:h"o
+*http://schemas.android.com/apk/res/androidid@+id/btnOpenSettings"6(Ğ„2
+û€¤øid/btnOpenSettings0"S
+*http://schemas.android.com/apk/res/androidtextOpen Notification Settings(Ï‚„6.*Ï
+ÆButton"`
+*http://schemas.android.com/apk/res/androidlayout_widthmatch_parent"=(ô„2:0ÿÿÿÿÿÿÿÿÿ"a
+*http://schemas.android.com/apk/res/androidlayout_heightwrap_content"=(õ„2:0şÿÿÿÿÿÿÿÿ"T
+*http://schemas.android.com/apk/res/androidlayout_marginTop16dp"=(ø„2:h "a
+*http://schemas.android.com/apk/res/androidid@+id/btnClose"=(Ğ„2
+ù€¤øid/btnClose0">
+*http://schemas.android.com/apk/res/androidtextClose(Ï‚„=/(/

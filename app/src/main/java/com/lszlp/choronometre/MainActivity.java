@@ -178,25 +178,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // EdgeToEdge.enable() kullanıldığında sistem çubukları şeffaf olur.
         // Bu yüzden Toolbar'ın üstüne ve Butonların altına manuel boşluk (padding) eklemeliyiz.
         ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot(), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-// Toolbar'ı status bar'ın altına itmek için üst padding ekle
-            if (binding.mainToolbar != null) {
-                binding.mainToolbar.setPadding(
-                        binding.mainToolbar.getPaddingLeft(),
-                        systemBars.top,
-                        binding.mainToolbar.getPaddingRight(),
-                        binding.mainToolbar.getPaddingBottom()
-                );
+            if (insets == null) {
+                return WindowInsetsCompat.CONSUMED;
             }
+            ActivityMainBinding currentBinding = binding;
+            if (currentBinding == null) {
+                return insets;
+            }
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            if (systemBars != null) {
+                // Toolbar'ı status bar'ın altına itmek için üst padding ekle
+                if (currentBinding.mainToolbar != null) {
+                    currentBinding.mainToolbar.setPadding(
+                            currentBinding.mainToolbar.getPaddingLeft(),
+                            systemBars.top,
+                            currentBinding.mainToolbar.getPaddingRight(),
+                            currentBinding.mainToolbar.getPaddingBottom()
+                    );
+                }
 
-            // Alt butonları navigasyon çubuğunun (gesture bar veya 3 buton) üzerine itmek için alt padding ekle
-            if (binding.buttons != null) {
-                binding.buttons.setPadding(
-                        binding.buttons.getPaddingLeft(),
-                        binding.buttons.getPaddingTop(),
-                        binding.buttons.getPaddingRight(),
-                        systemBars.bottom // navigationBars.bottom yerine systemBars.bottom kullanmak daha güvenlidir
-                );
+                // Alt butonları navigasyon çubuğunun (gesture bar veya 3 buton) üzerine itmek için alt padding ekle
+                if (currentBinding.buttons != null) {
+                    currentBinding.buttons.setPadding(
+                            currentBinding.buttons.getPaddingLeft(),
+                            currentBinding.buttons.getPaddingTop(),
+                            currentBinding.buttons.getPaddingRight(),
+                            systemBars.bottom // navigationBars.bottom yerine systemBars.bottom kullanmak daha güvenlidir
+                    );
+                }
             }
 
             // DrawerLayout kullandığınız için 'CONSUMED' döndürmeyin, insets'i zincirleme devam ettirin.
