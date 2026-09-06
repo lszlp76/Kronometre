@@ -8,24 +8,29 @@
 - **Çoklu Zaman Birimleri**: Saniye, Santidakika, Desimdakika
 - **Cycle Time Analizi**: Lap kayıtları ve istatistiksel analiz
 - **Veri Dışa Aktarma**: Excel formatında raporlama
-- **Grafiksel Gösterim**: Real-time performans grafikleri
+- **Grafiksel Gösterim**: Real-time performans grafikleri (MPAndroidChart)
 - **Widget Desteği**: Ana ekrandan hızlı erişim
 - **Arka Plan Çalışması**: Foreground service ile sürekli zaman ölçümü
+- **Tema Desteği**: Light, Dark ve System Theme seçenekleri (Yüksek kontrastlı okunabilirlik odaklı)
+- **Uygulama İçi Satın Alma (In-App Purchase)**: Google Play Billing Library 8.3.0 ile "Remove Ads" (Reklamları Kaldır) entegrasyonu ve dinamik menü gizleme.
 
-## 🏗️ MİMARİ YAPI
+## 🏗️ MİMARİ YAPI & TEKNOLOJİ YIĞINI
 
 ### Teknoloji Yığını
 - **Dil**: Java
 - **Mimari**: MVVM + Fragments
-- **Veri Paylaşımı**: ViewModel + LiveData
-- **Servis**: Foreground Service
-- **Veritabanı**: SharedPreferences + File Storage
+- **Veri Paylaşımı**: ViewModel + LiveData + LocalBroadcastManager
+- **Servis**: Foreground Service (`specialUse`)
+- **Veritabanı/Kayıt**: SharedPreferences + File Storage
+- **Build Sistemi**: Android Gradle Plugin (AGP) **9.3.2**, Gradle **9.5.0**
+- **Performans & Optimizasyon**: R8 Code Shrinking & Resource Optimization (`minifyEnabled true`, `shrinkResources true`)
+- **Monetization**: Google Play Billing Library **8.3.0**
 
 ### Modül Yapısı
 ```
 app/
-├── MainActivity (Ana kontrolör)
-├── TimerFragment (Zaman ölçüm ekranı)
+├── MainActivity (Ana kontrolör, Navigation, Tema ve Billing yönetimi)
+├── TimerFragment (Zaman ölçüm ekranı, Lap yönetimi ve Banner reklam entegrasyonu)
 ├── ChartFragment (Grafik analiz)
 ├── FileList (Dosya yönetimi)
 ├── ChronometerService (Arka plan servisi)
@@ -38,287 +43,76 @@ app/
 ### 1. MainActivity.java
 
 #### 📋 Sınıf Tanımı
-Uygulamanın ana aktivitesi, navigation drawer ve tab yapısını yönetir.
+Uygulamanın ana aktivitesi; Navigation Drawer, Tab yapısı, Tema yönetimi ve Google Play Billing istemcisini yönetir.
 
-#### 🔧 Temel Değişkenler
-```java
-public DrawerLayout drawer; // Navigation drawer
-public Boolean isResetDone; // Reset durumu kontrolü
-private ChronoState currentState = ChronoState.STOPPED; // Kronometre durumu
-private AdView adView; // Reklam banner
-boolean auth; // Lap yetkilendirmesi
-```
-
-#### 🎯 Önemli Metodlar
-
-**onCreate()**
-- Uygulama başlangıç konfigürasyonu
-- İzin kontrolleri ve temel setup
-
-**initializeApp()**
-- Uygulama bileşenlerinin başlatılması
-- Theme ve reklam sisteminin aktivasyonu
-
-**setupAppContent()**
-- ViewPager ve Fragment'ların oluşturulması
-- Navigation drawer yapılandırması
-
-**checkAndRequestAllPermissions()**
-- Depolama ve bildirim izinlerinin yönetimi
-
-#### ⚠️ Dikkat Edilmesi Gerekenler
-- `onBackPressed()` override edilmiş - uygulama arka plana atılıyor
-- `dispatchKeyEvent()` ile volume tuşları kronometre kontrolü için kullanılıyor
+#### 🔧 Temel Sorumluluklar
+- **Edge-to-Edge Desteği**: Modern Android ekran uyumluluğu (`EdgeToEdge.enable(this)`).
+- **Theme Manager**: Light, Dark ve System tema tercihini `SharedPreferences` ile kaydetme ve `AppCompatDelegate.setDefaultNightMode()` ile uygulama genelinde uygulama.
+- **Google Play Billing 8.3.0**: Reklamları kaldırma (`remove_ads`) ürününü sorgulama, satın alma akışı (`launchBillingFlow`), mevcut satın alımları doğrulama (`checkExistingPurchases`) ve satın alım başarılı olduğunda (`hideAdsFromUI`) banner/geçiş reklamlarını devre dışı bırakıp menüdeki "Remove Ads" öğesini gizleme.
 
 ### 2. TimerFragment.java
 
 #### 📋 Sınıf Tanımı
-Zaman ölçümü ve lap yönetiminin yapıldığı ana fragment.
+Zaman ölçümü, lap yönetimi, veri kaydetme ve reklam gösteriminin yapıldığı ana fragment.
 
-#### 🔧 Temel Değişkenler
-```java
-public String Timeunit; // Seçilen zaman birimi
-public int modul; // Zaman hesaplama modülü
-public int milis; // Milisaniye çarpanı
-private long lastKnownElapsedTime = 0L; // Servisten gelen zaman
-ArrayList<Lap> lapsArray = new ArrayList<>(); // Lap kayıtları
-boolean Auth; // Kronometre çalışma durumu
-```
-
-#### 🎯 Önemli Metodlar
-
-**start()**
-- Kronometreyi başlatır
-- Foreground service'i tetikler
-
-**stop()**
-- Kronometreyi durdurur
-- Servisi sonlandırır
-
-**takeLap()**
-- Mevcut zamanı lap olarak kaydeder
-- İstatistikleri günceller
-
-**resetAll()**
-- Tüm verileri sıfırlar
-- UI'ı başlangıç durumuna getirir
-
-#### ⚠️ Kritik Noktalar
-- Zaman birimine göre farklı hesaplama algoritmaları mevcut
-- Broadcast receiver'lar ile servis-Fragment iletişimi sağlanıyor
+#### 🔧 Temel Sorumluluklar
+- Zaman birimi modülleri (`modul`, `milis`) yönetimi.
+- Lap listesi ve istatistik hesaplamaları (`min`, `max`, `ave`).
+- Banner reklam (`AdView`) yönetimi (Kullanıcı reklamları kaldırdıysa otomatik olarak `GONE` durumuna getirilir ve durdurulur).
 
 ### 3. ChronometerService.java
 
 #### 📋 Sınıf Tanımı
 Arka planda zaman ölçümünü sürdüren foreground service.
 
-#### 🔧 Temel Değişkenler
-```java
-private Handler handler; // Zaman güncelleme handler'ı
-private long startTime = 0L; // Başlangıç zamanı
-private long elapsedTime = 0L; // Geçen süre
-private boolean isRunning = false; // Çalışma durumu
-private boolean isPaused = false; // Duraklatma durumu
-```
-
-#### 🎯 Önemli Metodlar
-
-**startTimer()**
-- Zaman güncelleme runnable'ını başlatır
-- Her 10ms'de bir UI ve bildirimi günceller
-
-**pauseChronometer()**
-- Kronometreyi duraklatır
-- Geçen süreyi kaydeder
-
-**resumeChronometer()**
-- Duraklatılmış kronometreyi devam ettirir
-
-**buildNotification()**
-- Özel notification layout'u oluşturur
-
 ### 4. PageViewModel.java
 
 #### 📋 Sınıf Tanımı
 Fragment'lar arası veri paylaşımını sağlayan ViewModel.
 
-#### 🔧 LiveData Değişkenleri
-```java
-MutableLiveData<Integer> mIndex; // Lap sayısı
-MutableLiveData<Float> mTimeValue; // Lap değeri
-MutableLiveData<String> mTimerValue; // Kronometre değeri
-MutableLiveData<ArrayList<Lap>> lapsForChart; // Grafik verisi
-```
+## 🎨 TEMA VE KONTRAST YÖNETİMİ
 
-## 🔧 TEKNİK DETAYLAR
+Uygulama, Light (Açık) ve Dark (Koyu) modlarda kusursuz okunabilirlik sağlamak üzere yüksek kontrastlı renk paletleriyle donatılmıştır:
+- **Light Mode (`res/values/colors.xml`)**: Ferah ve açık arkaplan (`#F1F5F9`), yüksek kontrastlı koyu sayaç ve metin renkleri (`#0F172A`) ve koyu grafik hatları (`#1E293B`) ile her koşulda mükemmel okunabilirlik sunar.
+- **Dark Mode (`res/values-night/colors.xml`)**: Göz yormayan koyu arkaplanlar (`#2D2D30`) ve parlak/kontrastlı metinler (`#FFFFFFFF`).
 
-### Zaman Birimi Sistemleri
+## 💰 GOOGLE PLAY BILLING 8.3.0 ENTEGRASYONU
 
-#### 1. Saniye (Sec.)
-- **Modül**: 60
-- **Milisaniye**: 1000
-- **Format**: HH:MM:SS.MMM
-
-#### 2. Santidakika (Cmin.)
-- **Modül**: 100
-- **Milisaniye**: 600
-- **Format**: HH:MM:CC
-- **1 Cmin** = 0.01 dakika = 600ms
-
-#### 3. Desimdakika (Dmh.)
-- **Modül**: 166
-- **Milisaniye**: 360
-- **Format**: HH:DD:CC
-- **1 Dmh** = 0.001 dakika = 360ms
-
-### Veri Akışı Diyagramı
-
-```
-TimerFragment → ChronometerService → Broadcast → TimerFragment/ChartFragment
-     ↓
-PageViewModel (Veri Paylaşımı)
-     ↓
-ChartFragment/FileList
-```
+- **Güvenli Başlatma**: `BillingClient` oluşturulurken `.enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())` kullanılarak eksiksiz işlem desteği sağlanmıştır.
+- **Dinamik Menü Yönetimi**: Kullanıcı reklamları kaldırma (`remove_ads`) satın alımını gerçekleştirdiğinde veya geri yüklediğinde:
+  - Interstitial (Geçiş) ve Banner reklamlar tamamen devre dışı bırakılır.
+  - Navigasyon menüsündeki "Remove Ads" öğesi otomatik olarak gizlenir (`setVisible(false)`).
 
 ## 🛠️ KURULUM VE YAPILANDIRMA
 
 ### Gereksinimler
-- **Minimum SDK**: API 21 (Android 5.0)
-- **Target SDK**: API 34 (Android 14)
-- **Gerekli İzinler**:
-  - `WRITE_EXTERNAL_STORAGE` (API 32 ve altı)
-  - `POST_NOTIFICATIONS` (API 33 ve üstü)
-  - `FOREGROUND_SERVICE`
+- **Minimum SDK**: API 29 (Android 10)
+- **Target SDK**: API 36 (Android 15+)
+- **AGP**: 9.3.2
+- **Gradle**: 9.5.0
 
-### Build Konfigürasyonu
+### Build Konfigürasyonu & R8 Optimizasyonu
 ```gradle
 android {
-    compileSdk 34
+    compileSdk 37
     defaultConfig {
         applicationId "com.lszlp.choronometre"
-        minSdk 21
-        targetSdk 34
+        minSdk 29
+        targetSdk 36
+        versionCode 52
+        versionName '6.0'
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
 }
 ```
 
-## 🚨 TEST STRATEJİSİ
-
-### Birim Testleri
-- ViewModel state management
-- Zaman hesaplama algoritmaları
-- Lap istatistik hesaplamaları
-
-### Entegrasyon Testleri
-- Fragment-Service iletişimi
-- Broadcast receiver senaryoları
-- File I/O operasyonları
-
-### UI Testleri
-- Kronometre kontrol akışları
-- Navigation ve tab geçişleri
-- Dialog interaksiyonları
-
-## 🔄 GÜNCELLEME REHBERİ
-
-### API Seviyesi Güncellemeleri
-1. **Android 10+ (API 29)**: Scoped Storage adaptasyonu
-2. **Android 12+ (API 31)**: PendingIntent flags güncellemesi
-3. **Android 13+ (API 33)**: Bildirim izni yönetimi
-
-### Kritik Güncelleme Noktaları
-
-#### 1. Foreground Service Yönetimi
-```java
-// Android 8.0+ için foreground service başlatma
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    requireContext().startForegroundService(serviceIntent);
-}
-```
-
-#### 2. Bildirim Kanalı Yönetimi
-```java
-// Android 8.0+ için notification channel
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-    NotificationChannel channel = new NotificationChannel(
-        Constants.CHANNEL_ID,
-        "Kronometre Servisi",
-        NotificationManager.IMPORTANCE_LOW
-    );
-}
-```
-
-#### 3. Dosya Erişim Yönetimi
-```java
-// Android 10+ için MediaStore kullanımı
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-    ContentValues contentValues = new ContentValues();
-    contentValues.put(MediaStore.Downloads.RELATIVE_PATH, 
-        Environment.DIRECTORY_DOWNLOADS + "/IndustrialChronometer");
-}
-```
-
-### Güvenlik Güncellemeleri
-- **FileProvider**: Dosya paylaşımı için güvenli yöntem
-- **PendingIntent Flags**: IMMUTABLE flag kullanımı
-- **Broadcast Export**: Receiver'ların export kontrolü
-
-## 📊 PERFORMANS OPTİMİZASYONU
-
-### Memory Yönetimi
-- View binding kullanımı
-- Broadcast receiver'ların doğru lifecycle yönetimi
-- Handler ve Runnable'ların temizlenmesi
-
-### Battery Optimizasyonu
-- Foreground service doğru kullanımı
-- WakeLock sınırlı kullanım
-- Background işlemlerin optimize edilmesi
-
-## 🐛 BİLİNEN SORUNLAR VE ÇÖZÜMLER
-
-### 1. Servis-Fragment Senkronizasyonu
-**Sorun**: Uygulama arka plana alındığında zaman senkronizasyonu kaybolabiliyor.
-
-**Çözüm**: `ACTION_REQUEST_STATUS` mekanizması ile durum senkronizasyonu.
-
-### 2. Memory Leaks
-**Sorun**: Broadcast receiver kayıtlarının temizlenmemesi.
-
-**Çözüm**: 
-```java
-@Override
-public void onDestroy() {
-    super.onDestroy();
-    LocalBroadcastManager.getInstance(requireContext())
-        .unregisterReceiver(timeUpdateReceiver);
-}
-```
-
-### 3. UI Thread Bloklama
-**Sorun**: Zaman hesaplamalarının UI thread'ini bloklaması.
-
-**Çözüm**: Handler ve Runnable kullanımı ile arka planda hesaplama.
-
-## 🔮 GELİŞTİRME ÖNERİLERİ
-
-### Kısa Vadeli
-- [ ] ViewModel test coverage artırımı
-- [ ] Error handling iyileştirmeleri
-- [ ] Memory leak detection implementasyonu
-
-### Orta Vadeli
-- [ ] Room database entegrasyonu
-- [ ] WorkManager ile background processing
-- [ ] Jetpack Compose migrasyon planı
-
-### Uzun Vadeli
-- [ ] Multi-module architecture
-- [ ] Dynamic feature modules
-- [ ] Cloud sync ve backup özellikleri
-
 ---
 
-**Doküman Versiyonu**: 1.1  
-**Son Güncelleme**: 2025 (C) LsZLP 
+**Doküman Versiyonu**: 2.0  
+**Son Güncelleme**: 2026 (C) LsZLP
