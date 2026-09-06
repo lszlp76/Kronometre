@@ -317,30 +317,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Düzeltme için bu kısmı düzenleyin:
 
 
-        drawerSwitchSec.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
-        drawerSwitchSec.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+        if (drawerSwitchSec != null) {
+            drawerSwitchSec.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+            drawerSwitchSec.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+        }
 
-        drawerSwitchCmin.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
-        drawerSwitchCmin.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+        if (drawerSwitchCmin != null) {
+            drawerSwitchCmin.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+            drawerSwitchCmin.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+        }
 
-        drawerSwitchDmin.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
-        drawerSwitchDmin.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+        if (drawerSwitchDmin != null) {
+            drawerSwitchDmin.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+            drawerSwitchDmin.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+        }
 
-        screenSaverSwitch.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
-        screenSaverSwitch.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector)); // menu item'a ulaşmak için menuıtem olarak çağırmalısın
-        MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
-        screenSaverSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked){
-
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı açık tutma
-                scren.setTitle(getString(R.string.screenOff));
-
-
-            }else{
-                scren.setTitle(getString(R.string.screenOn));
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);// ekranı kapatma
-            }
-        });
+        if (screenSaverSwitch != null) {
+            screenSaverSwitch.setThumbTintList(ContextCompat.getColorStateList(this, R.color.switch_thumb_selector));
+            screenSaverSwitch.setTrackTintList(ContextCompat.getColorStateList(this, R.color.switch_track_selector));
+            MenuItem scren = navigationView.getMenu().findItem(R.id.screenSaver);
+            screenSaverSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked){
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    if (scren != null) scren.setTitle(getString(R.string.screenOff));
+                }else{
+                    if (scren != null) scren.setTitle(getString(R.string.screenOn));
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                }
+            });
+        }
 
         setupSwitchListeners();
         // Setup switch listeners
